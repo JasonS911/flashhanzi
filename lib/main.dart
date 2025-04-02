@@ -1,4 +1,7 @@
+import 'package:flashhanzi/dictionary_lookup.dart';
+import 'package:flashhanzi/handwrite_character.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
 
 void main() {
@@ -14,11 +17,23 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'FlashHanzi',
       theme: ThemeData(
-        textTheme: TextTheme(
+        primaryTextTheme: TextTheme(
           bodyMedium: TextStyle(
             color: Colors.black87, // Set a neutral default color
             decoration: TextDecoration.none, // Remove default underline
           ),
+          bodyLarge: TextStyle(
+            color: Colors.black87, // Set a neutral default color
+            decoration: TextDecoration.none, // Remove default underline
+          ),
+        ),
+        bottomNavigationBarTheme: BottomNavigationBarThemeData(
+          backgroundColor: Colors.white, // Set the background color
+          selectedItemColor: Color(
+            0xFFB42F2B,
+          ), // Set the color for selected items
+          unselectedItemColor:
+              Colors.grey, // Set the color for unselected items
         ),
       ),
       home: const HomePage(),
@@ -27,51 +42,59 @@ class MyApp extends StatelessWidget {
 }
 
 class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key, required this.title});
+  final int initialIndex; // Add this to accept the initial index
 
-  final String title;
+  const MyHomePage({super.key, required this.initialIndex});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _counter = 0;
+  late int _currentIndex; // Tracks the current index of the BottomNavigationBar
 
-  void _incrementCounter() {
-    setState(() {
-      _counter++;
-    });
+  final List<Widget> _pages = [
+    const HomePage(), // HomePage
+    ScanCharacter(), // First tab
+    HandwriteCharacter(), // Second tab
+    DictionaryLookup(), // Third tab
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex; // Set the initial index
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        // Here we take the value from the MyHomePage object that was created by
-        // the App.build method, and use it to set our appbar title.
-        title: Text(widget.title),
+      // appBar: AppBar(title: const Text('FlashHanzi')),
+      body: _pages[_currentIndex], // Display the selected page
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex, // Highlight the selected tab
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+            );
+          } else {
+            setState(() {
+              _currentIndex = index; // Update the current index
+            });
+          }
+        },
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
+          BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Scan'),
+          BottomNavigationBarItem(icon: Icon(Icons.brush), label: 'Handwrite'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.book),
+            label: 'Dictionary Lookup',
+          ), // Add this line for the new tab
+        ],
       ),
-      body: Center(
-        // Center is a layout widget. It takes a single child and positions it
-        // in the middle of the parent.
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            const Text('You have pushed the button this many times:'),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
-          ],
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _incrementCounter,
-        tooltip: 'Increment',
-        child: const Icon(Icons.add),
-      ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
 }

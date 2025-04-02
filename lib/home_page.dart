@@ -1,22 +1,6 @@
+import 'package:flashhanzi/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-void main() {
-  runApp(
-    MaterialApp(
-      theme: ThemeData(
-        textTheme: TextTheme(
-          bodyMedium: TextStyle(
-            color: Colors.black87, // Set a neutral default color
-            decoration: TextDecoration.none, // Remove default underline
-          ),
-        ),
-      ),
-      home:
-          const HomePage(), // Correctly uses the 'home' parameter of MaterialApp.router
-    ),
-  );
-}
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -157,7 +141,7 @@ class _HomePageState extends State<HomePage> {
               ),
             ), // Adds space at the top
             SizedBox(
-              height: 4,
+              height: 12,
             ), // Adds space between the word of the day and the next section
             Text(
               '5 Characters due today', // Display the first sentence
@@ -188,7 +172,14 @@ class _HomePageState extends State<HomePage> {
                     child: _ActionTile(
                       label: 'Scan Character',
                       icon: Icons.camera_alt,
-                      onTap: doNothing, // Replace with your scan function
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(initialIndex: 1),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Padding(
@@ -196,7 +187,14 @@ class _HomePageState extends State<HomePage> {
                     child: _ActionTile(
                       label: 'Handwrite Character',
                       icon: Icons.brush,
-                      onTap: doNothing, // Replace with your scan function
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(initialIndex: 2),
+                          ),
+                        );
+                      }, // Replace with your scan function
                     ),
                   ),
                   Padding(
@@ -204,7 +202,14 @@ class _HomePageState extends State<HomePage> {
                     child: _ActionTile(
                       label: 'Review Characters',
                       icon: Icons.book,
-                      onTap: doNothing, // Replace with your scan function
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(initialIndex: 3),
+                          ),
+                        );
+                      },
                     ),
                   ),
                   Padding(

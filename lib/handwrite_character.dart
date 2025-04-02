@@ -1,0 +1,74 @@
+import 'package:flutter/material.dart';
+
+class HandwriteCharacter extends StatefulWidget {
+  const HandwriteCharacter({super.key});
+
+  @override
+  State<HandwriteCharacter> createState() => _HandwriteCharacterState();
+}
+
+class _HandwriteCharacterState extends State<HandwriteCharacter> {
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: Column(
+        children: [
+          SizedBox(height: 20),
+          Text(
+            'Character Input',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(height: 20),
+          Container(
+            height: 340,
+            width: 340,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey, width: 2),
+              borderRadius: BorderRadius.circular(8), // Rounded corners
+            ),
+          ),
+          SizedBox(height: 20), // Space before the buttons
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40), // Side padding
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                // Clear Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: doNothing,
+                    style: ElevatedButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: const Text('Clear'),
+                  ),
+                ),
+                const SizedBox(width: 16), // Space between buttons
+                // Recognize Button
+                Expanded(
+                  child: ElevatedButton(
+                    onPressed: doNothing,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFB42F2B),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                    ),
+                    child: const Text('Recognize'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+
+          // Center the buttons
+        ],
+      ),
+    );
+  }
+}
+
+void doNothing() {}
