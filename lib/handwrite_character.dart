@@ -42,7 +42,16 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    child: const Text('Clear'),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text(
+                        'Clear',
+                        style: TextStyle(
+                          color: Colors.black, // Text color
+                          fontSize: 16, // Font size
+                        ),
+                      ),
+                    ),
                   ),
                 ),
                 const SizedBox(width: 16), // Space between buttons
@@ -57,7 +66,10 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                         borderRadius: BorderRadius.circular(4),
                       ),
                     ),
-                    child: const Text('Recognize'),
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 12),
+                      child: Text('Recognize'),
+                    ),
                   ),
                 ),
               ],

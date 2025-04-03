@@ -120,9 +120,12 @@ class _ScanCharacterState extends State<ScanCharacter> {
                 borderRadius: BorderRadius.circular(4), // Rounded corners
               ),
             ),
-            child: Text(
-              'Add Selected Words for Review',
-              style: TextStyle(color: Colors.white, fontSize: 16),
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Text(
+                'Add Selected Words for Review',
+                style: TextStyle(color: Colors.white, fontSize: 16),
+              ),
             ),
           ),
         ],
