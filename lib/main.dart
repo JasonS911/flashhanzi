@@ -1,6 +1,7 @@
 import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/handwrite_character.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
 
@@ -54,10 +55,11 @@ class _MyHomePageState extends State<MyHomePage> {
   late int _currentIndex; // Tracks the current index of the BottomNavigationBar
 
   final List<Widget> _pages = [
-    const HomePage(), // HomePage
     ScanCharacter(), // First tab
     HandwriteCharacter(), // Second tab
+    ReviewCharacters(),
     DictionaryLookup(), // Third tab
+    // Fourth tab (if you have it)
   ];
 
   @override
@@ -74,23 +76,19 @@ class _MyHomePageState extends State<MyHomePage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex, // Highlight the selected tab
         onTap: (index) {
-          if (index == 0) {
-            Navigator.push(
-              context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-            );
-          } else {
-            setState(() {
-              _currentIndex = index; // Update the current index
-            });
-          }
+          setState(() {
+            _currentIndex = index; // Update the current index
+          });
         },
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
           BottomNavigationBarItem(icon: Icon(Icons.camera_alt), label: 'Scan'),
           BottomNavigationBarItem(icon: Icon(Icons.brush), label: 'Handwrite'),
           BottomNavigationBarItem(
             icon: Icon(Icons.book),
+            label: 'Review Characters',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
             label: 'Dictionary Lookup',
           ), // Add this line for the new tab
         ],

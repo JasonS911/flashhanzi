@@ -1,3 +1,4 @@
+import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class DictionaryLookup extends StatefulWidget {
@@ -17,9 +18,27 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
             CrossAxisAlignment.center, // Center items horizontally
         children: [
           SizedBox(height: 20), // Space at the top
-          const Text(
-            'Dictionary Lookup',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Stack(
+            alignment: Alignment.center, // Center the text in the Stack
+            children: [
+              Align(
+                alignment:
+                    Alignment.centerLeft, // Align the IconButton to the left
+                child: IconButton(
+                  icon: const Icon(Icons.home, size: 30),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
+                ),
+              ),
+              const Text(
+                'Dictionary Lookup', // Title of the page
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           const SizedBox(height: 20), // Space before the input field
           Padding(

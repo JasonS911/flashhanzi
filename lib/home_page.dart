@@ -176,7 +176,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 1),
+                            builder: (context) => MyHomePage(initialIndex: 0),
                           ),
                         );
                       },
@@ -191,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 2),
+                            builder: (context) => MyHomePage(initialIndex: 1),
                           ),
                         );
                       }, // Replace with your scan function
@@ -206,7 +206,7 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 3),
+                            builder: (context) => MyHomePage(initialIndex: 2),
                           ),
                         );
                       },
@@ -217,7 +217,14 @@ class _HomePageState extends State<HomePage> {
                     child: _ActionTile(
                       label: 'Search Characters',
                       icon: Icons.search,
-                      onTap: doNothing, // Replace with your scan function
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => MyHomePage(initialIndex: 3),
+                          ),
+                        );
+                      }, // Replace with your scan function
                     ),
                   ),
                 ],

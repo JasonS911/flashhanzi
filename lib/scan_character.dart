@@ -1,4 +1,5 @@
 import 'package:camera/camera.dart';
+import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class ScanCharacter extends StatefulWidget {
@@ -54,9 +55,27 @@ class _ScanCharacterState extends State<ScanCharacter> {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           SizedBox(height: 20), // Add some space at the top
-          const Text(
-            'Scan Character',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Stack(
+            alignment: Alignment.center, // Center the text in the Stack
+            children: [
+              Align(
+                alignment:
+                    Alignment.centerLeft, // Align the IconButton to the left
+                child: IconButton(
+                  icon: const Icon(Icons.home, size: 30),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
+                ),
+              ),
+              const Text(
+                'Scan Character',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           const SizedBox(
             height: 20,

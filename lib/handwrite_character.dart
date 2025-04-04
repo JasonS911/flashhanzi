@@ -1,3 +1,4 @@
+import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class HandwriteCharacter extends StatefulWidget {
@@ -14,9 +15,27 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       child: Column(
         children: [
           SizedBox(height: 20),
-          Text(
-            'Character Input',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Stack(
+            alignment: Alignment.center, // Center the text in the Stack
+            children: [
+              Align(
+                alignment:
+                    Alignment.centerLeft, // Align the IconButton to the left
+                child: IconButton(
+                  icon: const Icon(Icons.home, size: 30),
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => HomePage()),
+                    );
+                  },
+                ),
+              ),
+              const Text(
+                'Handwrite Character',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ],
           ),
           SizedBox(height: 20),
           Container(
