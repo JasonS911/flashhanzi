@@ -258,6 +258,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
+                      SizedBox(width: 52),
                       Text(
                         '好',
                         style: TextStyle(
@@ -267,16 +268,32 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         ),
                       ),
                       SizedBox(width: 28), // Space between characters
-                      Padding(
-                        padding: EdgeInsets.only(top: 12),
-                        child: Text(
-                          '[hao]',
-                          style: TextStyle(
-                            fontSize: 48,
-                            color: Colors.black87,
-                            decoration: TextDecoration.none, // Remove underline
+                      Row(
+                        children: [
+                          Padding(
+                            padding: const EdgeInsets.only(top: 12),
+                            child: Text(
+                              '[hao]',
+                              style: const TextStyle(
+                                fontSize: 48,
+                                color: Colors.black87,
+                                decoration:
+                                    TextDecoration.none, // Remove underline
+                              ),
+                            ),
                           ),
-                        ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.volume_up,
+                              size: 24,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              // Add functionality to play audio here
+                              doNothing();
+                            },
+                          ),
+                        ],
                       ),
                     ],
                   ),

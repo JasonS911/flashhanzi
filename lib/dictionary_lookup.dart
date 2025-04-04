@@ -79,16 +79,33 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                     ),
                   ),
                 ),
-                const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'hāo', // Pinyin with tone
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFFB42F2B),
-                      fontWeight: FontWeight.w600,
-                      decoration: TextDecoration.none,
-                    ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Row(
+                    children: [
+                      Text(
+                        'hāo', // Pinyin with tone
+                        style: TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFFB42F2B),
+                          fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                      IconButton(
+                        icon: const Icon(
+                          Icons.volume_up,
+                          size: 24,
+                          color: Colors.grey,
+                        ),
+                        onPressed: () {
+                          // Add functionality to play audio here
+                          print(
+                            "Playing audio for hāo",
+                          ); // Placeholder for audio functionality
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(

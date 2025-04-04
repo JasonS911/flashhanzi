@@ -94,6 +94,17 @@ class _HomePageState extends State<HomePage> {
                               ),
                             ),
                           ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.volume_up,
+                              size: 24,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              // Add functionality to play audio here
+                              doNothing();
+                            },
+                          ),
                         ],
                       ),
                     ),
