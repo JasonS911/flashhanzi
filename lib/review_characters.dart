@@ -1,15 +1,96 @@
+import 'package:flashhanzi/database/database.dart';
+import 'package:flashhanzi/main.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart'; // Add this import for FlipCard
 
 class ReviewCharacters extends StatefulWidget {
-  const ReviewCharacters({super.key});
+  const ReviewCharacters({super.key, required this.db});
+
+  final AppDatabase db; // Declare the database instance
 
   @override
   State<ReviewCharacters> createState() => _ReviewCharactersState();
 }
 
 class _ReviewCharactersState extends State<ReviewCharacters> {
+  late AppDatabase db; // Declare the database instance
+  late Future<List<CharacterCard>> _dueCards;
+  late int _currentIndex;
+  // late bool _flipped;
+
+  @override
+  void initState() {
+    super.initState();
+    db = AppDatabase(); // Initialize the database instance in initState
+    _dueCards = db.getDueCards(); // Call the method without arguments
+    _dueCards
+        .then((cards) {
+          print('Due Cards:');
+          for (var card in cards) {
+            print(
+              'Character: ${card.character}, Pinyin: ${card.pinyin}, Definition: ${card.definition}',
+            );
+          }
+        })
+        .catchError((error) {
+          print('Error fetching due cards: $error');
+        });
+    _currentIndex = 0; // Initialize the current index to 0
+    // bool _flipped = false; // Initialize the flipped state to false
+  }
+
+  void updateCard(int grade) async {
+    //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
+    final cards = await db.getDueCards();
+
+    if (cards.isNotEmpty) {
+      db.updateNextReview(cards[_currentIndex].character, DateTime.now());
+      if (cards.length == 1) {
+        //for now
+        doNothing();
+      } else {
+        setState(() {
+          _currentIndex = _currentIndex + 1;
+        });
+      }
+      // Reschedule for the specified number of days
+      // Cycle through cards
+
+      // if (buttonPressed == 1) {
+      //   // If "Forgot" button was pressed
+      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
+      //     Duration(days: 1),
+      //   ); // Reschedule for tomorrow
+      // } else if (buttonPressed == 2) {
+      //   // If "Hard" button was pressed
+      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
+      //     Duration(days: 2),
+      //   ); // Reschedule for two days later
+      // } else if (buttonPressed == 3) {
+      //   // If "Good" button was pressed
+      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
+      //     Duration(days: 3),
+      //   ); // Reschedule for three days later
+      // } else if (buttonPressed == 4) {
+      //   // If "Easy" button was pressed
+      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
+      //     Duration(days: 7),
+      //   ); // Reschedule for a week later
+      // }
+    } else {
+      // No more cards to review
+      setState(() {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => MyHomePage(initialIndex: 0, db: db),
+          ),
+        );
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return FlipCard(
@@ -42,16 +123,53 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                 ],
               ),
               SizedBox(height: 32), // Space before the review list
-              const Padding(
-                padding: EdgeInsets.symmetric(horizontal: 16),
-                child: Text(
-                  '好',
-                  style: TextStyle(
-                    fontSize: 116,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.black87,
-                    decoration: TextDecoration.none, // Remove underline
-                  ),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: FutureBuilder<List<CharacterCard>>(
+                  future: _dueCards,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Text(
+                        'Loading...',
+                        style: TextStyle(
+                          fontSize: 84,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Text(
+                        'Error loading data',
+                        style: TextStyle(
+                          fontSize: 116,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      return Text(
+                        snapshot.data![_currentIndex].character,
+                        style: const TextStyle(
+                          fontSize: 116,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    } else {
+                      return const Text(
+                        'No characters available',
+                        style: TextStyle(
+                          fontSize: 116,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black87,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
               SizedBox(height: 16), // Space before the review list
@@ -81,7 +199,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                       ), // Vertical padding for the button
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          doNothing();
+                          updateCard(1);
                         },
                         icon: const Icon(
                           Icons.close,
@@ -104,7 +222,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                       padding: EdgeInsets.only(top: 12, bottom: 4),
                       child: ElevatedButton(
                         onPressed: () {
-                          doNothing();
+                          updateCard(2); // Update the card with "Hard" grade
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.blue, // Button color
@@ -141,7 +259,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                       padding: EdgeInsets.symmetric(vertical: 4),
                       child: ElevatedButton.icon(
                         onPressed: () {
-                          doNothing();
+                          updateCard(3); // Update the card with "Good" grade
                         },
                         icon: const Icon(
                           Icons.thumb_up,
@@ -162,7 +280,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        doNothing();
+                        updateCard(4); // Update the card with "Easy" grade
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green, // Button color

@@ -1,14 +1,17 @@
+import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class DictionaryLookup extends StatefulWidget {
-  const DictionaryLookup({super.key});
+  const DictionaryLookup({super.key, required this.db});
+  final AppDatabase db;
 
   @override
   State<DictionaryLookup> createState() => _DictionaryLookupState();
 }
 
 class _DictionaryLookupState extends State<DictionaryLookup> {
+  late AppDatabase db;
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -29,7 +32,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(builder: (context) => HomePage(db: db)),
                     );
                   },
                 ),

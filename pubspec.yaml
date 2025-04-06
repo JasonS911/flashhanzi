@@ -37,10 +37,14 @@ dependencies:
   google_fonts: ^6.2.1
   camera: ^0.11.0
   flip_card: ^0.7.0
+  drift: ^2.7.0
+  sqlite3_flutter_libs: ^0.5.0
+  path_provider: ^2.1.5
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  drift_dev: ^2.7.0
+  build_runner: ^2.3.3
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your

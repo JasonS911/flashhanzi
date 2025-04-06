@@ -1,10 +1,11 @@
 import 'package:camera/camera.dart';
+import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class ScanCharacter extends StatefulWidget {
-  const ScanCharacter({super.key});
-
+  const ScanCharacter({super.key, required this.db});
+  final AppDatabase db;
   @override
   State<ScanCharacter> createState() => _ScanCharacterState();
 }
@@ -12,7 +13,7 @@ class ScanCharacter extends StatefulWidget {
 class _ScanCharacterState extends State<ScanCharacter> {
   late CameraController _cameraController;
   Future<void>? _initializeControllerFuture;
-
+  late AppDatabase db;
   @override
   void initState() {
     super.initState();
@@ -66,7 +67,7 @@ class _ScanCharacterState extends State<ScanCharacter> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(builder: (context) => HomePage(db: db)),
                     );
                   },
                 ),

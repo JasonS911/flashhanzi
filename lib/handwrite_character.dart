@@ -1,14 +1,17 @@
+import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 
 class HandwriteCharacter extends StatefulWidget {
-  const HandwriteCharacter({super.key});
+  const HandwriteCharacter({super.key, required this.db});
+  final AppDatabase db;
 
   @override
   State<HandwriteCharacter> createState() => _HandwriteCharacterState();
 }
 
 class _HandwriteCharacterState extends State<HandwriteCharacter> {
+  late AppDatabase db;
   @override
   Widget build(BuildContext context) {
     return Center(
@@ -26,7 +29,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                   onPressed: () {
                     Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => HomePage()),
+                      MaterialPageRoute(builder: (context) => HomePage(db: db)),
                     );
                   },
                 ),

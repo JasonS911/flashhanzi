@@ -1,15 +1,25 @@
+import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class HomePage extends StatefulWidget {
-  const HomePage({super.key});
-
+  const HomePage({super.key, required this.db});
+  final AppDatabase db;
   @override
   State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
+  late AppDatabase db;
+
+  @override
+  void initState() {
+    super.initState();
+    db =
+        widget.db; // Initialize the database using the value passed to HomePage
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -187,7 +197,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 0),
+                            builder:
+                                (context) =>
+                                    MyHomePage(initialIndex: 0, db: db),
                           ),
                         );
                       },
@@ -202,7 +214,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 1),
+                            builder:
+                                (context) =>
+                                    MyHomePage(initialIndex: 1, db: db),
                           ),
                         );
                       }, // Replace with your scan function
@@ -217,7 +231,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 2),
+                            builder:
+                                (context) =>
+                                    MyHomePage(initialIndex: 2, db: db),
                           ),
                         );
                       },
@@ -232,7 +248,9 @@ class _HomePageState extends State<HomePage> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => MyHomePage(initialIndex: 3),
+                            builder:
+                                (context) =>
+                                    MyHomePage(initialIndex: 3, db: db),
                           ),
                         );
                       }, // Replace with your scan function

@@ -1,3 +1,4 @@
+import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/handwrite_character.dart';
 import 'package:flashhanzi/home_page.dart';
@@ -5,13 +6,18 @@ import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
 
-void main() {
-  runApp(const MyApp());
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final db = AppDatabase();
+  await seedTestCards(db);
+  print(db);
+
+  runApp(MyApp(db: db));
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
+  const MyApp({super.key, required this.db});
+  final AppDatabase db; // Pass the database instance to the app
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
@@ -37,15 +43,15 @@ class MyApp extends StatelessWidget {
               Colors.grey, // Set the color for unselected items
         ),
       ),
-      home: const HomePage(),
+      home: HomePage(db: db),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
   final int initialIndex; // Add this to accept the initial index
-
-  const MyHomePage({super.key, required this.initialIndex});
+  final AppDatabase db; // Pass the database instance to the home page
+  const MyHomePage({super.key, required this.initialIndex, required this.db});
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
@@ -54,18 +60,18 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   late int _currentIndex; // Tracks the current index of the BottomNavigationBar
 
-  final List<Widget> _pages = [
-    ScanCharacter(), // First tab
-    HandwriteCharacter(), // Second tab
-    ReviewCharacters(),
-    DictionaryLookup(), // Third tab
-    // Fourth tab (if you have it)
-  ];
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex; // Set the initial index
+    _pages = [
+      ScanCharacter(db: widget.db), // First tab
+      HandwriteCharacter(db: widget.db), // Second tab
+      ReviewCharacters(db: widget.db),
+      DictionaryLookup(db: widget.db), // Third tab
+    ];
   }
 
   @override
