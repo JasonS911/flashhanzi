@@ -10,7 +10,6 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
   await seedTestCards(db);
-  print(db);
 
   runApp(MyApp(db: db));
 }

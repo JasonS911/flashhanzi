@@ -38,8 +38,18 @@ class AppDatabase extends _$AppDatabase {
   // Method to update the nextReview field for a specific card
   Future<void> updateNextReview(String character, DateTime newDate) async {
     await (update(characterCards)..where(
-      (tbl) => tbl.character.equals(character),
+      (card) => card.character.equals(character),
     )).write(CharacterCardsCompanion(nextReview: Value(newDate)));
+  }
+
+  //development only
+  Future<void> resetNextReview(String character) async {
+    await (update(characterCards)
+      ..where((card) => card.character.equals(character))).write(
+      CharacterCardsCompanion(
+        nextReview: Value(DateTime.now().subtract(const Duration(days: 1))),
+      ),
+    );
   }
 }
 
@@ -53,7 +63,12 @@ LazyDatabase _openConnection() {
 
 Future<void> seedTestCards(AppDatabase db) async {
   final existing = await db.select(db.characterCards).get();
-  if (existing.isNotEmpty) return;
+  if (existing.isNotEmpty) {
+    db.resetNextReview('好');
+    db.resetNextReview('学');
+    return;
+  }
+
   final cards = [
     CharacterCardsCompanion(
       character: Value('好'),

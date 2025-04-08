@@ -24,18 +24,18 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
     super.initState();
     db = AppDatabase(); // Initialize the database instance in initState
     _dueCards = db.getDueCards(); // Call the method without arguments
-    _dueCards
-        .then((cards) {
-          print('Due Cards:');
-          for (var card in cards) {
-            print(
-              'Character: ${card.character}, Pinyin: ${card.pinyin}, Definition: ${card.definition}',
-            );
-          }
-        })
-        .catchError((error) {
-          print('Error fetching due cards: $error');
-        });
+    // _dueCards
+    //     .then((cards) {
+    //       print('Due Cards:');
+    //       for (var card in cards) {
+    //         print(
+    //           'Character: ${card.character}, Pinyin: ${card.pinyin}, Definition: ${card.definition}',
+    //         );
+    //       }
+    //     })
+    //     .catchError((error) {
+    //       print('Error fetching due cards: $error');
+    //     });
     _currentIndex = 0; // Initialize the current index to 0
     // bool _flipped = false; // Initialize the flipped state to false
   }
@@ -45,48 +45,45 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
     final cards = await db.getDueCards();
 
     if (cards.isNotEmpty) {
-      db.updateNextReview(cards[_currentIndex].character, DateTime.now());
-      if (cards.length == 1) {
-        //for now
-        doNothing();
-      } else {
+      if (_currentIndex >= cards.length) {
         setState(() {
-          _currentIndex = _currentIndex + 1;
+          _currentIndex = -1;
         });
       }
+
+      db.updateNextReview(cards[_currentIndex].character, DateTime.now());
+
       // Reschedule for the specified number of days
       // Cycle through cards
 
-      // if (buttonPressed == 1) {
-      //   // If "Forgot" button was pressed
-      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
-      //     Duration(days: 1),
-      //   ); // Reschedule for tomorrow
-      // } else if (buttonPressed == 2) {
-      //   // If "Hard" button was pressed
-      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
-      //     Duration(days: 2),
-      //   ); // Reschedule for two days later
-      // } else if (buttonPressed == 3) {
-      //   // If "Good" button was pressed
-      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
-      //     Duration(days: 3),
-      //   ); // Reschedule for three days later
-      // } else if (buttonPressed == 4) {
-      //   // If "Easy" button was pressed
-      //   cards[_currentIndex - 1].updateNextReview = DateTime.now().add(
-      //     Duration(days: 7),
-      //   ); // Reschedule for a week later
-      // }
-    } else {
-      // No more cards to review
+      if (grade == 1) {
+        // If "Forgot" button was pressed
+        db.updateNextReview(
+          cards[_currentIndex].character,
+          DateTime.now().add(Duration(days: 1)),
+        ); // Reschedule for tomorrow
+      } else if (grade == 2) {
+        // If "Hard" button was pressed
+        db.updateNextReview(
+          cards[_currentIndex].character,
+          DateTime.now().add(Duration(days: 2)),
+        ); // Reschedule for two days later
+      } else if (grade == 3) {
+        // If "Good" button was pressed
+        db.updateNextReview(
+          cards[_currentIndex].character,
+          DateTime.now().add(Duration(days: 3)),
+        ); // Reschedule for three days later
+      } else if (grade == 4) {
+        // If "Easy" button was pressed
+        db.updateNextReview(
+          cards[_currentIndex].character,
+          DateTime.now().add(Duration(days: 4)),
+        ); // Reschedule for a week later
+      }
+
       setState(() {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => MyHomePage(initialIndex: 0, db: db),
-          ),
-        );
+        _currentIndex = _currentIndex + 1;
       });
     }
   }
@@ -149,26 +146,30 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         ),
                       );
                     } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      return Text(
-                        snapshot.data![_currentIndex].character,
-                        style: const TextStyle(
-                          fontSize: 116,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          decoration: TextDecoration.none, // Remove underline
-                        ),
-                      );
-                    } else {
-                      return const Text(
-                        'No characters available',
-                        style: TextStyle(
-                          fontSize: 116,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          decoration: TextDecoration.none, // Remove underline
-                        ),
-                      );
+                      try {
+                        return Text(
+                          snapshot.data![_currentIndex].character,
+                          style: const TextStyle(
+                            fontSize: 116,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            decoration: TextDecoration.none, // Remove underline
+                          ),
+                        );
+                      } catch (e) {
+                        //change this screen
+                        return const Text(
+                          'No characters available',
+                          style: TextStyle(
+                            fontSize: 84,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.red,
+                            decoration: TextDecoration.none, // Remove underline
+                          ),
+                        );
+                      }
                     }
+                    return const SizedBox(); // Default return statement
                   },
                 ),
               ),
