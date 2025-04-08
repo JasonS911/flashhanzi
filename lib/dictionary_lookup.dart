@@ -12,6 +12,14 @@ class DictionaryLookup extends StatefulWidget {
 
 class _DictionaryLookupState extends State<DictionaryLookup> {
   late AppDatabase db;
+  final _searchController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    db = AppDatabase();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -47,15 +55,12 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 40), // Side padding
             child: TextField(
+              controller: _searchController,
               decoration: InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Search',
                 prefixIcon: Icon(Icons.search),
               ),
-              onSubmitted: (String value) {
-                // Handle the lookup logic here
-                doNothing();
-              },
             ),
           ),
           const SizedBox(height: 24), // Space before the button
@@ -187,7 +192,14 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
           ),
           SizedBox(height: 16), // Add some space before the button
           ElevatedButton(
-            onPressed: doNothing,
+            onPressed: () {
+              final input = _searchController.text.trim();
+              if (input.isEmpty) {
+                doNothing();
+              } else {
+                db.searchDictionary(input);
+              }
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: Color(0xFFB42F2B), // Button color
               foregroundColor: Colors.white, // Text color

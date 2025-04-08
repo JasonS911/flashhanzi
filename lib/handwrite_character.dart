@@ -13,6 +13,12 @@ class HandwriteCharacter extends StatefulWidget {
 class _HandwriteCharacterState extends State<HandwriteCharacter> {
   late AppDatabase db;
   @override
+  void initState() {
+    super.initState();
+    db = AppDatabase(); // Initi
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Center(
       child: Column(

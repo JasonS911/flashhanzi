@@ -17,6 +17,7 @@ class _ScanCharacterState extends State<ScanCharacter> {
   @override
   void initState() {
     super.initState();
+    db = AppDatabase();
     _initializeCamera();
   }
 

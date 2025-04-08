@@ -20,8 +20,18 @@ class CharacterCards extends Table {
   Set<Column> get primaryKey => {character};
 }
 
+class DictionaryEntries extends Table {
+  TextColumn get simplified => text()();
+  TextColumn get traditional => text()();
+  TextColumn get pinyin => text()();
+  TextColumn get definition => text()();
+
+  @override
+  Set<Column> get primaryKey => {simplified, pinyin};
+}
+
 // Your database class
-@DriftDatabase(tables: [CharacterCards])
+@DriftDatabase(tables: [CharacterCards, DictionaryEntries])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -50,6 +60,15 @@ class AppDatabase extends _$AppDatabase {
         nextReview: Value(DateTime.now().subtract(const Duration(days: 1))),
       ),
     );
+  }
+
+  Future<List<DictionaryEntry>> searchDictionary(String input) {
+    return (select(dictionaryEntries)..where(
+      (entry) =>
+          entry.simplified.like(input) |
+          entry.traditional.like(input) |
+          entry.pinyin.like('%$input%'),
+    )).get();
   }
 }
 
