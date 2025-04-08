@@ -1,6 +1,5 @@
 import 'package:flashhanzi/database/database.dart';
-import 'package:flashhanzi/main.dart';
-import 'package:flashhanzi/scan_character.dart';
+import 'package:flashhanzi/home_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart'; // Add this import for FlipCard
 
@@ -24,20 +23,15 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
     super.initState();
     db = AppDatabase(); // Initialize the database instance in initState
     _dueCards = db.getDueCards(); // Call the method without arguments
-    // _dueCards
-    //     .then((cards) {
-    //       print('Due Cards:');
-    //       for (var card in cards) {
-    //         print(
-    //           'Character: ${card.character}, Pinyin: ${card.pinyin}, Definition: ${card.definition}',
-    //         );
-    //       }
-    //     })
-    //     .catchError((error) {
-    //       print('Error fetching due cards: $error');
-    //     });
     _currentIndex = 0; // Initialize the current index to 0
     // bool _flipped = false; // Initialize the flipped state to false
+    _dueCards.then((cards) {
+      if (cards.isEmpty) {
+        setState(() {
+          _currentIndex = -1;
+        });
+      }
+    });
   }
 
   void updateCard(int grade) async {
@@ -45,13 +39,13 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
     final cards = await db.getDueCards();
 
     if (cards.isNotEmpty) {
-      if (_currentIndex >= cards.length) {
+      if (_currentIndex > cards.length) {
         setState(() {
           _currentIndex = -1;
         });
       }
 
-      db.updateNextReview(cards[_currentIndex].character, DateTime.now());
+      // db.updateNextReview(cards[0].character, DateTime.now());
 
       // Reschedule for the specified number of days
       // Cycle through cards
@@ -59,25 +53,25 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
       if (grade == 1) {
         // If "Forgot" button was pressed
         db.updateNextReview(
-          cards[_currentIndex].character,
+          cards[0].character,
           DateTime.now().add(Duration(days: 1)),
         ); // Reschedule for tomorrow
       } else if (grade == 2) {
         // If "Hard" button was pressed
         db.updateNextReview(
-          cards[_currentIndex].character,
+          cards[0].character,
           DateTime.now().add(Duration(days: 2)),
         ); // Reschedule for two days later
       } else if (grade == 3) {
         // If "Good" button was pressed
         db.updateNextReview(
-          cards[_currentIndex].character,
+          cards[0].character,
           DateTime.now().add(Duration(days: 3)),
         ); // Reschedule for three days later
       } else if (grade == 4) {
         // If "Easy" button was pressed
         db.updateNextReview(
-          cards[_currentIndex].character,
+          cards[0].character,
           DateTime.now().add(Duration(days: 4)),
         ); // Reschedule for a week later
       }
@@ -158,18 +152,92 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         );
                       } catch (e) {
                         //change this screen
-                        return const Text(
-                          'No characters available',
-                          style: TextStyle(
-                            fontSize: 84,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                            decoration: TextDecoration.none, // Remove underline
+                        return Center(
+                          child: Column(
+                            children: [
+                              Text(
+                                'Done studying for today!',
+                                style: TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                  decoration:
+                                      TextDecoration.none, // Remove underline
+                                ),
+                              ),
+                              SizedBox(height: 40),
+
+                              ElevatedButton(
+                                style: OutlinedButton.styleFrom(
+                                  backgroundColor: Color(0xFFB42F2B),
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                ),
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => HomePage(db: db),
+                                    ),
+                                  );
+                                },
+                                child: Padding(
+                                  padding: EdgeInsets.all(12),
+                                  child: Text(
+                                    'Review All Cards',
+                                    style: TextStyle(color: Colors.white),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 28),
+                            ],
                           ),
                         );
                       }
                     }
-                    return const SizedBox(); // Default return statement
+                    return Center(
+                      child: Column(
+                        children: [
+                          Text(
+                            'Done studying for today!',
+                            style: TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
+                            ),
+                          ),
+                          SizedBox(height: 40),
+
+                          ElevatedButton(
+                            style: OutlinedButton.styleFrom(
+                              backgroundColor: Color(0xFFB42F2B),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(4),
+                              ),
+                            ),
+                            onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => HomePage(db: db),
+                                ),
+                              );
+                            },
+                            child: Padding(
+                              padding: EdgeInsets.all(12),
+                              child: Text(
+                                'Review All Cards',
+                                style: TextStyle(color: Colors.white),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 28),
+                        ],
+                      ),
+                    );
                   },
                 ),
               ),
@@ -667,4 +735,8 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
       ),
     );
   }
+}
+
+void doNothing() {
+  // Placeholder function for button actions
 }
