@@ -1,6 +1,6 @@
+import 'package:flutter/material.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
-import 'package:flutter/material.dart';
 
 class DictionaryLookup extends StatefulWidget {
   const DictionaryLookup({super.key, required this.db});
@@ -11,268 +11,263 @@ class DictionaryLookup extends StatefulWidget {
 }
 
 class _DictionaryLookupState extends State<DictionaryLookup> {
-  late AppDatabase db;
-  final _searchController = TextEditingController();
-  late Future<List<DictionaryEntry>> searchResults; // Declare as a list
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+
+  List<DictionaryEntry> results = [];
+  int offset = 0;
+  final int limit = 20;
+  bool isLoading = false;
+  bool hasMore = true;
 
   @override
   void initState() {
     super.initState();
-    db = AppDatabase();
-    searchResults = Future.value([]);
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels >=
+              _scrollController.position.maxScrollExtent - 200 &&
+          !isLoading &&
+          hasMore) {
+        loadMore();
+      }
+    });
+  }
+
+  Future<void> loadMore() async {
+    final input = _searchController.text.trim();
+    if (input.isEmpty) return;
+
+    setState(() => isLoading = true);
+
+    final newResults = await widget.db.searchDictionaryPaginated(
+      input,
+      limit,
+      offset,
+    );
+
+    setState(() {
+      results.addAll(newResults);
+      offset += newResults.length;
+      isLoading = false;
+      hasMore = newResults.length == limit;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.start, // Align items to the top
-        crossAxisAlignment:
-            CrossAxisAlignment.center, // Center items horizontally
+    return Scaffold(
+      body: ListView(
+        controller: _scrollController,
+        padding: const EdgeInsets.symmetric(vertical: 24),
         children: [
-          SizedBox(height: 20), // Space at the top
-          Stack(
-            alignment: Alignment.center, // Center the text in the Stack
-            children: [
-              Align(
-                alignment:
-                    Alignment.centerLeft, // Align the IconButton to the left
-                child: IconButton(
-                  icon: const Icon(Icons.home, size: 30),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => HomePage(db: db)),
-                    );
-                  },
-                ),
-              ),
-              const Text(
-                'Dictionary Lookup', // Title of the page
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20), // Space before the input field
+          // Home Button + Title
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 40), // Side padding
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Stack(
+              alignment: Alignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.home, size: 30),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(db: widget.db),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Text(
+                  'Dictionary Lookup',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 20),
+
+          // Search Field
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
             child: TextField(
               controller: _searchController,
-              decoration: InputDecoration(
+              decoration: const InputDecoration(
                 border: OutlineInputBorder(),
                 labelText: 'Search',
                 prefixIcon: Icon(Icons.search),
               ),
             ),
           ),
-          const SizedBox(height: 24), // Space before the button
-          Container(
-            height: 440,
-            width: 328,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey, width: 2),
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-            ),
-            child: FutureBuilder<List<DictionaryEntry>>(
-              future: searchResults,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return Center(child: CircularProgressIndicator());
-                } else if (snapshot.hasError) {
-                  return Center(
-                    child: Text(
-                      'Error: ${snapshot.error}',
-                      style: TextStyle(fontSize: 16, color: Colors.red),
-                    ),
-                  );
-                } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                  return Center(
-                    child: Text(
-                      'No results found',
-                      style: TextStyle(fontSize: 16, color: Colors.grey),
-                    ),
-                  );
-                } else {
-                  final results = snapshot.data!;
-                  return ListView.builder(
-                    itemCount: results.length,
-                    itemBuilder: (context, index) {
-                      final entry = results[index];
-                      return Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.start,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16),
-                              child: Text(
-                                entry.simplified,
-                                style: TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                              ),
-                              child: Row(
-                                children: [
-                                  Text(
-                                    entry.pinyin, // Pinyin with tone
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Color(0xFFB42F2B),
-                                      fontWeight: FontWeight.w600,
-                                      decoration: TextDecoration.none,
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.volume_up,
-                                      size: 24,
-                                      color: Colors.grey,
-                                    ),
-                                    onPressed: () {
-                                      // Add functionality to play audio here
-                                      print(
-                                        "Playing audio for hāo",
-                                      ); // Placeholder for audio functionality
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ), // Space between pinyin and definition
-                            Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                entry.definition,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ), // Space between pinyin and definition
-                            const Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                '她是一个好人',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ), // Space between pinyin and definition
-                            const Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                'Tā shì yí gè hǎo rén',
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 8,
-                            ), // Space between pinyin and definition
-                            const Padding(
-                              padding: EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                "Translation: He's studying Chinese",
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            //placeholder for stroke
-                            SizedBox(
-                              height: 16,
-                            ), // Space before the stroke container
-                            Center(
-                              child: Container(
-                                height: 180,
-                                width: 180,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.black),
-                                ), // Space after the button
-                              ),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
-                  );
-                }
-              },
-            ),
-          ),
 
-          SizedBox(height: 16), // Add some space before the button
-          ElevatedButton(
-            onPressed: () {
-              final input = _searchController.text.trim();
-              if (input.isEmpty) {
-                doNothing();
-              } else {
-                final results = db.searchDictionary(input);
+          const SizedBox(height: 16),
+
+          // Search Button
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 40),
+            child: ElevatedButton(
+              onPressed: () async {
+                final input = _searchController.text.trim();
+                if (input.isEmpty) return;
+
                 setState(() {
-                  searchResults =
-                      results; // Update the state with the search results
+                  results = [];
+                  offset = 0;
+                  hasMore = true;
                 });
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFB42F2B), // Button color
-              foregroundColor: Colors.white, // Text color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4), // Rounded corners
+
+                await loadMore();
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFB42F2B),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              child: const Padding(
+                padding: EdgeInsets.symmetric(vertical: 12),
+                child: Text('Search Word', style: TextStyle(fontSize: 16)),
               ),
             ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'Search Word',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ), // Add vertical padding for better touch target
-            ),
           ),
 
-          // Add some space after the button
+          const SizedBox(height: 24),
+
+          // No Results
+          if (results.isEmpty && !isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(
+                child: Text(
+                  'No results found',
+                  style: TextStyle(fontSize: 16, color: Colors.grey),
+                ),
+              ),
+            ),
+
+          // Search Results
+          ...results.map((entry) => buildResultCard(entry)).toList(),
+
+          // Loading Indicator
+          if (isLoading)
+            const Padding(
+              padding: EdgeInsets.all(16),
+              child: Center(child: CircularProgressIndicator()),
+            ),
         ],
       ),
     );
   }
-}
 
-void doNothing() {
-  // This function intentionally does nothing.
-  // It can be used as a placeholder for button actions.
+  Widget buildResultCard(DictionaryEntry entry) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 8.0),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey, width: 2),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                entry.simplified,
+                style: const TextStyle(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 8),
+              Wrap(
+                children: [
+                  Text(
+                    entry.pinyin,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Color(0xFFB42F2B),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(
+                      Icons.volume_up,
+                      size: 24,
+                      color: Colors.grey,
+                    ),
+                    onPressed: () {
+                      print("Playing audio for ${entry.simplified}");
+                    },
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                entry.definition,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Padding(
+                padding: EdgeInsets.only(left: 0),
+                child: Text(
+                  'Sentence: 她是一个好人',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Padding(
+                padding: EdgeInsets.only(left: 0),
+                child: Text(
+                  'Pinyin: Tā shì yí gè hǎo rén',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              const Padding(
+                padding: EdgeInsets.only(left: 0),
+                child: Text(
+                  "Translation: He's studying Chinese",
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.black,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Center(
+                child: Container(
+                  height: 180,
+                  width: 180,
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.black),
+                  ),
+                  child: const Center(child: Text('Stroke Order Placeholder')),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

@@ -62,13 +62,39 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
-  Future<List<DictionaryEntry>> searchDictionary(String input) {
-    return (select(dictionaryEntries)..where(
-      (entry) =>
-          entry.simplified.like(input) |
-          entry.traditional.like(input) |
-          entry.pinyin.like('%$input%'),
-    )).get();
+  // Future<List<DictionaryEntry>> searchDictionary(String input) {
+  //   return (select(dictionaryEntries)..where(
+  //     (entry) =>
+  //         entry.simplified.equals(input) |
+  //         entry.traditional.equals(input) |
+  //         entry.pinyin.like('%$input%'),
+  //   )).get();
+  // }
+
+  Future<List<DictionaryEntry>> searchDictionaryPaginated(
+    String input,
+    int limit,
+    int offset,
+  ) {
+    return (select(dictionaryEntries)
+          ..where(
+            (entry) =>
+                entry.simplified.equals(input) |
+                entry.traditional.equals(input) |
+                entry.pinyin.like('%$input%') |
+                CustomExpression<String>(
+                  "REPLACE(${entry.pinyin.name}, ' ', '')",
+                ).like('%$input%'),
+          )
+          ..orderBy([
+            (entry) => OrderingTerm(
+              expression: FunctionCallExpression('length', [entry.simplified]),
+              mode: OrderingMode.asc,
+            ),
+            (entry) => OrderingTerm(expression: entry.simplified),
+          ])
+          ..limit(limit, offset: offset))
+        .get();
   }
 }
 
