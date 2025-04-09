@@ -34,6 +34,7 @@ Future<void> parse(AppDatabase db) async {
       if (simplified.contains(RegExp(r'[A-Za-z]'))) continue;
 
       final pinyin = match.group(3)!.trim();
+      final pinYinPlain = normalizePinyin(pinyin);
       final definitions = match.group(4)!.replaceAll('/', '; ').trim();
 
       entries.add(
@@ -41,6 +42,7 @@ Future<void> parse(AppDatabase db) async {
           simplified: Value(simplified),
           traditional: Value(traditional),
           pinyin: Value(pinyin),
+          pinyinPlain: Value(pinYinPlain),
           definition: Value(definitions),
         ),
       );
@@ -58,4 +60,13 @@ Future<void> parse(AppDatabase db) async {
 
   inserted = entries.length;
   print('Inserted $inserted entries.');
+}
+
+String normalizePinyin(String input) {
+  final toneMap = {'1': '', '2': '', '3': '', '4': '', '5': ''};
+
+  return input
+      .replaceAllMapped(RegExp(r'\d'), (m) => toneMap[m.group(0)]!)
+      .replaceAll(' ', '')
+      .toLowerCase();
 }

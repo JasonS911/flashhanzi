@@ -25,6 +25,7 @@ class DictionaryEntries extends Table {
   TextColumn get traditional => text()();
   TextColumn get pinyin => text()();
   TextColumn get definition => text()();
+  TextColumn get pinyinPlain => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {simplified, pinyin};
@@ -82,9 +83,7 @@ class AppDatabase extends _$AppDatabase {
                 entry.simplified.equals(input) |
                 entry.traditional.equals(input) |
                 entry.pinyin.like('%$input%') |
-                CustomExpression<String>(
-                  "REPLACE(${entry.pinyin.name}, ' ', '')",
-                ).like('%$input%'),
+                entry.pinyinPlain.like('%$input%'),
           )
           ..orderBy([
             (entry) => OrderingTerm(

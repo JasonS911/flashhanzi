@@ -524,12 +524,24 @@ class $DictionaryEntriesTable extends DictionaryEntries
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pinyinPlainMeta = const VerificationMeta(
+    'pinyinPlain',
+  );
+  @override
+  late final GeneratedColumn<String> pinyinPlain = GeneratedColumn<String>(
+    'pinyin_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     simplified,
     traditional,
     pinyin,
     definition,
+    pinyinPlain,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -578,6 +590,15 @@ class $DictionaryEntriesTable extends DictionaryEntries
     } else if (isInserting) {
       context.missing(_definitionMeta);
     }
+    if (data.containsKey('pinyin_plain')) {
+      context.handle(
+        _pinyinPlainMeta,
+        pinyinPlain.isAcceptableOrUnknown(
+          data['pinyin_plain']!,
+          _pinyinPlainMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -607,6 +628,10 @@ class $DictionaryEntriesTable extends DictionaryEntries
             DriftSqlType.string,
             data['${effectivePrefix}definition'],
           )!,
+      pinyinPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pinyin_plain'],
+      ),
     );
   }
 
@@ -621,11 +646,13 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
   final String traditional;
   final String pinyin;
   final String definition;
+  final String? pinyinPlain;
   const DictionaryEntry({
     required this.simplified,
     required this.traditional,
     required this.pinyin,
     required this.definition,
+    this.pinyinPlain,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -634,6 +661,9 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
     map['traditional'] = Variable<String>(traditional);
     map['pinyin'] = Variable<String>(pinyin);
     map['definition'] = Variable<String>(definition);
+    if (!nullToAbsent || pinyinPlain != null) {
+      map['pinyin_plain'] = Variable<String>(pinyinPlain);
+    }
     return map;
   }
 
@@ -643,6 +673,10 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
       traditional: Value(traditional),
       pinyin: Value(pinyin),
       definition: Value(definition),
+      pinyinPlain:
+          pinyinPlain == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pinyinPlain),
     );
   }
 
@@ -656,6 +690,7 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
       traditional: serializer.fromJson<String>(json['traditional']),
       pinyin: serializer.fromJson<String>(json['pinyin']),
       definition: serializer.fromJson<String>(json['definition']),
+      pinyinPlain: serializer.fromJson<String?>(json['pinyinPlain']),
     );
   }
   @override
@@ -666,6 +701,7 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
       'traditional': serializer.toJson<String>(traditional),
       'pinyin': serializer.toJson<String>(pinyin),
       'definition': serializer.toJson<String>(definition),
+      'pinyinPlain': serializer.toJson<String?>(pinyinPlain),
     };
   }
 
@@ -674,11 +710,13 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
     String? traditional,
     String? pinyin,
     String? definition,
+    Value<String?> pinyinPlain = const Value.absent(),
   }) => DictionaryEntry(
     simplified: simplified ?? this.simplified,
     traditional: traditional ?? this.traditional,
     pinyin: pinyin ?? this.pinyin,
     definition: definition ?? this.definition,
+    pinyinPlain: pinyinPlain.present ? pinyinPlain.value : this.pinyinPlain,
   );
   DictionaryEntry copyWithCompanion(DictionaryEntriesCompanion data) {
     return DictionaryEntry(
@@ -689,6 +727,8 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
       pinyin: data.pinyin.present ? data.pinyin.value : this.pinyin,
       definition:
           data.definition.present ? data.definition.value : this.definition,
+      pinyinPlain:
+          data.pinyinPlain.present ? data.pinyinPlain.value : this.pinyinPlain,
     );
   }
 
@@ -698,13 +738,15 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
           ..write('simplified: $simplified, ')
           ..write('traditional: $traditional, ')
           ..write('pinyin: $pinyin, ')
-          ..write('definition: $definition')
+          ..write('definition: $definition, ')
+          ..write('pinyinPlain: $pinyinPlain')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(simplified, traditional, pinyin, definition);
+  int get hashCode =>
+      Object.hash(simplified, traditional, pinyin, definition, pinyinPlain);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -712,7 +754,8 @@ class DictionaryEntry extends DataClass implements Insertable<DictionaryEntry> {
           other.simplified == this.simplified &&
           other.traditional == this.traditional &&
           other.pinyin == this.pinyin &&
-          other.definition == this.definition);
+          other.definition == this.definition &&
+          other.pinyinPlain == this.pinyinPlain);
 }
 
 class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
@@ -720,12 +763,14 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
   final Value<String> traditional;
   final Value<String> pinyin;
   final Value<String> definition;
+  final Value<String?> pinyinPlain;
   final Value<int> rowid;
   const DictionaryEntriesCompanion({
     this.simplified = const Value.absent(),
     this.traditional = const Value.absent(),
     this.pinyin = const Value.absent(),
     this.definition = const Value.absent(),
+    this.pinyinPlain = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   DictionaryEntriesCompanion.insert({
@@ -733,6 +778,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
     required String traditional,
     required String pinyin,
     required String definition,
+    this.pinyinPlain = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : simplified = Value(simplified),
        traditional = Value(traditional),
@@ -743,6 +789,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
     Expression<String>? traditional,
     Expression<String>? pinyin,
     Expression<String>? definition,
+    Expression<String>? pinyinPlain,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -750,6 +797,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
       if (traditional != null) 'traditional': traditional,
       if (pinyin != null) 'pinyin': pinyin,
       if (definition != null) 'definition': definition,
+      if (pinyinPlain != null) 'pinyin_plain': pinyinPlain,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -759,6 +807,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
     Value<String>? traditional,
     Value<String>? pinyin,
     Value<String>? definition,
+    Value<String?>? pinyinPlain,
     Value<int>? rowid,
   }) {
     return DictionaryEntriesCompanion(
@@ -766,6 +815,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
       traditional: traditional ?? this.traditional,
       pinyin: pinyin ?? this.pinyin,
       definition: definition ?? this.definition,
+      pinyinPlain: pinyinPlain ?? this.pinyinPlain,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -785,6 +835,9 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
     if (definition.present) {
       map['definition'] = Variable<String>(definition.value);
     }
+    if (pinyinPlain.present) {
+      map['pinyin_plain'] = Variable<String>(pinyinPlain.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -798,6 +851,7 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
           ..write('traditional: $traditional, ')
           ..write('pinyin: $pinyin, ')
           ..write('definition: $definition, ')
+          ..write('pinyinPlain: $pinyinPlain, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1085,6 +1139,7 @@ typedef $$DictionaryEntriesTableCreateCompanionBuilder =
       required String traditional,
       required String pinyin,
       required String definition,
+      Value<String?> pinyinPlain,
       Value<int> rowid,
     });
 typedef $$DictionaryEntriesTableUpdateCompanionBuilder =
@@ -1093,6 +1148,7 @@ typedef $$DictionaryEntriesTableUpdateCompanionBuilder =
       Value<String> traditional,
       Value<String> pinyin,
       Value<String> definition,
+      Value<String?> pinyinPlain,
       Value<int> rowid,
     });
 
@@ -1122,6 +1178,11 @@ class $$DictionaryEntriesTableFilterComposer
 
   ColumnFilters<String> get definition => $composableBuilder(
     column: $table.definition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1154,6 +1215,11 @@ class $$DictionaryEntriesTableOrderingComposer
     column: $table.definition,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$DictionaryEntriesTableAnnotationComposer
@@ -1180,6 +1246,11 @@ class $$DictionaryEntriesTableAnnotationComposer
 
   GeneratedColumn<String> get definition => $composableBuilder(
     column: $table.definition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
     builder: (column) => column,
   );
 }
@@ -1234,12 +1305,14 @@ class $$DictionaryEntriesTableTableManager
                 Value<String> traditional = const Value.absent(),
                 Value<String> pinyin = const Value.absent(),
                 Value<String> definition = const Value.absent(),
+                Value<String?> pinyinPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DictionaryEntriesCompanion(
                 simplified: simplified,
                 traditional: traditional,
                 pinyin: pinyin,
                 definition: definition,
+                pinyinPlain: pinyinPlain,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1248,12 +1321,14 @@ class $$DictionaryEntriesTableTableManager
                 required String traditional,
                 required String pinyin,
                 required String definition,
+                Value<String?> pinyinPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => DictionaryEntriesCompanion.insert(
                 simplified: simplified,
                 traditional: traditional,
                 pinyin: pinyin,
                 definition: definition,
+                pinyinPlain: pinyinPlain,
                 rowid: rowid,
               ),
           withReferenceMapper:
