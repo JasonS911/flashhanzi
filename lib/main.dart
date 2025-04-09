@@ -1,3 +1,4 @@
+import 'package:flashhanzi/assets/parse_cedict.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/handwrite_character.dart';
@@ -10,6 +11,12 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
   await seedTestCards(db);
+
+  final isTableEmpty = (await db.select(db.dictionaryEntries).get()).isEmpty;
+
+  if (isTableEmpty) {
+    await parse(db); // Run parsing if the table is empty
+  }
 
   runApp(MyApp(db: db));
 }
