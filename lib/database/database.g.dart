@@ -899,8 +899,17 @@ class $SentencePairsTable extends SentencePairs
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _pinyinMeta = const VerificationMeta('pinyin');
   @override
-  List<GeneratedColumn> get $columns => [id, chinese, english];
+  late final GeneratedColumn<String> pinyin = GeneratedColumn<String>(
+    'pinyin',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, chinese, english, pinyin];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -932,6 +941,14 @@ class $SentencePairsTable extends SentencePairs
     } else if (isInserting) {
       context.missing(_englishMeta);
     }
+    if (data.containsKey('pinyin')) {
+      context.handle(
+        _pinyinMeta,
+        pinyin.isAcceptableOrUnknown(data['pinyin']!, _pinyinMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pinyinMeta);
+    }
     return context;
   }
 
@@ -956,6 +973,11 @@ class $SentencePairsTable extends SentencePairs
             DriftSqlType.string,
             data['${effectivePrefix}english'],
           )!,
+      pinyin:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}pinyin'],
+          )!,
     );
   }
 
@@ -969,10 +991,12 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
   final int id;
   final String chinese;
   final String english;
+  final String pinyin;
   const SentencePair({
     required this.id,
     required this.chinese,
     required this.english,
+    required this.pinyin,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -980,6 +1004,7 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
     map['id'] = Variable<int>(id);
     map['chinese'] = Variable<String>(chinese);
     map['english'] = Variable<String>(english);
+    map['pinyin'] = Variable<String>(pinyin);
     return map;
   }
 
@@ -988,6 +1013,7 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
       id: Value(id),
       chinese: Value(chinese),
       english: Value(english),
+      pinyin: Value(pinyin),
     );
   }
 
@@ -1000,6 +1026,7 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
       id: serializer.fromJson<int>(json['id']),
       chinese: serializer.fromJson<String>(json['chinese']),
       english: serializer.fromJson<String>(json['english']),
+      pinyin: serializer.fromJson<String>(json['pinyin']),
     );
   }
   @override
@@ -1009,20 +1036,27 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
       'id': serializer.toJson<int>(id),
       'chinese': serializer.toJson<String>(chinese),
       'english': serializer.toJson<String>(english),
+      'pinyin': serializer.toJson<String>(pinyin),
     };
   }
 
-  SentencePair copyWith({int? id, String? chinese, String? english}) =>
-      SentencePair(
-        id: id ?? this.id,
-        chinese: chinese ?? this.chinese,
-        english: english ?? this.english,
-      );
+  SentencePair copyWith({
+    int? id,
+    String? chinese,
+    String? english,
+    String? pinyin,
+  }) => SentencePair(
+    id: id ?? this.id,
+    chinese: chinese ?? this.chinese,
+    english: english ?? this.english,
+    pinyin: pinyin ?? this.pinyin,
+  );
   SentencePair copyWithCompanion(SentencePairsCompanion data) {
     return SentencePair(
       id: data.id.present ? data.id.value : this.id,
       chinese: data.chinese.present ? data.chinese.value : this.chinese,
       english: data.english.present ? data.english.value : this.english,
+      pinyin: data.pinyin.present ? data.pinyin.value : this.pinyin,
     );
   }
 
@@ -1031,46 +1065,54 @@ class SentencePair extends DataClass implements Insertable<SentencePair> {
     return (StringBuffer('SentencePair(')
           ..write('id: $id, ')
           ..write('chinese: $chinese, ')
-          ..write('english: $english')
+          ..write('english: $english, ')
+          ..write('pinyin: $pinyin')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, chinese, english);
+  int get hashCode => Object.hash(id, chinese, english, pinyin);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SentencePair &&
           other.id == this.id &&
           other.chinese == this.chinese &&
-          other.english == this.english);
+          other.english == this.english &&
+          other.pinyin == this.pinyin);
 }
 
 class SentencePairsCompanion extends UpdateCompanion<SentencePair> {
   final Value<int> id;
   final Value<String> chinese;
   final Value<String> english;
+  final Value<String> pinyin;
   const SentencePairsCompanion({
     this.id = const Value.absent(),
     this.chinese = const Value.absent(),
     this.english = const Value.absent(),
+    this.pinyin = const Value.absent(),
   });
   SentencePairsCompanion.insert({
     this.id = const Value.absent(),
     required String chinese,
     required String english,
+    required String pinyin,
   }) : chinese = Value(chinese),
-       english = Value(english);
+       english = Value(english),
+       pinyin = Value(pinyin);
   static Insertable<SentencePair> custom({
     Expression<int>? id,
     Expression<String>? chinese,
     Expression<String>? english,
+    Expression<String>? pinyin,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (chinese != null) 'chinese': chinese,
       if (english != null) 'english': english,
+      if (pinyin != null) 'pinyin': pinyin,
     });
   }
 
@@ -1078,11 +1120,13 @@ class SentencePairsCompanion extends UpdateCompanion<SentencePair> {
     Value<int>? id,
     Value<String>? chinese,
     Value<String>? english,
+    Value<String>? pinyin,
   }) {
     return SentencePairsCompanion(
       id: id ?? this.id,
       chinese: chinese ?? this.chinese,
       english: english ?? this.english,
+      pinyin: pinyin ?? this.pinyin,
     );
   }
 
@@ -1098,6 +1142,9 @@ class SentencePairsCompanion extends UpdateCompanion<SentencePair> {
     if (english.present) {
       map['english'] = Variable<String>(english.value);
     }
+    if (pinyin.present) {
+      map['pinyin'] = Variable<String>(pinyin.value);
+    }
     return map;
   }
 
@@ -1106,7 +1153,8 @@ class SentencePairsCompanion extends UpdateCompanion<SentencePair> {
     return (StringBuffer('SentencePairsCompanion(')
           ..write('id: $id, ')
           ..write('chinese: $chinese, ')
-          ..write('english: $english')
+          ..write('english: $english, ')
+          ..write('pinyin: $pinyin')
           ..write(')'))
         .toString();
   }
@@ -1624,12 +1672,14 @@ typedef $$SentencePairsTableCreateCompanionBuilder =
       Value<int> id,
       required String chinese,
       required String english,
+      required String pinyin,
     });
 typedef $$SentencePairsTableUpdateCompanionBuilder =
     SentencePairsCompanion Function({
       Value<int> id,
       Value<String> chinese,
       Value<String> english,
+      Value<String> pinyin,
     });
 
 class $$SentencePairsTableFilterComposer
@@ -1653,6 +1703,11 @@ class $$SentencePairsTableFilterComposer
 
   ColumnFilters<String> get english => $composableBuilder(
     column: $table.english,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pinyin => $composableBuilder(
+    column: $table.pinyin,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1680,6 +1735,11 @@ class $$SentencePairsTableOrderingComposer
     column: $table.english,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pinyin => $composableBuilder(
+    column: $table.pinyin,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$SentencePairsTableAnnotationComposer
@@ -1699,6 +1759,9 @@ class $$SentencePairsTableAnnotationComposer
 
   GeneratedColumn<String> get english =>
       $composableBuilder(column: $table.english, builder: (column) => column);
+
+  GeneratedColumn<String> get pinyin =>
+      $composableBuilder(column: $table.pinyin, builder: (column) => column);
 }
 
 class $$SentencePairsTableTableManager
@@ -1739,20 +1802,24 @@ class $$SentencePairsTableTableManager
                 Value<int> id = const Value.absent(),
                 Value<String> chinese = const Value.absent(),
                 Value<String> english = const Value.absent(),
+                Value<String> pinyin = const Value.absent(),
               }) => SentencePairsCompanion(
                 id: id,
                 chinese: chinese,
                 english: english,
+                pinyin: pinyin,
               ),
           createCompanionCallback:
               ({
                 Value<int> id = const Value.absent(),
                 required String chinese,
                 required String english,
+                required String pinyin,
               }) => SentencePairsCompanion.insert(
                 id: id,
                 chinese: chinese,
                 english: english,
+                pinyin: pinyin,
               ),
           withReferenceMapper:
               (p0) =>

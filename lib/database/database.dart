@@ -35,6 +35,7 @@ class SentencePairs extends Table {
   IntColumn get id => integer().autoIncrement()();
   TextColumn get chinese => text()();
   TextColumn get english => text()();
+  TextColumn get pinyin => text()();
 }
 
 // Your database class

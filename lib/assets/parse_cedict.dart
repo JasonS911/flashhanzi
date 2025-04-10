@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:flashhanzi/database/database.dart';
+import 'package:pinyin/pinyin.dart';
 
 Future<void> parse(AppDatabase db) async {
   final file = File('lib/assets/cedict_ts.u8'); // File path
@@ -28,6 +29,7 @@ Future<void> parse(AppDatabase db) async {
         SentencePairsCompanion(
           chinese: Value(chinese),
           english: Value(english),
+          pinyin: Value(PinyinHelper.getPinyin(chinese)),
         ),
       );
     }

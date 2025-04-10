@@ -25,7 +25,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     super.initState();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
-              _scrollController.position.maxScrollExtent - 200 &&
+              _scrollController.position.maxScrollExtent - 300 &&
           !isLoading &&
           hasMore) {
         loadMore();
@@ -243,10 +243,10 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                           ),
                         ),
                         const SizedBox(height: 8),
-                        const Padding(
+                        Padding(
                           padding: EdgeInsets.only(left: 0),
                           child: Text(
-                            'Pinyin: Tā shì yí gè hǎo rén',
+                            "Pinyin: ${sentence.pinyin}",
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
