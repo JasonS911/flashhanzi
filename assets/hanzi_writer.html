@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <meta charset="UTF-8">
+        <title>Stroke Order</title>
+        <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@2.0.2/dist/hanzi-writer.min.js"></script>
+        <style>
+            body {
+                margin: 0;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                height: 100vh;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div id="target" style="width: 180px; height: 180px;"></div>
+
+        <script>
+            const writer = HanziWriter.create('target', '{{CHAR}}', {
+                width: 180,
+                height: 180,
+                padding: 5,
+                showOutline: true,
+                strokeAnimationSpeed: 1,
+            });
+            writer.animateCharacter();
+        </script>
+    </body>
+
+</html>

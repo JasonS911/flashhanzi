@@ -1,3 +1,5 @@
+import 'package:flashhanzi/parse.dart';
+import 'package:flashhanzi/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
@@ -20,9 +22,14 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
   bool isLoading = false;
   bool hasMore = true;
 
+  late Map<String, StrokeData> strokeMap;
+  bool strokesLoaded = false;
+
   @override
   void initState() {
     super.initState();
+    strokeMap = {};
+    loadData();
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 300 &&
@@ -30,6 +37,17 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
           hasMore) {
         loadMore();
       }
+    });
+  }
+
+  Future<void> loadData() async {
+    print('initState fired');
+
+    strokeMap = await loadStrokeData();
+    print('Loaded strokes: ${strokeMap.length}');
+
+    setState(() {
+      strokesLoaded = true;
     });
   }
 
@@ -225,7 +243,29 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                   if (snapshot.connectionState == ConnectionState.waiting) {
                     return CircularProgressIndicator();
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                    return Text('No example sentence found.');
+                    return Column(
+                      children: [
+                        Text('No example sentence found.'),
+
+                        strokesLoaded && strokeMap.containsKey(entry.simplified)
+                            ? ExpansionTile(
+                              title: const Text("Stroke Animation"),
+                              leading: const Icon(Icons.play_arrow),
+                              children: [
+                                Center(
+                                  child:
+                                      strokeMap.containsKey(entry.simplified)
+                                          ? CharacterStrokeView(
+                                            strokeData:
+                                                strokeMap[entry.simplified]!,
+                                          )
+                                          : SizedBox.shrink(),
+                                ),
+                              ],
+                            )
+                            : const SizedBox.shrink(), // return nothing
+                      ],
+                    );
                   } else {
                     final sentence = snapshot.data!.first;
                     return Column(
@@ -266,21 +306,31 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                             ),
                           ),
                         ),
+                        const SizedBox(height: 16),
+                        strokesLoaded && strokeMap.containsKey(entry.simplified)
+                            ? ExpansionTile(
+                              title: const Text("Stroke Animation"),
+                              leading: const Icon(Icons.play_arrow),
+                              children: [
+                                Center(
+                                  child: SizedBox(
+                                    height: 200,
+                                    child:
+                                        strokeMap.containsKey(entry.simplified)
+                                            ? CharacterStrokeView(
+                                              strokeData:
+                                                  strokeMap[entry.simplified]!,
+                                            )
+                                            : SizedBox.shrink(),
+                                  ),
+                                ),
+                              ],
+                            )
+                            : const SizedBox.shrink(), // return nothing
                       ],
                     );
                   }
                 },
-              ),
-              const SizedBox(height: 16),
-              Center(
-                child: Container(
-                  height: 180,
-                  width: 180,
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.black),
-                  ),
-                  child: const Center(child: Text('Stroke Order Placeholder')),
-                ),
               ),
             ],
           ),

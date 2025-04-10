@@ -1,4 +1,4 @@
-import 'package:flashhanzi/assets/parse_cedict.dart';
+import 'package:flashhanzi/parse.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/handwrite_character.dart';

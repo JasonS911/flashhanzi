@@ -387,6 +387,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
               ExpansionTile(
                 title: const Text("Personal Notes"),
                 leading: const Icon(Icons.play_arrow),
+                trailing: const Icon(Icons.arrow_drop_down),
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
@@ -573,6 +574,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
               ExpansionTile(
                 title: const Text("Stroke Order Animation"),
                 leading: const Icon(Icons.play_arrow),
+                trailing: const Icon(Icons.arrow_drop_down),
                 children: [
                   Container(
                     padding: const EdgeInsets.all(16),
