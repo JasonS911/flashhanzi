@@ -858,12 +858,267 @@ class DictionaryEntriesCompanion extends UpdateCompanion<DictionaryEntry> {
   }
 }
 
+class $SentencePairsTable extends SentencePairs
+    with TableInfo<$SentencePairsTable, SentencePair> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SentencePairsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _chineseMeta = const VerificationMeta(
+    'chinese',
+  );
+  @override
+  late final GeneratedColumn<String> chinese = GeneratedColumn<String>(
+    'chinese',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _englishMeta = const VerificationMeta(
+    'english',
+  );
+  @override
+  late final GeneratedColumn<String> english = GeneratedColumn<String>(
+    'english',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [id, chinese, english];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sentence_pairs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SentencePair> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('chinese')) {
+      context.handle(
+        _chineseMeta,
+        chinese.isAcceptableOrUnknown(data['chinese']!, _chineseMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_chineseMeta);
+    }
+    if (data.containsKey('english')) {
+      context.handle(
+        _englishMeta,
+        english.isAcceptableOrUnknown(data['english']!, _englishMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_englishMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SentencePair map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SentencePair(
+      id:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}id'],
+          )!,
+      chinese:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}chinese'],
+          )!,
+      english:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.string,
+            data['${effectivePrefix}english'],
+          )!,
+    );
+  }
+
+  @override
+  $SentencePairsTable createAlias(String alias) {
+    return $SentencePairsTable(attachedDatabase, alias);
+  }
+}
+
+class SentencePair extends DataClass implements Insertable<SentencePair> {
+  final int id;
+  final String chinese;
+  final String english;
+  const SentencePair({
+    required this.id,
+    required this.chinese,
+    required this.english,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['chinese'] = Variable<String>(chinese);
+    map['english'] = Variable<String>(english);
+    return map;
+  }
+
+  SentencePairsCompanion toCompanion(bool nullToAbsent) {
+    return SentencePairsCompanion(
+      id: Value(id),
+      chinese: Value(chinese),
+      english: Value(english),
+    );
+  }
+
+  factory SentencePair.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SentencePair(
+      id: serializer.fromJson<int>(json['id']),
+      chinese: serializer.fromJson<String>(json['chinese']),
+      english: serializer.fromJson<String>(json['english']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'chinese': serializer.toJson<String>(chinese),
+      'english': serializer.toJson<String>(english),
+    };
+  }
+
+  SentencePair copyWith({int? id, String? chinese, String? english}) =>
+      SentencePair(
+        id: id ?? this.id,
+        chinese: chinese ?? this.chinese,
+        english: english ?? this.english,
+      );
+  SentencePair copyWithCompanion(SentencePairsCompanion data) {
+    return SentencePair(
+      id: data.id.present ? data.id.value : this.id,
+      chinese: data.chinese.present ? data.chinese.value : this.chinese,
+      english: data.english.present ? data.english.value : this.english,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SentencePair(')
+          ..write('id: $id, ')
+          ..write('chinese: $chinese, ')
+          ..write('english: $english')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, chinese, english);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SentencePair &&
+          other.id == this.id &&
+          other.chinese == this.chinese &&
+          other.english == this.english);
+}
+
+class SentencePairsCompanion extends UpdateCompanion<SentencePair> {
+  final Value<int> id;
+  final Value<String> chinese;
+  final Value<String> english;
+  const SentencePairsCompanion({
+    this.id = const Value.absent(),
+    this.chinese = const Value.absent(),
+    this.english = const Value.absent(),
+  });
+  SentencePairsCompanion.insert({
+    this.id = const Value.absent(),
+    required String chinese,
+    required String english,
+  }) : chinese = Value(chinese),
+       english = Value(english);
+  static Insertable<SentencePair> custom({
+    Expression<int>? id,
+    Expression<String>? chinese,
+    Expression<String>? english,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (chinese != null) 'chinese': chinese,
+      if (english != null) 'english': english,
+    });
+  }
+
+  SentencePairsCompanion copyWith({
+    Value<int>? id,
+    Value<String>? chinese,
+    Value<String>? english,
+  }) {
+    return SentencePairsCompanion(
+      id: id ?? this.id,
+      chinese: chinese ?? this.chinese,
+      english: english ?? this.english,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (chinese.present) {
+      map['chinese'] = Variable<String>(chinese.value);
+    }
+    if (english.present) {
+      map['english'] = Variable<String>(english.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SentencePairsCompanion(')
+          ..write('id: $id, ')
+          ..write('chinese: $chinese, ')
+          ..write('english: $english')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
   late final $CharacterCardsTable characterCards = $CharacterCardsTable(this);
   late final $DictionaryEntriesTable dictionaryEntries =
       $DictionaryEntriesTable(this);
+  late final $SentencePairsTable sentencePairs = $SentencePairsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -871,6 +1126,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   List<DatabaseSchemaEntity> get allSchemaEntities => [
     characterCards,
     dictionaryEntries,
+    sentencePairs,
   ];
 }
 
@@ -1363,6 +1619,173 @@ typedef $$DictionaryEntriesTableProcessedTableManager =
       DictionaryEntry,
       PrefetchHooks Function()
     >;
+typedef $$SentencePairsTableCreateCompanionBuilder =
+    SentencePairsCompanion Function({
+      Value<int> id,
+      required String chinese,
+      required String english,
+    });
+typedef $$SentencePairsTableUpdateCompanionBuilder =
+    SentencePairsCompanion Function({
+      Value<int> id,
+      Value<String> chinese,
+      Value<String> english,
+    });
+
+class $$SentencePairsTableFilterComposer
+    extends Composer<_$AppDatabase, $SentencePairsTable> {
+  $$SentencePairsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chinese => $composableBuilder(
+    column: $table.chinese,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get english => $composableBuilder(
+    column: $table.english,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SentencePairsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SentencePairsTable> {
+  $$SentencePairsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get chinese => $composableBuilder(
+    column: $table.chinese,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get english => $composableBuilder(
+    column: $table.english,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SentencePairsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SentencePairsTable> {
+  $$SentencePairsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get chinese =>
+      $composableBuilder(column: $table.chinese, builder: (column) => column);
+
+  GeneratedColumn<String> get english =>
+      $composableBuilder(column: $table.english, builder: (column) => column);
+}
+
+class $$SentencePairsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SentencePairsTable,
+          SentencePair,
+          $$SentencePairsTableFilterComposer,
+          $$SentencePairsTableOrderingComposer,
+          $$SentencePairsTableAnnotationComposer,
+          $$SentencePairsTableCreateCompanionBuilder,
+          $$SentencePairsTableUpdateCompanionBuilder,
+          (
+            SentencePair,
+            BaseReferences<_$AppDatabase, $SentencePairsTable, SentencePair>,
+          ),
+          SentencePair,
+          PrefetchHooks Function()
+        > {
+  $$SentencePairsTableTableManager(_$AppDatabase db, $SentencePairsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer:
+              () => $$SentencePairsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer:
+              () =>
+                  $$SentencePairsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer:
+              () => $$SentencePairsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> chinese = const Value.absent(),
+                Value<String> english = const Value.absent(),
+              }) => SentencePairsCompanion(
+                id: id,
+                chinese: chinese,
+                english: english,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String chinese,
+                required String english,
+              }) => SentencePairsCompanion.insert(
+                id: id,
+                chinese: chinese,
+                english: english,
+              ),
+          withReferenceMapper:
+              (p0) =>
+                  p0
+                      .map(
+                        (e) => (
+                          e.readTable(table),
+                          BaseReferences(db, table, e),
+                        ),
+                      )
+                      .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SentencePairsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SentencePairsTable,
+      SentencePair,
+      $$SentencePairsTableFilterComposer,
+      $$SentencePairsTableOrderingComposer,
+      $$SentencePairsTableAnnotationComposer,
+      $$SentencePairsTableCreateCompanionBuilder,
+      $$SentencePairsTableUpdateCompanionBuilder,
+      (
+        SentencePair,
+        BaseReferences<_$AppDatabase, $SentencePairsTable, SentencePair>,
+      ),
+      SentencePair,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -1371,4 +1794,6 @@ class $AppDatabaseManager {
       $$CharacterCardsTableTableManager(_db, _db.characterCards);
   $$DictionaryEntriesTableTableManager get dictionaryEntries =>
       $$DictionaryEntriesTableTableManager(_db, _db.dictionaryEntries);
+  $$SentencePairsTableTableManager get sentencePairs =>
+      $$SentencePairsTableTableManager(_db, _db.sentencePairs);
 }

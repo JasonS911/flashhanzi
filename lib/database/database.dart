@@ -31,8 +31,14 @@ class DictionaryEntries extends Table {
   Set<Column> get primaryKey => {simplified, pinyin};
 }
 
+class SentencePairs extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get chinese => text()();
+  TextColumn get english => text()();
+}
+
 // Your database class
-@DriftDatabase(tables: [CharacterCards, DictionaryEntries])
+@DriftDatabase(tables: [CharacterCards, DictionaryEntries, SentencePairs])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
@@ -93,6 +99,13 @@ class AppDatabase extends _$AppDatabase {
             (entry) => OrderingTerm(expression: entry.simplified),
           ])
           ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<List<SentencePair>> findSentencesFor(String word) {
+    return (select(sentencePairs)
+          ..where((tbl) => tbl.chinese.like('%$word%'))
+          ..limit(1))
         .get();
   }
 }

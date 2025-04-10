@@ -150,7 +150,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
             ),
 
           // Search Results
-          ...results.map((entry) => buildResultCard(entry)).toList(),
+          ...results.map((entry) => buildResultCard(entry)),
 
           // Loading Indicator
           if (isLoading)
@@ -218,40 +218,58 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                 ),
               ),
               const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 0),
-                child: Text(
-                  'Sentence: 她是一个好人',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 0),
-                child: Text(
-                  'Pinyin: Tā shì yí gè hǎo rén',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.grey,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 8),
-              const Padding(
-                padding: EdgeInsets.only(left: 0),
-                child: Text(
-                  "Translation: He's studying Chinese",
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black,
-                  ),
-                ),
+              FutureBuilder<List<SentencePair>>(
+                future: widget.db.findSentencesFor(entry.simplified),
+
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator();
+                  } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
+                    return Text('No example sentence found.');
+                  } else {
+                    final sentence = snapshot.data!.first;
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            "Sentence: ${sentence.chinese}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        const Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            'Pinyin: Tā shì yí gè hǎo rén',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Padding(
+                          padding: EdgeInsets.only(left: 0),
+                          child: Text(
+                            "Translation: ${sentence.english}",
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.black,
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
               const SizedBox(height: 16),
               Center(

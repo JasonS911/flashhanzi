@@ -4,18 +4,34 @@ import 'package:flashhanzi/database/database.dart';
 
 Future<void> parse(AppDatabase db) async {
   final file = File('lib/assets/cedict_ts.u8'); // File path
+  final fileSentences = File('lib/assets/ch_eng_pairs.tsv'); // File path
 
-  if (!await file.exists()) {
+  if (!await file.exists() || !await fileSentences.exists()) {
     print('File not found.');
     return;
   }
 
   final lines = await file.readAsLines();
-
-  int inserted = 0;
+  final linesSentences = await fileSentences.readAsLines();
 
   // Collect all rows to insert
   final List<DictionaryEntriesCompanion> entries = [];
+  final List<SentencePairsCompanion> sentencePairs = [];
+
+  for (final line in linesSentences) {
+    final parts = line.split('\t');
+    if (parts.length >= 4) {
+      final chinese = parts[1].trim();
+      final english = parts[3].trim();
+
+      sentencePairs.add(
+        SentencePairsCompanion(
+          chinese: Value(chinese),
+          english: Value(english),
+        ),
+      );
+    }
+  }
 
   for (final line in lines) {
     if (line.startsWith('#')) continue; // Skip comments
@@ -56,10 +72,12 @@ Future<void> parse(AppDatabase db) async {
       entries,
       mode: InsertMode.insertOrIgnore,
     );
+    batch.insertAll(
+      db.sentencePairs,
+      sentencePairs,
+      mode: InsertMode.insertOrIgnore,
+    );
   });
-
-  inserted = entries.length;
-  print('Inserted $inserted entries.');
 }
 
 String normalizePinyin(String input) {
