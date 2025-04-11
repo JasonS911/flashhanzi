@@ -104,25 +104,48 @@ class StrokeData {
 
   StrokeData({required this.character, required this.strokes});
 
+  // Keep this method for parsing the JSON data later if needed
   factory StrokeData.fromJson(Map<String, dynamic> json) {
     return StrokeData(
       character: json['character'],
       strokes: List<String>.from(json['strokes']),
     );
   }
+
+  // Add a method to get the JSON string for future reference if necessary
+  String toJson() {
+    return '{"character": "$character", "strokes": ${strokes.toString()}}';
+  }
 }
 
-Future<Map<String, StrokeData>> loadStrokeData() async {
+Future<Map<String, String>> loadStrokeData() async {
   final raw = await rootBundle.loadString('assets/graphics.txt');
   final lines = raw.split('\n');
-  final Map<String, StrokeData> map = {};
+  final Map<String, String> map = {};
 
   for (final line in lines) {
     if (line.trim().isEmpty) continue;
-    final jsonData = json.decode(line);
-    final strokeData = StrokeData.fromJson(jsonData);
-    map[strokeData.character] = strokeData;
+    final jsonData = json.decode(
+      line,
+    ); // Parse the JSON string to a Dart object (if needed)
+    final character =
+        jsonData['character']; // Get the character from the parsed JSON
+    map[character] =
+        line; // Store the raw JSON string (the entire line) in the map
   }
 
   return map;
+}
+
+String? getStrokesForCharacter(
+  String character,
+  Map<String, String> strokeDataMap,
+) {
+  final strokeDataJson = strokeDataMap[character];
+
+  if (strokeDataJson != null) {
+    return strokeDataJson; // Return the raw JSON string for the character
+  } else {
+    return null; // Return null if the character is not found
+  }
 }

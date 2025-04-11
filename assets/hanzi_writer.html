@@ -1,32 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 
     <head>
-        <meta charset="UTF-8">
-        <title>Stroke Order</title>
-        <script src="https://cdn.jsdelivr.net/npm/hanzi-writer@2.0.2/dist/hanzi-writer.min.js"></script>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Hanzi Writer</title>
+        <script src="https://unpkg.com/hanzi-writer@2.1.2/dist/hanzi-writer.min.js"></script>
         <style>
+            html,
             body {
                 margin: 0;
+                padding: 0;
+                background-color: white;
+                width: 100%;
+                height: 100%;
                 display: flex;
-                justify-content: center;
                 align-items: center;
-                height: 100vh;
+                justify-content: center;
+            }
+
+            #target {
+                width: 200px;
+                height: 200px;
             }
         </style>
     </head>
 
     <body>
-        <div id="target" style="width: 180px; height: 180px;"></div>
+        <div id="target"></div>
 
         <script>
             const writer = HanziWriter.create('target', '{{CHAR}}', {
-                width: 180,
-                height: 180,
-                padding: 5,
+                width: 200,
+                height: 200,
+                padding: 10,
+                strokeColor: '#D32F2F',
+                outlineColor: '#cccccc',
                 showOutline: true,
-                strokeAnimationSpeed: 1,
+                showCharacter: false,
+                strokeAnimationSpeed: 1.2,
+                delayBetweenStrokes: 500,
             });
+
             writer.animateCharacter();
         </script>
     </body>

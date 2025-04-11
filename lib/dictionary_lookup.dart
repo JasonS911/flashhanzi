@@ -22,14 +22,13 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
   bool isLoading = false;
   bool hasMore = true;
 
-  late Map<String, StrokeData> strokeMap;
+  late Map<String, String> strokeMap;
   bool strokesLoaded = false;
 
   @override
   void initState() {
     super.initState();
-    strokeMap = {};
-    loadData();
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 300 &&
@@ -38,16 +37,18 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
         loadMore();
       }
     });
+
+    // Call loadData to fetch stroke data asynchronously
+    _loadData();
   }
 
-  Future<void> loadData() async {
-    print('initState fired');
-
-    strokeMap = await loadStrokeData();
-    print('Loaded strokes: ${strokeMap.length}');
-
+  // Use this method to load the stroke data asynchronously
+  Future<void> _loadData() async {
+    // Load stroke data asynchronously
+    Map<String, String> dataMap = await loadStrokeData();
     setState(() {
-      strokesLoaded = true;
+      strokeMap = dataMap;
+      strokesLoaded = true; // Mark strokes as loaded
     });
   }
 
@@ -246,20 +247,22 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                     return Column(
                       children: [
                         Text('No example sentence found.'),
-
+                        const SizedBox(height: 16),
                         strokesLoaded && strokeMap.containsKey(entry.simplified)
                             ? ExpansionTile(
                               title: const Text("Stroke Animation"),
                               leading: const Icon(Icons.play_arrow),
                               children: [
                                 Center(
-                                  child:
-                                      strokeMap.containsKey(entry.simplified)
-                                          ? CharacterStrokeView(
-                                            strokeData:
-                                                strokeMap[entry.simplified]!,
-                                          )
-                                          : SizedBox.shrink(),
+                                  child: SizedBox(
+                                    height: 150,
+                                    child:
+                                        strokeMap.containsKey(entry.simplified)
+                                            ? StrokeOrderWidget(
+                                              character: entry.simplified,
+                                            ) // Pass the character to the widget
+                                            : SizedBox.shrink(),
+                                  ),
                                 ),
                               ],
                             )
@@ -314,13 +317,12 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                               children: [
                                 Center(
                                   child: SizedBox(
-                                    height: 200,
+                                    height: 150,
                                     child:
                                         strokeMap.containsKey(entry.simplified)
-                                            ? CharacterStrokeView(
-                                              strokeData:
-                                                  strokeMap[entry.simplified]!,
-                                            )
+                                            ? StrokeOrderWidget(
+                                              character: entry.simplified,
+                                            ) // Pass the character to the widget
                                             : SizedBox.shrink(),
                                   ),
                                 ),

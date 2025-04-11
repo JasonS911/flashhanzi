@@ -1,53 +1,99 @@
 import 'package:flashhanzi/parse.dart';
 import 'package:flutter/material.dart';
-import 'package:path_drawing/path_drawing.dart';
+import 'package:stroke_order_animator/stroke_order_animator.dart'; // Import stroke order animator library
 
-class StrokePainter extends CustomPainter {
-  final List<String> strokes;
+// Define the StrokeOrder class to represent the stroke data.
 
-  StrokePainter(this.strokes);
+class StrokeOrderWidget extends StatefulWidget {
+  final String character; // The stroke order data to display animation for.
+
+  const StrokeOrderWidget({super.key, required this.character});
 
   @override
-  void paint(Canvas canvas, Size size) {
-    final paint =
-        Paint()
-          ..color = Colors.black
-          ..style = PaintingStyle.stroke
-          ..strokeWidth = 2
-          ..isAntiAlias = true;
+  _StrokeOrderWidgetState createState() => _StrokeOrderWidgetState();
+}
 
-    final double scale = size.width / 1024; // scale strokes to canvas size
+class _StrokeOrderWidgetState extends State<StrokeOrderWidget>
+    with TickerProviderStateMixin {
+  late StrokeOrderAnimationController _completedController;
+  late Future<StrokeOrderAnimationController> _animationController;
 
-    for (final svg in strokes) {
-      final path = parseSvgPathData(svg);
-      final offsetX = (size.width - 1024 * scale) / 2;
-      final offsetY = (size.height - 1024 * scale) / 2;
+  @override
+  void initState() {
+    super.initState();
+    // Load stroke data asynchronously
+    _loadData();
+  }
 
-      final matrix =
-          Matrix4.identity()
-            ..translate(offsetX, offsetY + 1024 * scale) // move down then flip
-            ..scale(scale, -scale); // Flip Y
+  // Async method to load data
+  Future<void> _loadData() async {
+    // Load stroke data asynchronously
+    Map<String, String> dataMap = await loadStrokeData();
+    // Pass the data map along with the character to _loadStrokeOrder
+    print(dataMap);
+    _animationController = _loadStrokeOrder(widget.character, dataMap);
+    setState(() {});
+  }
 
-      final flipped = path.transform(matrix.storage);
-      canvas.drawPath(flipped, paint);
+  // Dispose the controller when it's no longer needed.
+  @override
+  void dispose() {
+    _completedController.dispose();
+    super.dispose();
+  }
+
+  // Loads the stroke order for the character.
+  Future<StrokeOrderAnimationController> _loadStrokeOrder(
+    String character,
+    Map<String, String>
+    strokeDataMap, // Map where the character key maps to the JSON string
+  ) async {
+    // Retrieve the JSON string for the given character from the map
+    final strokeDataJson = strokeDataMap[character];
+
+    if (strokeDataJson == null) {
+      // Handle the case where the character does not exist in the map
+      throw Exception("Stroke data for character '$character' not found");
     }
+
+    // Use the retrieved JSON string to create the StrokeOrderAnimationController
+    final controller = StrokeOrderAnimationController(
+      StrokeOrder(strokeDataJson), // Pass the JSON string here
+      this,
+    );
+    controller.startAnimation();
+    return controller;
+  }
+
+  // Builds the stroke order animation.
+  Widget _buildStrokeOrderAnimation(StrokeOrderAnimationController controller) {
+    return StrokeOrderAnimator(
+      controller,
+      size: Size(150, 150), // Set the size of the animation area
+      key: UniqueKey(),
+    );
   }
 
   @override
-  bool shouldRepaint(CustomPainter oldDelegate) => false;
-}
-
-class CharacterStrokeView extends StatelessWidget {
-  final StrokeData strokeData;
-
-  const CharacterStrokeView({super.key, required this.strokeData});
-
-  @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      width: 200,
-      height: 200,
-      child: CustomPaint(painter: StrokePainter(strokeData.strokes)),
+    return FutureBuilder<StrokeOrderAnimationController>(
+      future: _animationController,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return CircularProgressIndicator(); // Show loading indicator while waiting.
+        }
+
+        if (snapshot.hasData) {
+          // When data is available, build the animation view.
+          return Column(children: [_buildStrokeOrderAnimation(snapshot.data!)]);
+        }
+
+        if (snapshot.hasError) {
+          return Text('Error: ${snapshot.error}'); // Handle error state.
+        }
+
+        return SizedBox.shrink(); // Return empty widget if no data is available.
+      },
     );
   }
 }
