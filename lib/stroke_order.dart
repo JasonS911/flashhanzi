@@ -1,13 +1,17 @@
-import 'package:flashhanzi/parse.dart';
 import 'package:flutter/material.dart';
 import 'package:stroke_order_animator/stroke_order_animator.dart'; // Import stroke order animator library
 
 // Define the StrokeOrder class to represent the stroke data.
 
+// ignore: must_be_immutable
 class StrokeOrderWidget extends StatefulWidget {
   final String character; // The stroke order data to display animation for.
-
-  const StrokeOrderWidget({super.key, required this.character});
+  Map<String, String> dataMap;
+  StrokeOrderWidget({
+    super.key,
+    required this.character,
+    required this.dataMap,
+  });
 
   @override
   _StrokeOrderWidgetState createState() => _StrokeOrderWidgetState();
@@ -22,18 +26,17 @@ class _StrokeOrderWidgetState extends State<StrokeOrderWidget>
   void initState() {
     super.initState();
     // Load stroke data asynchronously
-    _loadData();
+    _animationController = _loadStrokeOrder(widget.character, widget.dataMap);
   }
 
   // Async method to load data
-  Future<void> _loadData() async {
-    // Load stroke data asynchronously
-    Map<String, String> dataMap = await loadStrokeData();
-    // Pass the data map along with the character to _loadStrokeOrder
-    print(dataMap);
-    _animationController = _loadStrokeOrder(widget.character, dataMap);
-    setState(() {});
-  }
+  // Future<void> _loadData() async {
+  //   // Load stroke data asynchronously
+  //   Map<String, String> dataMap = await loadStrokeData();
+  //   // Pass the data map along with the character to _loadStrokeOrder
+  //   _animationController = _loadStrokeOrder(widget.character, dataMap);
+  //   setState(() {});
+  // }
 
   // Dispose the controller when it's no longer needed.
   @override

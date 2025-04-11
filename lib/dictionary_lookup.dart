@@ -42,12 +42,12 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     _loadData();
   }
 
-  // Use this method to load the stroke data asynchronously
   Future<void> _loadData() async {
-    // Load stroke data asynchronously
-    Map<String, String> dataMap = await loadStrokeData();
+    // Await the result of the asynchronous loadStrokeData function.
+    Map<String, String> dataMap =
+        await loadStrokeData(); // Correct use of await
     setState(() {
-      strokeMap = dataMap;
+      strokeMap = dataMap; // Update the strokeMap with the loaded data
       strokesLoaded = true; // Mark strokes as loaded
     });
   }
@@ -260,6 +260,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                                         strokeMap.containsKey(entry.simplified)
                                             ? StrokeOrderWidget(
                                               character: entry.simplified,
+                                              dataMap: strokeMap,
                                             ) // Pass the character to the widget
                                             : SizedBox.shrink(),
                                   ),
@@ -322,6 +323,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                                         strokeMap.containsKey(entry.simplified)
                                             ? StrokeOrderWidget(
                                               character: entry.simplified,
+                                              dataMap: strokeMap,
                                             ) // Pass the character to the widget
                                             : SizedBox.shrink(),
                                   ),
