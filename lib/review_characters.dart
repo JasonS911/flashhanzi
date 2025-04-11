@@ -16,12 +16,13 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   late AppDatabase db; // Declare the database instance
   late Future<List<CharacterCard>> _dueCards;
   late int _currentIndex;
+  final TextEditingController _notesController = TextEditingController();
   // late bool _flipped;
 
   @override
   void initState() {
     super.initState();
-    db = AppDatabase(); // Initialize the database instance in initState
+    db = widget.db; // Initialize the database instance in initState
     _dueCards = db.getDueCards(); // Call the method without arguments
     _currentIndex = 0; // Initialize the current index to 0
     // bool _flipped = false; // Initialize the flipped state to false
@@ -32,6 +33,32 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
         });
       }
     });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Ensure you are fetching the latest notes when navigating back to this page
+    _dueCards =
+        db.getDueCards(); // Fetch the data again when the page is revisited
+  }
+
+  void updateNotes() async {
+    final newNotes = _notesController.text;
+
+    final cards = await db.getDueCards();
+
+    // Ensure the current index is valid
+    if (_currentIndex < 0 || _currentIndex >= cards.length) {
+      return; // Handle out-of-bounds error or invalid index
+    }
+
+    // Get the card to update
+    final cardToUpdate = cards[_currentIndex];
+
+    // Update the database
+    await db.updateNotesDB(cardToUpdate.character, newNotes);
+    // Re-fetch the data to ensure the UI is updated
   }
 
   void updateCard(int grade) async {
@@ -384,18 +411,58 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                 ),
               ),
               SizedBox(height: 24), // Space before the next review character
-              ExpansionTile(
-                title: const Text("Personal Notes"),
-                leading: const Icon(Icons.play_arrow),
-                trailing: const Icon(Icons.arrow_drop_down),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    height: 150, // or any size you want
-                    color: Colors.grey[100],
-                    child: Center(child: Text("Add notes here")),
-                  ),
-                ],
+              FutureBuilder<List<CharacterCard>>(
+                future: _dueCards, // Your future to fetch the data
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return CircularProgressIndicator(); // Show loading indicator while waiting
+                  } else if (snapshot.hasError) {
+                    return Text('Error loading data'); // Handle error state
+                  } else if (snapshot.hasData) {
+                    final cards = snapshot.data!;
+
+                    if (cards.isNotEmpty &&
+                        _currentIndex >= 0 &&
+                        _currentIndex < cards.length) {
+                      final card = cards[_currentIndex];
+
+                      // Set the notesController to the existing notes
+                      _notesController.text = card.notes ?? '';
+                    }
+
+                    return ExpansionTile(
+                      title: const Text("Personal Notes"),
+                      leading: const Icon(Icons.play_arrow),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          height: 150, // or any size you want
+                          child: Center(
+                            child: TextField(
+                              controller: _notesController,
+                              maxLines: 5,
+                              maxLength: 300,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Add your notes here",
+                              ),
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: () {
+                            updateNotes();
+                          },
+                          child: Text('Save Notes'),
+                        ),
+                        SizedBox(height: 8),
+                      ],
+                    );
+                  }
+
+                  return SizedBox.shrink(); // Return empty widget if no data
+                },
               ),
             ],
           ),

@@ -10,7 +10,7 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
-  await seedTestCards(db);
+  // await seedTestCards(db);
 
   final isTableEmpty = (await db.select(db.dictionaryEntries).get()).isEmpty;
 

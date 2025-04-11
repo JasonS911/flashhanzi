@@ -87,6 +87,15 @@ class $CharacterCardsTable extends CharacterCards
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _notesMeta = const VerificationMeta('notes');
+  @override
+  late final GeneratedColumn<String> notes = GeneratedColumn<String>(
+    'notes',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     character,
@@ -96,6 +105,7 @@ class $CharacterCardsTable extends CharacterCards
     repetition,
     easeFactor,
     nextReview,
+    notes,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -157,6 +167,12 @@ class $CharacterCardsTable extends CharacterCards
         nextReview.isAcceptableOrUnknown(data['next_review']!, _nextReviewMeta),
       );
     }
+    if (data.containsKey('notes')) {
+      context.handle(
+        _notesMeta,
+        notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
+      );
+    }
     return context;
   }
 
@@ -200,6 +216,10 @@ class $CharacterCardsTable extends CharacterCards
         DriftSqlType.dateTime,
         data['${effectivePrefix}next_review'],
       ),
+      notes: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}notes'],
+      ),
     );
   }
 
@@ -217,6 +237,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
   final int repetition;
   final double easeFactor;
   final DateTime? nextReview;
+  final String? notes;
   const CharacterCard({
     required this.character,
     required this.pinyin,
@@ -225,6 +246,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     required this.repetition,
     required this.easeFactor,
     this.nextReview,
+    this.notes,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -237,6 +259,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     map['ease_factor'] = Variable<double>(easeFactor);
     if (!nullToAbsent || nextReview != null) {
       map['next_review'] = Variable<DateTime>(nextReview);
+    }
+    if (!nullToAbsent || notes != null) {
+      map['notes'] = Variable<String>(notes);
     }
     return map;
   }
@@ -253,6 +278,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           nextReview == null && nullToAbsent
               ? const Value.absent()
               : Value(nextReview),
+      notes:
+          notes == null && nullToAbsent ? const Value.absent() : Value(notes),
     );
   }
 
@@ -269,6 +296,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       repetition: serializer.fromJson<int>(json['repetition']),
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
       nextReview: serializer.fromJson<DateTime?>(json['nextReview']),
+      notes: serializer.fromJson<String?>(json['notes']),
     );
   }
   @override
@@ -282,6 +310,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       'repetition': serializer.toJson<int>(repetition),
       'easeFactor': serializer.toJson<double>(easeFactor),
       'nextReview': serializer.toJson<DateTime?>(nextReview),
+      'notes': serializer.toJson<String?>(notes),
     };
   }
 
@@ -293,6 +322,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     int? repetition,
     double? easeFactor,
     Value<DateTime?> nextReview = const Value.absent(),
+    Value<String?> notes = const Value.absent(),
   }) => CharacterCard(
     character: character ?? this.character,
     pinyin: pinyin ?? this.pinyin,
@@ -301,6 +331,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     repetition: repetition ?? this.repetition,
     easeFactor: easeFactor ?? this.easeFactor,
     nextReview: nextReview.present ? nextReview.value : this.nextReview,
+    notes: notes.present ? notes.value : this.notes,
   );
   CharacterCard copyWithCompanion(CharacterCardsCompanion data) {
     return CharacterCard(
@@ -315,6 +346,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           data.easeFactor.present ? data.easeFactor.value : this.easeFactor,
       nextReview:
           data.nextReview.present ? data.nextReview.value : this.nextReview,
+      notes: data.notes.present ? data.notes.value : this.notes,
     );
   }
 
@@ -327,7 +359,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           ..write('interval: $interval, ')
           ..write('repetition: $repetition, ')
           ..write('easeFactor: $easeFactor, ')
-          ..write('nextReview: $nextReview')
+          ..write('nextReview: $nextReview, ')
+          ..write('notes: $notes')
           ..write(')'))
         .toString();
   }
@@ -341,6 +374,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     repetition,
     easeFactor,
     nextReview,
+    notes,
   );
   @override
   bool operator ==(Object other) =>
@@ -352,7 +386,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           other.interval == this.interval &&
           other.repetition == this.repetition &&
           other.easeFactor == this.easeFactor &&
-          other.nextReview == this.nextReview);
+          other.nextReview == this.nextReview &&
+          other.notes == this.notes);
 }
 
 class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
@@ -363,6 +398,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
   final Value<int> repetition;
   final Value<double> easeFactor;
   final Value<DateTime?> nextReview;
+  final Value<String?> notes;
   final Value<int> rowid;
   const CharacterCardsCompanion({
     this.character = const Value.absent(),
@@ -372,6 +408,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.repetition = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.nextReview = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharacterCardsCompanion.insert({
@@ -382,6 +419,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.repetition = const Value.absent(),
     this.easeFactor = const Value.absent(),
     this.nextReview = const Value.absent(),
+    this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : character = Value(character),
        pinyin = Value(pinyin),
@@ -394,6 +432,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Expression<int>? repetition,
     Expression<double>? easeFactor,
     Expression<DateTime>? nextReview,
+    Expression<String>? notes,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -404,6 +443,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       if (repetition != null) 'repetition': repetition,
       if (easeFactor != null) 'ease_factor': easeFactor,
       if (nextReview != null) 'next_review': nextReview,
+      if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -416,6 +456,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Value<int>? repetition,
     Value<double>? easeFactor,
     Value<DateTime?>? nextReview,
+    Value<String?>? notes,
     Value<int>? rowid,
   }) {
     return CharacterCardsCompanion(
@@ -426,6 +467,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       repetition: repetition ?? this.repetition,
       easeFactor: easeFactor ?? this.easeFactor,
       nextReview: nextReview ?? this.nextReview,
+      notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -454,6 +496,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     if (nextReview.present) {
       map['next_review'] = Variable<DateTime>(nextReview.value);
     }
+    if (notes.present) {
+      map['notes'] = Variable<String>(notes.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -470,6 +515,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
           ..write('repetition: $repetition, ')
           ..write('easeFactor: $easeFactor, ')
           ..write('nextReview: $nextReview, ')
+          ..write('notes: $notes, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1187,6 +1233,7 @@ typedef $$CharacterCardsTableCreateCompanionBuilder =
       Value<int> repetition,
       Value<double> easeFactor,
       Value<DateTime?> nextReview,
+      Value<String?> notes,
       Value<int> rowid,
     });
 typedef $$CharacterCardsTableUpdateCompanionBuilder =
@@ -1198,6 +1245,7 @@ typedef $$CharacterCardsTableUpdateCompanionBuilder =
       Value<int> repetition,
       Value<double> easeFactor,
       Value<DateTime?> nextReview,
+      Value<String?> notes,
       Value<int> rowid,
     });
 
@@ -1242,6 +1290,11 @@ class $$CharacterCardsTableFilterComposer
 
   ColumnFilters<DateTime> get nextReview => $composableBuilder(
     column: $table.nextReview,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get notes => $composableBuilder(
+    column: $table.notes,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1289,6 +1342,11 @@ class $$CharacterCardsTableOrderingComposer
     column: $table.nextReview,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get notes => $composableBuilder(
+    column: $table.notes,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharacterCardsTableAnnotationComposer
@@ -1328,6 +1386,9 @@ class $$CharacterCardsTableAnnotationComposer
     column: $table.nextReview,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get notes =>
+      $composableBuilder(column: $table.notes, builder: (column) => column);
 }
 
 class $$CharacterCardsTableTableManager
@@ -1374,6 +1435,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> repetition = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion(
                 character: character,
@@ -1383,6 +1445,7 @@ class $$CharacterCardsTableTableManager
                 repetition: repetition,
                 easeFactor: easeFactor,
                 nextReview: nextReview,
+                notes: notes,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1394,6 +1457,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> repetition = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
+                Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion.insert(
                 character: character,
@@ -1403,6 +1467,7 @@ class $$CharacterCardsTableTableManager
                 repetition: repetition,
                 easeFactor: easeFactor,
                 nextReview: nextReview,
+                notes: notes,
                 rowid: rowid,
               ),
           withReferenceMapper:

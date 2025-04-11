@@ -15,7 +15,7 @@ class CharacterCards extends Table {
   IntColumn get repetition => integer().withDefault(const Constant(0))();
   RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
   DateTimeColumn get nextReview => dateTime().nullable()();
-
+  TextColumn get notes => text().nullable()();
   @override
   Set<Column> get primaryKey => {character};
 }
@@ -70,6 +70,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> updateNotesDB(String character, String newNotes) async {
+    await (update(characterCards)..where(
+      (card) => card.character.equals(character),
+    )).write(CharacterCardsCompanion(notes: Value(newNotes)));
+  }
   // Future<List<DictionaryEntry>> searchDictionary(String input) {
   //   return (select(dictionaryEntries)..where(
   //     (entry) =>

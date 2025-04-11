@@ -245,6 +245,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                     return CircularProgressIndicator();
                   } else if (!snapshot.hasData || snapshot.data!.isEmpty) {
                     return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text('No example sentence found.'),
                         const SizedBox(height: 16),
