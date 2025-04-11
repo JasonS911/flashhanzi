@@ -90,12 +90,28 @@ class AppDatabase extends _$AppDatabase {
                 entry.simplified.equals(input) |
                 entry.traditional.equals(input) |
                 entry.pinyin.like('%$input%') |
-                entry.pinyinPlain.like('%$input%'),
+                entry.pinyinPlain.like('%$input%'), //removes accents
           )
           ..orderBy([
             (entry) => OrderingTerm(
               expression: FunctionCallExpression('length', [entry.simplified]),
               mode: OrderingMode.asc,
+            ),
+            // Order by exact matches for 'simplified' first
+            (entry) => OrderingTerm(
+              expression:
+                  entry.simplified
+                      .equals(input)
+                      .cast<int>(), // 1 for exact match, 0 for non-match
+              mode: OrderingMode.desc, // Exact matches come first
+            ),
+            // Order by exact matches for 'pinyin'
+            (entry) => OrderingTerm(
+              expression:
+                  entry.pinyinPlain
+                      .equals(input)
+                      .cast<int>(), // 1 for exact match, 0 for non-match
+              mode: OrderingMode.desc, // Exact matches come first
             ),
             (entry) => OrderingTerm(expression: entry.simplified),
           ])
