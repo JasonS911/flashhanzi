@@ -495,167 +495,238 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                 ],
               ),
               SizedBox(height: 8), // Space before the review list
+              //inside futurebuilder
               Padding(
-                padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                child: Container(
-                  padding: const EdgeInsets.only(
-                    bottom: 20,
-                  ), // Add padding inside the container
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey, // Underline color
-                        width: 1, // Underline thickness
-                      ),
-                    ),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      SizedBox(width: 52),
-                      Text(
-                        '好',
+                padding: EdgeInsets.all(0),
+                child: FutureBuilder(
+                  future: _dueCards,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Text(
+                        'Loading...',
                         style: TextStyle(
-                          fontSize: 76,
+                          fontSize: 84,
+                          fontWeight: FontWeight.bold,
                           color: Colors.black87,
                           decoration: TextDecoration.none, // Remove underline
                         ),
-                      ),
-                      SizedBox(width: 28), // Space between characters
-                      Row(
+                      );
+                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
+                      return Column(
                         children: [
                           Padding(
-                            padding: const EdgeInsets.only(top: 12),
-                            child: Text(
-                              '[hao]',
-                              style: const TextStyle(
-                                fontSize: 48,
-                                color: Colors.black87,
-                                decoration:
-                                    TextDecoration.none, // Remove underline
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: 16,
+                            ),
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                bottom: 20,
+                              ), // Add padding inside the container
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Colors.grey, // Underline color
+                                    width: 1, // Underline thickness
+                                  ),
+                                ),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  SizedBox(width: 52),
+                                  Text(
+                                    snapshot.data![_currentIndex].character,
+                                    style: TextStyle(
+                                      fontSize: 76,
+                                      color: Colors.black87,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
+                                  ),
+                                  SizedBox(
+                                    width: 28,
+                                  ), // Space between characters
+                                  Row(
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(top: 12),
+                                        child: Text(
+                                          '[${snapshot.data![_currentIndex].pinyin}]',
+                                          style: const TextStyle(
+                                            fontSize: 48,
+                                            color: Colors.black87,
+                                            decoration:
+                                                TextDecoration
+                                                    .none, // Remove underline
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.volume_up,
+                                          size: 24,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          // Add functionality to play audio here
+                                          doNothing();
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
                             ),
                           ),
-                          IconButton(
-                            icon: const Icon(
-                              Icons.volume_up,
-                              size: 24,
-                              color: Colors.grey,
+                          SizedBox(height: 4), // Space before the review list
+
+                          Padding(
+                            padding: EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: 16,
                             ),
-                            onPressed: () {
-                              // Add functionality to play audio here
-                              doNothing();
-                            },
+                            child: Container(
+                              padding: const EdgeInsets.only(
+                                bottom: 20,
+                              ), // Add padding inside the container
+                              decoration: BoxDecoration(
+                                border: Border(
+                                  bottom: BorderSide(
+                                    color: Colors.grey, // Underline color
+                                    width: 1, // Underline thickness
+                                  ),
+                                ),
+                              ),
+                              child: Column(
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Meaning: ${snapshot.data![_currentIndex].definition}',
+                                        style: TextStyle(
+                                          fontSize: 24,
+                                          color: Color(0xFFB42F2B),
+                                          fontWeight: FontWeight.bold,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  SizedBox(
+                                    height: 8,
+                                  ), // Space between meaning and example
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Example: 她是一个好人',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        'Pinyin: Tā shì yí gè hǎo rén',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Translation: He's studying Chinese",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                          ExpansionTile(
+                            title: const Text("Stroke Order Animation"),
+                            leading: const Icon(Icons.play_arrow),
+                            trailing: const Icon(Icons.arrow_drop_down),
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(16),
+                                height: 150, // or any size you want
+                                color: Colors.grey[100],
+                                child: Center(
+                                  child: Text(
+                                    "← Insert stroke animation widget here →",
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16),
                         ],
-                      ),
-                    ],
-                  ),
+                      );
+                    } else if (snapshot.hasError) {
+                      return const Text(
+                        'Error loading data',
+                        style: TextStyle(
+                          fontSize: 116,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    } else {
+                      return const Text(
+                        'Error loading data',
+                        style: TextStyle(
+                          fontSize: 116,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.red,
+                          decoration: TextDecoration.none, // Remove underline
+                        ),
+                      );
+                    }
+                  },
                 ),
               ),
-              SizedBox(height: 4), // Space before the review list
 
-              Padding(
-                padding: EdgeInsets.only(left: 16, right: 16, bottom: 16),
-                child: Container(
-                  padding: const EdgeInsets.only(
-                    bottom: 20,
-                  ), // Add padding inside the container
-                  decoration: BoxDecoration(
-                    border: Border(
-                      bottom: BorderSide(
-                        color: Colors.grey, // Underline color
-                        width: 1, // Underline thickness
-                      ),
-                    ),
-                  ),
-                  child: Column(
-                    children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Meaning: Good; well',
-                            style: TextStyle(
-                              fontSize: 24,
-                              color: Color(0xFFB42F2B),
-                              fontWeight: FontWeight.bold,
-                              decoration:
-                                  TextDecoration.none, // Remove underline
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 8), // Space between meaning and example
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Example: 她是一个好人',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              decoration:
-                                  TextDecoration.none, // Remove underline
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Pinyin: Tā shì yí gè hǎo rén',
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              decoration:
-                                  TextDecoration.none, // Remove underline
-                            ),
-                          ),
-                        ],
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            "Translation: He's studying Chinese",
-                            style: TextStyle(
-                              fontSize: 16,
-                              color: Colors.black87,
-                              decoration:
-                                  TextDecoration.none, // Remove underline
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              ExpansionTile(
-                title: const Text("Stroke Order Animation"),
-                leading: const Icon(Icons.play_arrow),
-                trailing: const Icon(Icons.arrow_drop_down),
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    height: 150, // or any size you want
-                    color: Colors.grey[100],
-                    child: Center(
-                      child: Text("← Insert stroke animation widget here →"),
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 16), // Space before the next review character
-
-              SizedBox(height: 16), // Space before the notes input
+              //stuff after column containing future builder
+              SizedBox(height: 16),
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 child: Text(

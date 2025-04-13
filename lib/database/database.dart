@@ -102,14 +102,6 @@ class AppDatabase extends _$AppDatabase {
               expression: FunctionCallExpression('length', [entry.simplified]),
               mode: OrderingMode.asc,
             ),
-            // Order by exact matches for 'simplified' first
-            (entry) => OrderingTerm(
-              expression:
-                  entry.simplified
-                      .equals(input)
-                      .cast<int>(), // 1 for exact match, 0 for non-match
-              mode: OrderingMode.desc, // Exact matches come first
-            ),
             // Order by exact matches for 'pinyin'
             (entry) => OrderingTerm(
               expression:
@@ -118,6 +110,15 @@ class AppDatabase extends _$AppDatabase {
                       .cast<int>(), // 1 for exact match, 0 for non-match
               mode: OrderingMode.desc, // Exact matches come first
             ),
+            // Order by exact matches for 'simplified' first
+            (entry) => OrderingTerm(
+              expression:
+                  entry.simplified
+                      .equals(input)
+                      .cast<int>(), // 1 for exact match, 0 for non-match
+              mode: OrderingMode.desc, // Exact matches come first
+            ),
+
             (entry) => OrderingTerm(expression: entry.simplified),
           ])
           ..limit(limit, offset: offset))
