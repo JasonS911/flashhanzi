@@ -1,6 +1,7 @@
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/parse.dart';
+import 'package:flashhanzi/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart'; // Add this import for FlipCard
 
@@ -21,6 +22,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   Future<List<SentencePair>>? _sentencesFuture;
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
+  final ExpansionTileController expansionController = ExpansionTileController();
 
   bool noMoreCards = false;
   @override
@@ -85,6 +87,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   }
 
   void updateCard(int grade) async {
+    expansionController.collapse();
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
     final cards = await db.getDueCards();
     // make currentIndex -1 to show completed cards
@@ -263,6 +266,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                       return Center(
                         child: Column(
                           children: [
+                            SizedBox(height: 32),
                             Text(
                               'Done studying for today!',
                               style: TextStyle(
@@ -700,6 +704,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                               return Center(
                                 child: Column(
                                   children: [
+                                    SizedBox(height: 32),
                                     Text(
                                       'Done studying for today!',
                                       style: TextStyle(
@@ -860,28 +865,6 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                                       ),
                                     ),
                                     SizedBox(height: 12),
-                                    ExpansionTile(
-                                      title: const Text(
-                                        "Stroke Order Animation",
-                                      ),
-                                      leading: const Icon(Icons.play_arrow),
-                                      trailing: const Icon(
-                                        Icons.arrow_drop_down,
-                                      ),
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(16),
-                                          height: 150, // or any size you want
-                                          color: Colors.grey[100],
-                                          child: Center(
-                                            child: Text(
-                                              "← Insert stroke animation widget here →",
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    SizedBox(height: 16),
                                   ],
                                 ),
                               );
@@ -914,7 +897,58 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                     ],
                   ),
                 ),
+                FutureBuilder<List<CharacterCard>>(
+                  future: _dueCards, // Your future to fetch the data
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return CircularProgressIndicator(); // Show loading indicator while waiting
+                    } else if (snapshot.hasError) {
+                      return Text('Error loading data'); // Handle error state
+                    } else if (snapshot.hasData) {
+                      final cards = snapshot.data!;
+                      try {
+                        return ListView(
+                          shrinkWrap: true,
+                          children: [
+                            strokesLoaded &&
+                                    strokeMap.containsKey(
+                                      cards[_currentIndex].character,
+                                    )
+                                ? ExpansionTile(
+                                  controller: expansionController,
+                                  title: const Text("Stroke Order Animation"),
+                                  leading: const Icon(Icons.play_arrow),
+                                  children: [
+                                    Center(
+                                      child: SizedBox(
+                                        height: 150,
+                                        child:
+                                            strokeMap.containsKey(
+                                                  cards[_currentIndex]
+                                                      .character,
+                                                )
+                                                ? StrokeOrderWidget(
+                                                  character:
+                                                      cards[_currentIndex]
+                                                          .character,
+                                                  dataMap: strokeMap,
+                                                ) // Pass the character to the widget
+                                                : SizedBox.shrink(),
+                                      ),
+                                    ),
+                                  ],
+                                )
+                                : const SizedBox.shrink(), // return nothing
+                          ],
+                        );
+                      } catch (e) {
+                        return SizedBox(height: 4);
+                      }
+                    }
 
+                    return SizedBox.shrink(); // Return empty widget if no data
+                  },
+                ),
                 //stuff after column containing future builder
                 SizedBox(height: 16),
                 const Padding(
@@ -944,7 +978,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         ), // Vertical padding for the button
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            doNothing();
+                            updateCard(1);
                           },
                           icon: const Icon(
                             Icons.close,
@@ -967,7 +1001,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         padding: EdgeInsets.only(top: 12, bottom: 4),
                         child: ElevatedButton(
                           onPressed: () {
-                            doNothing();
+                            updateCard(2);
                           },
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.blue, // Button color
@@ -1007,7 +1041,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         padding: EdgeInsets.symmetric(vertical: 4),
                         child: ElevatedButton.icon(
                           onPressed: () {
-                            doNothing();
+                            updateCard(3);
                           },
                           icon: const Icon(
                             Icons.thumb_up,
@@ -1028,7 +1062,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                     Expanded(
                       child: ElevatedButton(
                         onPressed: () {
-                          doNothing();
+                          updateCard(4);
                         },
                         style: ElevatedButton.styleFrom(
                           backgroundColor: Colors.green, // Button color

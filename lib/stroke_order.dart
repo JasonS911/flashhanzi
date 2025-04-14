@@ -20,7 +20,7 @@ class StrokeOrderWidget extends StatefulWidget {
 
 class _StrokeOrderWidgetState extends State<StrokeOrderWidget>
     with TickerProviderStateMixin {
-  late StrokeOrderAnimationController _completedController;
+  late StrokeOrderAnimationController? _completedController;
   late Future<StrokeOrderAnimationController> _animationController;
 
   @override
@@ -28,6 +28,7 @@ class _StrokeOrderWidgetState extends State<StrokeOrderWidget>
     super.initState();
     // Load stroke data asynchronously
     _animationController = _loadStrokeOrder(widget.character, widget.dataMap);
+    _animationController.then((a) => _completedController = a);
   }
 
   // Async method to load data
@@ -42,7 +43,7 @@ class _StrokeOrderWidgetState extends State<StrokeOrderWidget>
   // Dispose the controller when it's no longer needed.
   @override
   void dispose() {
-    _completedController.dispose();
+    _completedController?.dispose();
     super.dispose();
   }
 

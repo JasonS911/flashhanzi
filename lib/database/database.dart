@@ -144,14 +144,14 @@ LazyDatabase _openConnection() {
 Future<void> seedTestCards(AppDatabase db) async {
   final existing = await db.select(db.characterCards).get();
   if (existing.isNotEmpty) {
-    db.resetNextReview('好');
+    db.resetNextReview('好学');
     db.resetNextReview('学');
     return;
   }
 
   final cards = [
     CharacterCardsCompanion(
-      character: Value('好'),
+      character: Value('好学'),
       pinyin: Value('hǎo'),
       definition: Value('good'),
       nextReview: Value(DateTime.now().subtract(const Duration(days: 1))),
