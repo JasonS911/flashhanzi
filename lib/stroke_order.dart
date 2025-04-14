@@ -14,6 +14,7 @@ class StrokeOrderWidget extends StatefulWidget {
   });
 
   @override
+  // ignore: library_private_types_in_public_api
   _StrokeOrderWidgetState createState() => _StrokeOrderWidgetState();
 }
 
