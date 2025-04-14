@@ -40,6 +40,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
       } else {
         setState(() {
           // Initialize _sentencesFuture here after _dueCards is available
+          _currentIndex = 0;
           _sentencesFuture = widget.db.findSentencesFor(
             cards[_currentIndex].character,
           );
@@ -87,9 +88,12 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   }
 
   void updateCard(int grade) async {
-    expansionController.collapse();
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
     final cards = await db.getDueCards();
+    //currentindex is 1 if cards is empty
+    if (_currentIndex == -1) {
+      return;
+    }
     // make currentIndex -1 to show completed cards
     if (cards.isNotEmpty) {
       if (_currentIndex >= cards.length) {
@@ -130,7 +134,9 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
           DateTime.now().add(Duration(days: 4)),
         ); // Reschedule for a week later
       }
-
+      if (strokeMap.containsKey(cards[_currentIndex].character)) {
+        expansionController.collapse();
+      }
       setState(() {
         _currentIndex = _currentIndex + 1;
         _sentencesFuture = widget.db.findSentencesFor(

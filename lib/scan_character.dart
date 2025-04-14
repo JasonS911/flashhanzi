@@ -11,7 +11,7 @@ class ScanCharacter extends StatefulWidget {
 }
 
 class _ScanCharacterState extends State<ScanCharacter> {
-  late CameraController _cameraController;
+  late CameraController? _cameraController;
   Future<void>? _initializeControllerFuture;
   late AppDatabase db;
   @override
@@ -36,7 +36,7 @@ class _ScanCharacterState extends State<ScanCharacter> {
 
       // Initialize the controller and store the Future
       setState(() {
-        _initializeControllerFuture = _cameraController.initialize();
+        _initializeControllerFuture = _cameraController?.initialize();
       });
     } catch (e) {
       print('Error initializing camera: $e');
@@ -46,7 +46,7 @@ class _ScanCharacterState extends State<ScanCharacter> {
   @override
   void dispose() {
     // Dispose of the CameraController when the widget is disposed
-    _cameraController.dispose();
+    _cameraController?.dispose();
     super.dispose();
   }
 
@@ -104,7 +104,7 @@ class _ScanCharacterState extends State<ScanCharacter> {
                       borderRadius: BorderRadius.circular(
                         8,
                       ), // Match the border radius
-                      child: CameraPreview(_cameraController),
+                      child: CameraPreview(_cameraController!),
                     ),
                   ),
                 );
