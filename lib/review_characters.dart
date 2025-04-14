@@ -17,8 +17,8 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   late Future<List<CharacterCard>> _dueCards;
   late int _currentIndex;
   final TextEditingController _notesController = TextEditingController();
-  // late bool _flipped;
-
+  Future<List<SentencePair>>? _sentencesFuture;
+  bool noMoreCards = false;
   @override
   void initState() {
     super.initState();
@@ -30,6 +30,13 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
       if (cards.isEmpty) {
         setState(() {
           _currentIndex = -1;
+        });
+      } else {
+        setState(() {
+          // Initialize _sentencesFuture here after _dueCards is available
+          _sentencesFuture = widget.db.findSentencesFor(
+            cards[_currentIndex].character,
+          );
         });
       }
     });
@@ -64,12 +71,14 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
     final cards = await db.getDueCards();
-
+    // make currentIndex -1 to show completed cards
     if (cards.isNotEmpty) {
-      if (_currentIndex > cards.length) {
+      if (_currentIndex >= cards.length) {
         setState(() {
           _currentIndex = -1;
+          noMoreCards = true;
         });
+        return;
       }
 
       // db.updateNextReview(cards[0].character, DateTime.now());
@@ -105,6 +114,9 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
 
       setState(() {
         _currentIndex = _currentIndex + 1;
+        _sentencesFuture = widget.db.findSentencesFor(
+          cards[_currentIndex].character,
+        );
       });
     }
   }
@@ -494,234 +506,357 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                   ),
                 ],
               ),
-              SizedBox(height: 8), // Space before the review list
+              SizedBox(height: 32), // Space before the review list
               //inside futurebuilder
               Padding(
                 padding: EdgeInsets.all(0),
-                child: FutureBuilder(
-                  future: _dueCards,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Text(
-                        'Loading...',
-                        style: TextStyle(
-                          fontSize: 84,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
-                          decoration: TextDecoration.none, // Remove underline
-                        ),
-                      );
-                    } else if (snapshot.hasData && snapshot.data!.isNotEmpty) {
-                      return Column(
-                        children: [
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: 16,
-                              right: 16,
-                              bottom: 16,
+                child: Column(
+                  children: [
+                    FutureBuilder(
+                      future: _dueCards,
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return const Text(
+                            'Loading...',
+                            style: TextStyle(
+                              fontSize: 84,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
                             ),
-                            child: Container(
-                              padding: const EdgeInsets.only(
-                                bottom: 20,
-                              ), // Add padding inside the container
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey, // Underline color
-                                    width: 1, // Underline thickness
+                          );
+                        } else if (snapshot.hasData &&
+                            snapshot.data!.isNotEmpty) {
+                          try {
+                            return Column(
+                              children: [
+                                SizedBox(height: 32),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 16,
                                   ),
-                                ),
-                              ),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  SizedBox(width: 52),
-                                  Text(
-                                    snapshot.data![_currentIndex].character,
-                                    style: TextStyle(
-                                      fontSize: 76,
-                                      color: Colors.black87,
-                                      decoration:
-                                          TextDecoration
-                                              .none, // Remove underline
+                                  child: Container(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 20,
+                                    ), // Add padding inside the container
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey, // Underline color
+                                          width: 1, // Underline thickness
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                  SizedBox(
-                                    width: 28,
-                                  ), // Space between characters
-                                  Row(
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(top: 12),
-                                        child: Text(
-                                          '[${snapshot.data![_currentIndex].pinyin}]',
-                                          style: const TextStyle(
-                                            fontSize: 48,
+                                    child: Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        SizedBox(width: 52),
+                                        Text(
+                                          snapshot
+                                              .data![_currentIndex]
+                                              .character,
+                                          style: TextStyle(
+                                            fontSize: 76,
                                             color: Colors.black87,
                                             decoration:
                                                 TextDecoration
                                                     .none, // Remove underline
                                           ),
                                         ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.volume_up,
-                                          size: 24,
-                                          color: Colors.grey,
+                                        SizedBox(
+                                          width: 28,
+                                        ), // Space between characters
+                                        Row(
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 12,
+                                              ),
+                                              child: Text(
+                                                '[${snapshot.data![_currentIndex].pinyin}]',
+                                                style: const TextStyle(
+                                                  fontSize: 48,
+                                                  color: Colors.black87,
+                                                  decoration:
+                                                      TextDecoration
+                                                          .none, // Remove underline
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.volume_up,
+                                                size: 24,
+                                                color: Colors.grey,
+                                              ),
+                                              onPressed: () {
+                                                // Add functionality to play audio here
+                                                doNothing();
+                                              },
+                                            ),
+                                          ],
                                         ),
-                                        onPressed: () {
-                                          // Add functionality to play audio here
-                                          doNothing();
-                                        },
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          SizedBox(height: 4), // Space before the review list
-
-                          Padding(
-                            padding: EdgeInsets.only(
-                              left: 16,
-                              right: 16,
-                              bottom: 16,
-                            ),
-                            child: Container(
-                              padding: const EdgeInsets.only(
-                                bottom: 20,
-                              ), // Add padding inside the container
-                              decoration: BoxDecoration(
-                                border: Border(
-                                  bottom: BorderSide(
-                                    color: Colors.grey, // Underline color
-                                    width: 1, // Underline thickness
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
+                                SizedBox(
+                                  height: 4,
+                                ), // Space before the review list
+
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 0,
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 0,
+                                    ), // Add padding inside the container
+
+                                    child: Column(
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Meaning: ${snapshot.data![_currentIndex].definition}',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                color: Color(0xFFB42F2B),
+                                                fontWeight: FontWeight.bold,
+                                                decoration:
+                                                    TextDecoration
+                                                        .none, // Remove underline
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } catch (e) {
+                            //change this screen
+                            return Center(
                               child: Column(
                                 children: [
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Meaning: ${snapshot.data![_currentIndex].definition}',
-                                        style: TextStyle(
-                                          fontSize: 24,
-                                          color: Color(0xFFB42F2B),
-                                          fontWeight: FontWeight.bold,
-                                          decoration:
-                                              TextDecoration
-                                                  .none, // Remove underline
-                                        ),
-                                      ),
-                                    ],
+                                  Text(
+                                    'Done studying for today!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
                                   ),
-                                  SizedBox(
-                                    height: 8,
-                                  ), // Space between meaning and example
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Example: 她是一个好人',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                          decoration:
-                                              TextDecoration
-                                                  .none, // Remove underline
-                                        ),
+                                  SizedBox(height: 40),
+
+                                  ElevatedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Color(0xFFB42F2B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
                                       ),
-                                    ],
-                                  ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        'Pinyin: Tā shì yí gè hǎo rén',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                          decoration:
-                                              TextDecoration
-                                                  .none, // Remove underline
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => HomePage(db: db),
                                         ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Text(
+                                        'Review All Cards',
+                                        style: TextStyle(color: Colors.white),
                                       ),
-                                    ],
+                                    ),
                                   ),
-                                  Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "Translation: He's studying Chinese",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                          decoration:
-                                              TextDecoration
-                                                  .none, // Remove underline
-                                        ),
-                                      ),
-                                    ],
-                                  ),
+                                  SizedBox(height: 28),
                                 ],
                               ),
+                            );
+                          }
+                        } else if (snapshot.hasError) {
+                          return const Text(
+                            'Error loading data',
+                            style: TextStyle(
+                              fontSize: 116,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
                             ),
-                          ),
-                          ExpansionTile(
-                            title: const Text("Stroke Order Animation"),
-                            leading: const Icon(Icons.play_arrow),
-                            trailing: const Icon(Icons.arrow_drop_down),
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                height: 150, // or any size you want
-                                color: Colors.grey[100],
-                                child: Center(
-                                  child: Text(
-                                    "← Insert stroke animation widget here →",
+                          );
+                        } else {
+                          return const Text(
+                            'Error loading data',
+                            style: TextStyle(
+                              fontSize: 116,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.red,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
+                            ),
+                          );
+                        }
+                      },
+                    ),
+
+                    Padding(
+                      padding: EdgeInsets.all(0),
+                      child: FutureBuilder(
+                        future: _sentencesFuture,
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState ==
+                              ConnectionState.waiting) {
+                            return const Text(
+                              'Loading...',
+                              style: TextStyle(
+                                fontSize: 84,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                                decoration:
+                                    TextDecoration.none, // Remove underline
+                              ),
+                            );
+                          } else if (snapshot.hasData &&
+                              snapshot.data!.isNotEmpty) {
+                            if (noMoreCards) {
+                              return SizedBox(height: 4);
+                            }
+                            return Column(
+                              children: [
+                                SizedBox(
+                                  height: 8,
+                                ), // Space between meaning and example
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Example: ${snapshot.data![0].chinese}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                        decoration:
+                                            TextDecoration
+                                                .none, // Remove underline
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Pinyin: ${snapshot.data![0].pinyin}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                        decoration:
+                                            TextDecoration
+                                                .none, // Remove underline
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                Container(
+                                  padding: EdgeInsets.only(bottom: 24),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey, // Underline color
+                                        width: 1, // Underline thickness
+                                      ),
+                                    ),
+                                  ),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Text(
+                                        "Translation: ${snapshot.data![0].english}",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
+                                SizedBox(height: 12),
+                                ExpansionTile(
+                                  title: const Text("Stroke Order Animation"),
+                                  leading: const Icon(Icons.play_arrow),
+                                  trailing: const Icon(Icons.arrow_drop_down),
+                                  children: [
+                                    Container(
+                                      padding: const EdgeInsets.all(16),
+                                      height: 150, // or any size you want
+                                      color: Colors.grey[100],
+                                      child: Center(
+                                        child: Text(
+                                          "← Insert stroke animation widget here →",
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                SizedBox(height: 16),
+                              ],
+                            );
+                          } else if (snapshot.hasError) {
+                            return const Text(
+                              'Error loading data',
+                              style: TextStyle(
+                                fontSize: 116,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                                decoration:
+                                    TextDecoration.none, // Remove underline
                               ),
-                            ],
-                          ),
-                          SizedBox(height: 16),
-                        ],
-                      );
-                    } else if (snapshot.hasError) {
-                      return const Text(
-                        'Error loading data',
-                        style: TextStyle(
-                          fontSize: 116,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                          decoration: TextDecoration.none, // Remove underline
-                        ),
-                      );
-                    } else {
-                      return const Text(
-                        'Error loading data',
-                        style: TextStyle(
-                          fontSize: 116,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.red,
-                          decoration: TextDecoration.none, // Remove underline
-                        ),
-                      );
-                    }
-                  },
+                            );
+                          } else {
+                            return const Text(
+                              'Error loading data',
+                              style: TextStyle(
+                                fontSize: 116,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.red,
+                                decoration:
+                                    TextDecoration.none, // Remove underline
+                              ),
+                            );
+                          }
+                        },
+                      ),
+                    ),
+                  ],
                 ),
               ),
 
