@@ -28,7 +28,7 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        minSdk = flutter.minSdkVersion
+
 
     }
 
@@ -39,6 +39,28 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+    
+    dependencies {
+    // Required for Chinese recognition
+        implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
+    }
+
+     // Bundle the ML Kit models
+    buildFeatures {
+        mlModelBinding = true
+    }
+
+    packagingOptions {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
+    }
+
+    // This makes sure the model is bundled in the APK
+    aaptOptions {
+        noCompress += "tflite"
+    }
+
 }
 
 flutter {

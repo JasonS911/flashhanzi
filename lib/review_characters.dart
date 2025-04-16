@@ -194,7 +194,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                         return const Text(
                           'Loading...',
                           style: TextStyle(
-                            fontSize: 84,
+                            fontSize: 48,
                             fontWeight: FontWeight.bold,
                             color: Colors.black87,
                             decoration: TextDecoration.none, // Remove underline
