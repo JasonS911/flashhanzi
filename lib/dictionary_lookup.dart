@@ -41,7 +41,6 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     // Call loadData to fetch stroke data asynchronously
     _loadData();
   }
-  
 
   //get character stroke data
   Future<void> _loadData() async {
@@ -53,6 +52,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
       strokesLoaded = true; // Mark strokes as loaded
     });
   }
+
   //get more characters after searching. Search is paginated
   Future<void> loadMore() async {
     final input = _searchController.text.trim();

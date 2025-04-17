@@ -65,26 +65,39 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   late int _currentIndex; // Tracks the current index of the BottomNavigationBar
-
-  late final List<Widget> _pages;
+  // ignore: unused_field
+  late Widget? _scanPage;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex; // Set the initial index
-    _pages = [
-      ScanCharacter(db: widget.db), // First tab
-      HandwriteCharacter(db: widget.db), // Second tab
-      ReviewCharacters(db: widget.db),
-      DictionaryLookup(db: widget.db), // Third tab
-    ];
+    // _pages = [
+    //   ScanCharacter(db: widget.db), // First tab
+    //   HandwriteCharacter(db: widget.db), // Second tab
+    //   ReviewCharacters(db: widget.db),
+    //   DictionaryLookup(db: widget.db), // Third tab
+    // ];
+    _scanPage = ScanCharacter(db: widget.db); // Start with Scan
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       // appBar: AppBar(title: const Text('FlashHanzi')),
-      body: _pages[_currentIndex], // Display the selected page
+      // body: _pages[_currentIndex], // Display the selected page
+      body: IndexedStack(
+        index: _currentIndex,
+        children: [
+          if (_currentIndex == 0)
+            ScanCharacter(db: widget.db)
+          else
+            const SizedBox(),
+          HandwriteCharacter(db: widget.db),
+          ReviewCharacters(db: widget.db),
+          DictionaryLookup(db: widget.db),
+        ],
+      ),
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex, // Highlight the selected tab
         onTap: (index) {

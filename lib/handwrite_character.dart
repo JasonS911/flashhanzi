@@ -20,7 +20,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   final GlobalKey _globalKey = GlobalKey();
   late mlkit.DigitalInkRecognizer _digitalInkRecognizer;
   Set<String> recognizedList = {};
-  Set<String> finalRecognizedList = {};
+  // Set<String> finalRecognizedList = {};
   @override
   void initState() {
     super.initState();
@@ -40,7 +40,6 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       // Convert the List<RecognitionCandidate> to a single string
       String recognized = result.map((candidate) => candidate.text).join('\n');
       List<String> recognizedTextList = recognized.split('\n');
-      print(recognizedTextList);
       //cycle through the first ten words of the list. For each word break apart using Jieba and add to the final recognizedList to return
       for (var wordNumber = 0; wordNumber < 10; wordNumber++) {
         //add the most matched words right away if they exist in dictionary
