@@ -5,7 +5,6 @@ import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_re
     as mlkit;
 import 'package:jieba_flutter/analysis/jieba_segmenter.dart';
 import 'package:jieba_flutter/analysis/seg_token.dart';
-// import 'package:jieba_flutter/jieba_flutter.dart';
 
 class HandwriteCharacter extends StatefulWidget {
   const HandwriteCharacter({super.key, required this.db});
@@ -41,17 +40,35 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       // Convert the List<RecognitionCandidate> to a single string
       String recognized = result.map((candidate) => candidate.text).join('\n');
       List<String> recognizedTextList = recognized.split('\n');
-      //cycle through the first five words of the list. For each word break apart using Jieba and add to the final recognizedList to return
-      for (var wordNumber = 0; wordNumber < 5; wordNumber++) {
+      print(recognizedTextList);
+      //cycle through the first ten words of the list. For each word break apart using Jieba and add to the final recognizedList to return
+      for (var wordNumber = 0; wordNumber < 10; wordNumber++) {
+        //add the most matched words right away if they exist in dictionary
         var recognizedWord = recognizedTextList[wordNumber];
-        await JiebaSegmenter.init().then((value) {
-          var segmentedWord = JiebaSegmenter();
-          List<String> recognizedWordBeforeBroken = segmentedWord
-              .process(recognizedWord, SegMode.SEARCH)[0]
-              .toString()
-              .split(',');
-          recognizedWord = recognizedWordBeforeBroken[0].substring(1);
+        List<DictionaryEntry>? results = await widget.db.searchDictionary(
+          recognizedWord,
+        );
+        if (results.isNotEmpty) {
           recognizedList.add(recognizedWord);
+        }
+        results = null;
+        //segment each matched word phrase and add if they exist in dictionary
+        await JiebaSegmenter.init().then((value) async {
+          var segmentedWord = JiebaSegmenter();
+          List<SegToken> recognizedWordBeforeBroken = segmentedWord.process(
+            recognizedWord,
+            SegMode.SEARCH,
+          );
+          for (var i = 0; i < recognizedWordBeforeBroken.length; i++) {
+            recognizedWord = recognizedWordBeforeBroken[i].word;
+            List<DictionaryEntry>? results = await widget.db.searchDictionary(
+              recognizedWord,
+            );
+            if (results.isNotEmpty) {
+              recognizedList.add(recognizedWord);
+            }
+            results = null;
+          }
         });
       }
       setState(() {
@@ -225,14 +242,39 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                 ],
               ),
             ),
-            if (recognizedList.isNotEmpty) // Display recognized text below
-              Padding(
-                padding: const EdgeInsets.all(16.0),
-                child: SizedBox(
-                  height: 300, // or any fixed height that fits your design
-                  child: WordGrid(wordSet: recognizedList),
+            if (recognizedList.isNotEmpty) ...[
+              const SizedBox(height: 28),
+              Text(
+                'Recognized Characters',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                  letterSpacing: 0.5,
                 ),
               ),
+
+              WordGrid(wordSet: recognizedList),
+
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  await recognizeDrawing();
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFB42F2B),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
+                  child: Text('Add Characters to Personal Dictionary'),
+                ),
+              ),
+              SizedBox(height: 16),
+            ],
           ],
         ),
       ),
@@ -284,7 +326,6 @@ class _WordGridState extends State<WordGrid> {
     super.initState();
     // Convert the Set into a List to display in the GridView
     words = widget.wordSet.toList();
-    print(words);
   }
 
   void updateWords(Set<String> newWords) {
@@ -297,16 +338,33 @@ class _WordGridState extends State<WordGrid> {
   Widget build(BuildContext context) {
     return GridView.builder(
       shrinkWrap: true,
+      physics: NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 48, vertical: 28),
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 3,
-        crossAxisSpacing: 10,
-        mainAxisSpacing: 10,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
       ),
       itemCount: words.length,
       itemBuilder: (context, index) {
         return Container(
-          padding: EdgeInsets.all(8),
-          color: Colors.blue[100],
+          padding: EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: const Color.fromARGB(
+              240,
+              247,
+              245,
+              245,
+            ), // Light grey background
+            borderRadius: BorderRadius.circular(12), // Rounded corners
+            boxShadow: [
+              BoxShadow(
+                color: Colors.grey, // Subtle shadow
+                blurRadius: 2,
+                offset: Offset(2, 2), // Shadow position
+              ),
+            ],
+          ),
           child: Center(
             child: Text(
               words[index],

@@ -75,14 +75,14 @@ class AppDatabase extends _$AppDatabase {
       (card) => card.character.equals(character),
     )).write(CharacterCardsCompanion(notes: Value(newNotes)));
   }
-  // Future<List<DictionaryEntry>> searchDictionary(String input) {
-  //   return (select(dictionaryEntries)..where(
-  //     (entry) =>
-  //         entry.simplified.equals(input) |
-  //         entry.traditional.equals(input) |
-  //         entry.pinyin.like('%$input%'),
-  //   )).get();
-  // }
+
+  //search for specific character
+  Future<List<DictionaryEntry>> searchDictionary(String input) {
+    return (select(dictionaryEntries)..where(
+      (entry) =>
+          entry.simplified.equals(input) | entry.traditional.equals(input),
+    )).get();
+  }
 
   Future<List<DictionaryEntry>> searchDictionaryPaginated(
     String input,
