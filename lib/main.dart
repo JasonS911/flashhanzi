@@ -10,7 +10,6 @@ import 'package:flutter/material.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
-  await seedTestCards(db);
 
   final isTableEmpty = (await db.select(db.dictionaryEntries).get()).isEmpty;
 
@@ -72,12 +71,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex; // Set the initial index
-    // _pages = [
-    //   ScanCharacter(db: widget.db), // First tab
-    //   HandwriteCharacter(db: widget.db), // Second tab
-    //   ReviewCharacters(db: widget.db),
-    //   DictionaryLookup(db: widget.db), // Third tab
-    // ];
     _scanPage = ScanCharacter(db: widget.db); // Start with Scan
   }
 

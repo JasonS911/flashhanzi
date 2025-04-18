@@ -19,8 +19,16 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   List<Offset?> points = [];
   final GlobalKey _globalKey = GlobalKey();
   late mlkit.DigitalInkRecognizer _digitalInkRecognizer;
+
+  //select characters and update grid widget
   Set<String> recognizedList = {};
-  // Set<String> finalRecognizedList = {};
+  Set<String> charactersToAddRecognizedList = {};
+  void onSelectionChanged(Set<String> updatedSelection) {
+    setState(() {
+      charactersToAddRecognizedList = updatedSelection;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -29,7 +37,9 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
     // Initialize the digital ink recognizer with the correct language code
     _digitalInkRecognizer = mlkit.DigitalInkRecognizer(languageCode: 'zh-Hans');
   }
-
+  Future<void> addNewCards() async{
+    
+  }
   Future<void> recognizeDrawing() async {
     try {
       await ensureModelDownloaded();
@@ -253,12 +263,16 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                 ),
               ),
 
-              WordGrid(wordSet: recognizedList),
+              WordGrid(
+                wordSet: recognizedList,
+                finalWordSet: charactersToAddRecognizedList,
+                onSelectionChanged: onSelectionChanged,
+              ),
 
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
-                  await recognizeDrawing();
+                  await new
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB42F2B),
@@ -310,8 +324,16 @@ class MyPainter extends CustomPainter {
 }
 
 class WordGrid extends StatefulWidget {
-  final Set<String> wordSet;
-  const WordGrid({super.key, required this.wordSet});
+  final Set<String> wordSet; //aka recognizedList Set
+  final Set<String> finalWordSet;
+  final void Function(Set<String>) onSelectionChanged;
+
+  const WordGrid({
+    super.key,
+    required this.wordSet,
+    required this.finalWordSet,
+    required this.onSelectionChanged,
+  });
 
   @override
   // ignore: library_private_types_in_public_api
@@ -320,17 +342,13 @@ class WordGrid extends StatefulWidget {
 
 class _WordGridState extends State<WordGrid> {
   late List<String> words;
+  // late Set<String> selectedWords;
+  late void Function(Set<String>) onSelectionChanged;
   @override
   void initState() {
     super.initState();
     // Convert the Set into a List to display in the GridView
     words = widget.wordSet.toList();
-  }
-
-  void updateWords(Set<String> newWords) {
-    setState(() {
-      words = newWords.toList(); // Update the words when the Set changes
-    });
   }
 
   @override
@@ -346,28 +364,43 @@ class _WordGridState extends State<WordGrid> {
       ),
       itemCount: words.length,
       itemBuilder: (context, index) {
-        return Container(
-          padding: EdgeInsets.all(4),
-          decoration: BoxDecoration(
-            color: const Color.fromARGB(
-              240,
-              247,
-              245,
-              245,
-            ), // Light grey background
-            borderRadius: BorderRadius.circular(12), // Rounded corners
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey, // Subtle shadow
-                blurRadius: 2,
-                offset: Offset(2, 2), // Shadow position
+        final word = words[index];
+        final isSelected = widget.finalWordSet.contains(word);
+        return GestureDetector(
+          onTap: () {
+            final newSelection = Set<String>.from(
+              widget.finalWordSet,
+            ); //create new set of selected words
+            isSelected ? newSelection.remove(word) : newSelection.add(word);
+
+            widget.onSelectionChanged(newSelection); // SEND BACK here
+          },
+          child: Container(
+            padding: EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color:
+                  isSelected
+                      ? Colors.blue
+                      : const Color.fromARGB(
+                        240,
+                        247,
+                        245,
+                        245,
+                      ), // Light grey background
+              borderRadius: BorderRadius.circular(12), // Rounded corners
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey, // Subtle shadow
+                  blurRadius: 2,
+                  offset: Offset(2, 2), // Shadow position
+                ),
+              ],
+            ),
+            child: Center(
+              child: Text(
+                words[index],
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
-            ],
-          ),
-          child: Center(
-            child: Text(
-              words[index],
-              style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
           ),
         );
