@@ -37,10 +37,20 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
     // Initialize the digital ink recognizer with the correct language code
     _digitalInkRecognizer = mlkit.DigitalInkRecognizer(languageCode: 'zh-Hans');
   }
-  Future<void> addNewCards() async{
-    
+
+  Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {
+    for (String word in charactersToAdd) {
+      newCard(db, word);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Words added to your review deck!'),
+        duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
+      ),
+    );
   }
-  Future<void> recognizeDrawing() async {
+
+  Future<void> _recognizeDrawing() async {
     try {
       await ensureModelDownloaded();
       // Convert raw points to Ink
@@ -233,7 +243,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        await recognizeDrawing();
+                        await _recognizeDrawing();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFB42F2B),
@@ -272,7 +282,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
               SizedBox(height: 16),
               ElevatedButton(
                 onPressed: () async {
-                  await new
+                  await _addNewCards(db, charactersToAddRecognizedList);
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color(0xFFB42F2B),

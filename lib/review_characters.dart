@@ -11,10 +11,10 @@ class ReviewCharacters extends StatefulWidget {
   final AppDatabase db; // Declare the database instance
 
   @override
-  State<ReviewCharacters> createState() => _ReviewCharactersState();
+  State<ReviewCharacters> createState() => ReviewCharactersState();
 }
 
-class _ReviewCharactersState extends State<ReviewCharacters> {
+class ReviewCharactersState extends State<ReviewCharacters> {
   late AppDatabase db; // Declare the database instance
   late Future<List<CharacterCard>> _dueCards;
   late int _currentIndex;
@@ -23,31 +23,36 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
   final ExpansionTileController expansionController = ExpansionTileController();
-
   bool noMoreCards = false;
+
+  void refreshDueCards() {
+    setState(() {
+      db = widget.db; // Initialize the database instance in initState
+      _dueCards = db.getDueCards(); // Call the method without arguments
+      _currentIndex = 0; // Initialize the current index to 0
+      // bool _flipped = false; // Initialize the flipped state to false
+      _dueCards.then((cards) {
+        if (cards.isEmpty) {
+          setState(() {
+            _currentIndex = -1;
+          });
+        } else {
+          setState(() {
+            // Initialize _sentencesFuture here after _dueCards is available
+            _currentIndex = 0;
+            _sentencesFuture = widget.db.findSentencesFor(
+              cards[_currentIndex].character,
+            );
+          });
+        }
+      });
+    });
+  }
+
   @override
   void initState() {
     super.initState();
-    db = widget.db; // Initialize the database instance in initState
-    _dueCards = db.getDueCards(); // Call the method without arguments
-    _currentIndex = 0; // Initialize the current index to 0
-    // bool _flipped = false; // Initialize the flipped state to false
-    _dueCards.then((cards) {
-      if (cards.isEmpty) {
-        setState(() {
-          _currentIndex = -1;
-        });
-      } else {
-        setState(() {
-          // Initialize _sentencesFuture here after _dueCards is available
-          _currentIndex = 0;
-          _sentencesFuture = widget.db.findSentencesFor(
-            cards[_currentIndex].character,
-          );
-        });
-      }
-    });
-
+    refreshDueCards();
     _loadData();
   }
 
@@ -228,6 +233,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                           return Center(
                             child: Column(
                               children: [
+                                SizedBox(height: 32),
                                 Text(
                                   'Done studying for today!',
                                   style: TextStyle(
@@ -710,7 +716,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                               return Center(
                                 child: Column(
                                   children: [
-                                    SizedBox(height: 32),
+                                    SizedBox(height: 64),
                                     Text(
                                       'Done studying for today!',
                                       style: TextStyle(
@@ -756,25 +762,95 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                               );
                             }
                           } else if (snapshot.hasError) {
-                            return const Text(
-                              'Error loading data',
-                              style: TextStyle(
-                                fontSize: 116,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                                decoration:
-                                    TextDecoration.none, // Remove underline
+                            return Center(
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 64),
+                                  Text(
+                                    'Done studying for today!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
+                                  ),
+                                  SizedBox(height: 40),
+
+                                  ElevatedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Color(0xFFB42F2B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => HomePage(db: db),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Text(
+                                        'Review All Cards',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 28),
+                                ],
                               ),
                             );
                           } else {
-                            return const Text(
-                              'Error loading data',
-                              style: TextStyle(
-                                fontSize: 116,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.red,
-                                decoration:
-                                    TextDecoration.none, // Remove underline
+                            return Center(
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 64),
+                                  Text(
+                                    'Done studying for today!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
+                                  ),
+                                  SizedBox(height: 40),
+
+                                  ElevatedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Color(0xFFB42F2B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) => HomePage(db: db),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Text(
+                                        'Review All Cards',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 28),
+                                ],
                               ),
                             );
                           }
@@ -875,27 +951,9 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                                 ),
                               );
                             } else if (snapshot.hasError) {
-                              return const Text(
-                                'Error loading data',
-                                style: TextStyle(
-                                  fontSize: 116,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              );
+                              return const SizedBox(height: 4);
                             } else {
-                              return const Text(
-                                'Error loading data',
-                                style: TextStyle(
-                                  fontSize: 116,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.red,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              );
+                              return const SizedBox(height: 4);
                             }
                           },
                         ),
@@ -909,7 +967,7 @@ class _ReviewCharactersState extends State<ReviewCharacters> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return CircularProgressIndicator(); // Show loading indicator while waiting
                     } else if (snapshot.hasError) {
-                      return Text('Error loading data'); // Handle error state
+                      return SizedBox(height: 4); // Handle error state
                     } else if (snapshot.hasData) {
                       final cards = snapshot.data!;
                       try {

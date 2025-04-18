@@ -66,6 +66,8 @@ class _MyHomePageState extends State<MyHomePage> {
   late int _currentIndex; // Tracks the current index of the BottomNavigationBar
   // ignore: unused_field
   late Widget? _scanPage;
+  final GlobalKey<ReviewCharactersState> _reviewKey =
+      GlobalKey<ReviewCharactersState>();
 
   @override
   void initState() {
@@ -82,12 +84,18 @@ class _MyHomePageState extends State<MyHomePage> {
       body: IndexedStack(
         index: _currentIndex,
         children: [
-          if (_currentIndex == 0)
-            ScanCharacter(db: widget.db)
-          else
-            const SizedBox(),
+          // Tab 0: ScanCharacter – only build when active
+          _currentIndex == 0 ? ScanCharacter(db: widget.db) : const SizedBox(),
+
+          // Tab 1: HandwriteCharacter – always alive (stateful drawing)
           HandwriteCharacter(db: widget.db),
-          ReviewCharacters(db: widget.db),
+
+          // Tab 2: ReviewCharacters – only build when active
+          _currentIndex == 2
+              ? ReviewCharacters(key: _reviewKey, db: widget.db)
+              : const SizedBox(),
+
+          // Tab 3: DictionaryLookup – always alive (stateful lookups)
           DictionaryLookup(db: widget.db),
         ],
       ),
@@ -96,6 +104,9 @@ class _MyHomePageState extends State<MyHomePage> {
         onTap: (index) {
           setState(() {
             _currentIndex = index; // Update the current index
+            if (index == 2) {
+              _reviewKey.currentState?.refreshDueCards();
+            }
           });
         },
         items: const [

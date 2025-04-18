@@ -84,6 +84,7 @@ class AppDatabase extends _$AppDatabase {
     )).get();
   }
 
+  //search dictionary page search
   Future<List<DictionaryEntry>> searchDictionaryPaginated(
     String input,
     int limit,
@@ -170,17 +171,30 @@ LazyDatabase _openConnection() {
 // }
 
 Future<void> newCard(AppDatabase db, String character) async {
-  final existing = await db.select(db.characterCards).get();
-  if (existing.isNotEmpty) {
+  final entry = await lookupCharacter(db, character);
+  //theoretically should not trigger
+  if (entry == null) {
     return;
   }
 
   final card = CharacterCardsCompanion(
     character: Value(character),
-    pinyin: Value('xué'),
-    definition: Value('to study'),
+    pinyin: Value(entry.pinyin),
+    definition: Value(entry.definition),
     nextReview: Value(DateTime.now().add(const Duration(days: 0))),
   );
 
-  await db.into(db.characterCards).insert(card);
+  await db.into(db.characterCards).insertOnConflictUpdate(card);
+}
+
+Future<DictionaryEntry?> lookupCharacter(
+  AppDatabase db,
+  String character,
+) async {
+  final result =
+      await (db.select(db.dictionaryEntries)..where(
+        (entry) => entry.simplified.equals(character),
+      )).getSingleOrNull();
+
+  return result; // might be null if character not found
 }
