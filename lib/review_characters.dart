@@ -15,8 +15,7 @@ class ReviewCharacters extends StatefulWidget {
 }
 
 class ReviewCharactersState extends State<ReviewCharacters> {
-  late AppDatabase db; // Declare the database instance
-  late Future<List<CharacterCard>> _dueCards;
+  Future<List<CharacterCard>> _dueCards = Future.value([]);
   late int _currentIndex;
   final TextEditingController _notesController = TextEditingController();
   Future<List<SentencePair>>? _sentencesFuture;
@@ -25,27 +24,18 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   final ExpansionTileController expansionController = ExpansionTileController();
   bool noMoreCards = false;
 
-  void refreshDueCards() {
+  void refreshDueCards() async {
+    final cards = await widget.db.getDueCards(); // no need to reassign db
+
+    if (!mounted) return;
+
     setState(() {
-      db = widget.db; // Initialize the database instance in initState
-      _dueCards = db.getDueCards(); // Call the method without arguments
-      _currentIndex = 0; // Initialize the current index to 0
-      // bool _flipped = false; // Initialize the flipped state to false
-      _dueCards.then((cards) {
-        if (cards.isEmpty) {
-          setState(() {
-            _currentIndex = -1;
-          });
-        } else {
-          setState(() {
-            // Initialize _sentencesFuture here after _dueCards is available
-            _currentIndex = 0;
-            _sentencesFuture = widget.db.findSentencesFor(
-              cards[_currentIndex].character,
-            );
-          });
-        }
-      });
+      _dueCards = Future.value(cards);
+      _currentIndex = cards.isEmpty ? -1 : 0;
+      _sentencesFuture =
+          cards.isNotEmpty
+              ? widget.db.findSentencesFor(cards[0].character)
+              : null;
     });
   }
 
@@ -53,7 +43,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   void initState() {
     super.initState();
     refreshDueCards();
-    _loadData();
+    _loadData(); //loads stroke animation data
   }
 
   Future<void> _loadData() async {
@@ -66,36 +56,40 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     });
   }
 
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    // Ensure you are fetching the latest notes when navigating back to this page
-    _dueCards =
-        db.getDueCards(); // Fetch the data again when the page is revisited
-  }
+  // @override
+  // void didChangeDependencies() {
+  //   super.didChangeDependencies();
+  //   // Ensure you are fetching the latest notes when navigating back to this page
+  //   _dueCards =
+  //       widget.db.getDueCards(); // Fetch the data again when the page is revisited
+  // }
 
   void updateNotes() async {
     final newNotes = _notesController.text;
 
-    final cards = await db.getDueCards();
+    final cards = await widget.db.getDueCards();
 
     // Ensure the current index is valid
-    if (_currentIndex < 0 || _currentIndex >= cards.length) {
+    // if (_currentIndex < 0 || _currentIndex >= cards.length) {
+    //   return; // Handle out-of-bounds error or invalid index
+    // }
+    if (_currentIndex < 0) {
       return; // Handle out-of-bounds error or invalid index
     }
-
     // Get the card to update
     final cardToUpdate = cards[_currentIndex];
 
     // Update the database
-    await db.updateNotesDB(cardToUpdate.character, newNotes);
+    await widget.db.updateNotesDB(cardToUpdate.character, newNotes);
     // Re-fetch the data to ensure the UI is updated
   }
 
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
-    final cards = await db.getDueCards();
+    var cards = await widget.db.getDueCards();
     //currentindex is 1 if cards is empty
+    print(_currentIndex);
+
     if (_currentIndex == -1) {
       return;
     }
@@ -109,45 +103,41 @@ class ReviewCharactersState extends State<ReviewCharacters> {
         return;
       }
 
-      // db.updateNextReview(cards[0].character, DateTime.now());
+      // widget.db.updateNextReview(cards[0].character, DateTime.now());
 
       // Reschedule for the specified number of days
       // Cycle through cards
 
       if (grade == 1) {
         // If "Forgot" button was pressed
-        db.updateNextReview(
+        widget.db.updateNextReview(
           cards[0].character,
           DateTime.now().add(Duration(days: 1)),
         ); // Reschedule for tomorrow
       } else if (grade == 2) {
         // If "Hard" button was pressed
-        db.updateNextReview(
+        widget.db.updateNextReview(
           cards[0].character,
           DateTime.now().add(Duration(days: 2)),
         ); // Reschedule for two days later
       } else if (grade == 3) {
         // If "Good" button was pressed
-        db.updateNextReview(
+        widget.db.updateNextReview(
           cards[0].character,
           DateTime.now().add(Duration(days: 3)),
         ); // Reschedule for three days later
       } else if (grade == 4) {
         // If "Easy" button was pressed
-        db.updateNextReview(
+        widget.db.updateNextReview(
           cards[0].character,
           DateTime.now().add(Duration(days: 4)),
         ); // Reschedule for a week later
       }
-      if (strokeMap.containsKey(cards[_currentIndex].character)) {
+      if (strokeMap.containsKey(cards[0].character)) {
         expansionController.collapse();
       }
-      setState(() {
-        _currentIndex = _currentIndex + 1;
-        _sentencesFuture = widget.db.findSentencesFor(
-          cards[_currentIndex].character,
-        );
-      });
+
+      refreshDueCards();
     }
   }
 
@@ -196,15 +186,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                     future: _dueCards,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Text(
-                          'Loading...',
-                          style: TextStyle(
-                            fontSize: 48,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                            decoration: TextDecoration.none, // Remove underline
-                          ),
-                        );
+                        return SizedBox(height: 0);
                       } else if (snapshot.hasError) {
                         return const Text(
                           'Error loading data',
@@ -219,7 +201,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                           snapshot.data!.isNotEmpty) {
                         try {
                           return Text(
-                            snapshot.data![_currentIndex].character,
+                            snapshot.data![0].character,
                             style: const TextStyle(
                               fontSize: 116,
                               fontWeight: FontWeight.bold,
@@ -257,7 +239,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                     Navigator.push(
                                       context,
                                       MaterialPageRoute(
-                                        builder: (context) => HomePage(db: db),
+                                        builder:
+                                            (context) =>
+                                                HomePage(db: widget.db),
                                       ),
                                     );
                                   },
@@ -302,7 +286,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 Navigator.push(
                                   context,
                                   MaterialPageRoute(
-                                    builder: (context) => HomePage(db: db),
+                                    builder:
+                                        (context) => HomePage(db: widget.db),
                                   ),
                                 );
                               },
@@ -481,7 +466,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       if (cards.isNotEmpty &&
                           _currentIndex >= 0 &&
                           _currentIndex < cards.length) {
-                        final card = cards[_currentIndex];
+                        final card = cards[0];
 
                         // Set the notesController to the existing notes
                         _notesController.text = card.notes ?? '';
@@ -574,16 +559,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                         builder: (context, snapshot) {
                           if (snapshot.connectionState ==
                               ConnectionState.waiting) {
-                            return const Text(
-                              'Loading...',
-                              style: TextStyle(
-                                fontSize: 84,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                                decoration:
-                                    TextDecoration.none, // Remove underline
-                              ),
-                            );
+                            return SizedBox(height: 0);
                           } else if (snapshot.hasData &&
                               snapshot.data!.isNotEmpty) {
                             try {
@@ -619,9 +595,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           Wrap(
                                             children: [
                                               Text(
-                                                snapshot
-                                                    .data![_currentIndex]
-                                                    .character,
+                                                snapshot.data![0].character,
                                                 style: TextStyle(
                                                   fontSize: 76,
                                                   color: Colors.black87,
@@ -643,7 +617,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                   top: 12,
                                                 ),
                                                 child: Text(
-                                                  '[${snapshot.data![_currentIndex].pinyin}]',
+                                                  '[${snapshot.data![0].pinyin}]',
                                                   style: const TextStyle(
                                                     fontSize: 48,
                                                     color: Colors.black87,
@@ -693,7 +667,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                             //     CrossAxisAlignment.center,
                                             children: [
                                               Text(
-                                                'Meaning: ${snapshot.data![_currentIndex].definition}',
+                                                'Meaning: ${snapshot.data![0].definition}',
                                                 style: TextStyle(
                                                   fontSize: 24,
                                                   color: Color(0xFFB42F2B),
@@ -744,7 +718,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           context,
                                           MaterialPageRoute(
                                             builder:
-                                                (context) => HomePage(db: db),
+                                                (context) =>
+                                                    HomePage(db: widget.db),
                                           ),
                                         );
                                       },
@@ -791,7 +766,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         context,
                                         MaterialPageRoute(
                                           builder:
-                                              (context) => HomePage(db: db),
+                                              (context) =>
+                                                  HomePage(db: widget.db),
                                         ),
                                       );
                                     },
@@ -837,7 +813,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         context,
                                         MaterialPageRoute(
                                           builder:
-                                              (context) => HomePage(db: db),
+                                              (context) =>
+                                                  HomePage(db: widget.db),
                                         ),
                                       );
                                     },
@@ -864,16 +841,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                           builder: (context, snapshot) {
                             if (snapshot.connectionState ==
                                 ConnectionState.waiting) {
-                              return const Text(
-                                'Loading...',
-                                style: TextStyle(
-                                  fontSize: 84,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              );
+                              return SizedBox(height: 0);
                             } else if (snapshot.hasData &&
                                 snapshot.data!.isNotEmpty) {
                               if (noMoreCards) {
@@ -975,9 +943,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                           shrinkWrap: true,
                           children: [
                             strokesLoaded &&
-                                    strokeMap.containsKey(
-                                      cards[_currentIndex].character,
-                                    )
+                                    strokeMap.containsKey(cards[0].character)
                                 ? ExpansionTile(
                                   controller: expansionController,
                                   title: const Text("Stroke Order Animation"),
@@ -988,13 +954,10 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         height: 150,
                                         child:
                                             strokeMap.containsKey(
-                                                  cards[_currentIndex]
-                                                      .character,
+                                                  cards[0].character,
                                                 )
                                                 ? StrokeOrderWidget(
-                                                  character:
-                                                      cards[_currentIndex]
-                                                          .character,
+                                                  character: cards[0].character,
                                                   dataMap: strokeMap,
                                                 ) // Pass the character to the widget
                                                 : SizedBox.shrink(),

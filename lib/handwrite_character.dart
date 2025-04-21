@@ -48,11 +48,12 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
         duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
       ),
     );
+    clearCanvas();
   }
 
   Future<void> _recognizeDrawing() async {
     try {
-      await ensureModelDownloaded();
+      // await ensureModelDownloaded();
       // Convert raw points to Ink
       final ink = _convertPointsToInk(points);
       final result = await _digitalInkRecognizer.recognize(ink);
@@ -137,25 +138,6 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       points.clear();
       recognizedList = {};
     });
-  }
-
-  Future<void> ensureModelDownloaded() async {
-    const modelName = 'zh-Hani';
-    final modelManager = mlkit.DigitalInkRecognizerModelManager();
-
-    try {
-      bool isDownloaded = await modelManager.isModelDownloaded(modelName);
-
-      if (!isDownloaded) {
-        print("Model not downloaded, downloading...");
-        await modelManager.downloadModel(modelName); // Download the model once
-        print("Model downloaded and saved locally.");
-      } else {
-        print("Model is already downloaded.");
-      }
-    } catch (e) {
-      print("Error checking/downloading model: $e");
-    }
   }
 
   @override

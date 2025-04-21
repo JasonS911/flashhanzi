@@ -2,6 +2,8 @@ import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/main.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
+    as mlkit;
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key, required this.db});
@@ -12,12 +14,33 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   late AppDatabase db;
+  // late mlkit.DigitalInkRecognizer _digitalInkRecognizer;
 
   @override
   void initState() {
     super.initState();
     db =
         widget.db; // Initialize the database using the value passed to HomePage
+    ensureModelDownloaded();
+  }
+
+  Future<void> ensureModelDownloaded() async {
+    const modelName = 'zh-Hani';
+    final modelManager = mlkit.DigitalInkRecognizerModelManager();
+
+    try {
+      bool isDownloaded = await modelManager.isModelDownloaded(modelName);
+
+      if (!isDownloaded) {
+        print("Model not downloaded, downloading...");
+        await modelManager.downloadModel(modelName); // Download the model once
+        print("Model downloaded and saved locally.");
+      } else {
+        print("Model is already downloaded.");
+      }
+    } catch (e) {
+      print("Error checking/downloading model: $e");
+    }
   }
 
   @override
