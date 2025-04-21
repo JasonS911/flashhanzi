@@ -15,27 +15,34 @@ class ReviewCharacters extends StatefulWidget {
 }
 
 class ReviewCharactersState extends State<ReviewCharacters> {
-  Future<List<CharacterCard>> _dueCards = Future.value([]);
   late int _currentIndex;
   final TextEditingController _notesController = TextEditingController();
+  List<CharacterCard> _cards = [];
+  late Future<List<CharacterCard>> _dueCards;
   Future<List<SentencePair>>? _sentencesFuture;
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
   final ExpansionTileController expansionController = ExpansionTileController();
   bool noMoreCards = false;
+  bool _initialized = false;
+
+  String? _lastCardCharacter; // keeps track of the previously shown character
 
   void refreshDueCards() async {
-    final cards = await widget.db.getDueCards(); // no need to reassign db
+    final cards = await widget.db.getDueCards();
 
     if (!mounted) return;
 
     setState(() {
-      _dueCards = Future.value(cards);
+      _cards = cards;
       _currentIndex = cards.isEmpty ? -1 : 0;
       _sentencesFuture =
           cards.isNotEmpty
               ? widget.db.findSentencesFor(cards[0].character)
               : null;
+      noMoreCards = cards.isEmpty;
+      _dueCards = widget.db.getDueCards();
+      _initialized = true;
     });
   }
 
@@ -55,14 +62,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
       strokesLoaded = true; // Mark strokes as loaded
     });
   }
-
-  // @override
-  // void didChangeDependencies() {
-  //   super.didChangeDependencies();
-  //   // Ensure you are fetching the latest notes when navigating back to this page
-  //   _dueCards =
-  //       widget.db.getDueCards(); // Fetch the data again when the page is revisited
-  // }
 
   void updateNotes() async {
     final newNotes = _notesController.text;
@@ -143,6 +142,19 @@ class ReviewCharactersState extends State<ReviewCharacters> {
 
   @override
   Widget build(BuildContext context) {
+    CharacterCard? currentCard;
+    if (!_initialized) {
+      // Still loading
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_currentIndex >= 0 && _currentIndex < _cards.length) {
+      currentCard = _cards[_currentIndex];
+    }
+    if (_lastCardCharacter != currentCard?.character) {
+      _notesController.text = currentCard?.notes ?? '';
+      _lastCardCharacter = currentCard?.character;
+    }
     return FlipCard(
       fill: Fill.fillFront,
       direction: FlipDirection.HORIZONTAL, // or VERTICAL
@@ -182,37 +194,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                 SizedBox(height: 32), // Space before the review list
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: FutureBuilder<List<CharacterCard>>(
-                    future: _dueCards,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return SizedBox(height: 0);
-                      } else if (snapshot.hasError) {
-                        return const Text(
-                          'Error loading data',
-                          style: TextStyle(
-                            fontSize: 116,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                            decoration: TextDecoration.none, // Remove underline
-                          ),
-                        );
-                      } else if (snapshot.hasData &&
-                          snapshot.data!.isNotEmpty) {
-                        try {
-                          return Text(
-                            snapshot.data![0].character,
-                            style: const TextStyle(
-                              fontSize: 116,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.black87,
-                              decoration:
-                                  TextDecoration.none, // Remove underline
-                            ),
-                          );
-                        } catch (e) {
-                          //change this screen
-                          return Center(
+                  child:
+                      (_cards.isEmpty || _currentIndex == -1)
+                          ? Center(
                             child: Column(
                               children: [
                                 SizedBox(height: 32),
@@ -256,55 +240,17 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 SizedBox(height: 28),
                               ],
                             ),
-                          );
-                        }
-                      }
-                      return Center(
-                        child: Column(
-                          children: [
-                            SizedBox(height: 32),
-                            Text(
-                              'Done studying for today!',
-                              style: TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black,
-                                decoration:
-                                    TextDecoration.none, // Remove underline
-                              ),
+                          )
+                          : Text(
+                            currentCard!.character,
+                            style: const TextStyle(
+                              fontSize: 116,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
                             ),
-                            SizedBox(height: 40),
-
-                            ElevatedButton(
-                              style: OutlinedButton.styleFrom(
-                                backgroundColor: Color(0xFFB42F2B),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
-                              ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder:
-                                        (context) => HomePage(db: widget.db),
-                                  ),
-                                );
-                              },
-                              child: Padding(
-                                padding: EdgeInsets.all(12),
-                                child: Text(
-                                  'Review All Cards',
-                                  style: TextStyle(color: Colors.white),
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 28),
-                          ],
-                        ),
-                      );
-                    },
-                  ),
+                          ),
                 ),
                 SizedBox(height: 16), // Space before the review list
                 const Padding(
@@ -453,63 +399,43 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                   ),
                 ),
                 SizedBox(height: 24), // Space before the next review character
-                FutureBuilder<List<CharacterCard>>(
-                  future: _dueCards, // Your future to fetch the data
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(); // Show loading indicator while waiting
-                    } else if (snapshot.hasError) {
-                      return Text('Error loading data'); // Handle error state
-                    } else if (snapshot.hasData) {
-                      final cards = snapshot.data!;
+                // Check for valid state
+                // if (_cards.isEmpty || _currentIndex == -1) {
+                //   return;
+                // }
 
-                      if (cards.isNotEmpty &&
-                          _currentIndex >= 0 &&
-                          _currentIndex < cards.length) {
-                        final card = cards[0];
-
-                        // Set the notesController to the existing notes
-                        _notesController.text = card.notes ?? '';
-                      }
-
-                      return ListView(
-                        shrinkWrap: true,
-                        children: [
-                          ExpansionTile(
-                            title: const Text("Personal Notes"),
-                            leading: const Icon(Icons.play_arrow),
-                            children: [
-                              Container(
-                                padding: const EdgeInsets.all(16),
-                                height: 150, // or any size you want
-                                child: Center(
-                                  child: TextField(
-                                    controller: _notesController,
-                                    maxLines: 5,
-                                    maxLength: 300,
-                                    decoration: InputDecoration(
-                                      border: InputBorder.none,
-                                      hintText: "Add your notes here",
-                                    ),
-                                  ),
-                                ),
+                // Initialize notes if needed
+                ListView(
+                  shrinkWrap: true,
+                  children: [
+                    ExpansionTile(
+                      title: const Text("Personal Notes"),
+                      leading: const Icon(Icons.play_arrow),
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(16),
+                          height: 150,
+                          child: Center(
+                            child: TextField(
+                              controller: _notesController,
+                              maxLines: 5,
+                              maxLength: 300,
+                              decoration: InputDecoration(
+                                border: InputBorder.none,
+                                hintText: "Add your notes here",
                               ),
-                              SizedBox(height: 8),
-                              ElevatedButton(
-                                onPressed: () {
-                                  updateNotes();
-                                },
-                                child: Text('Save Notes'),
-                              ),
-                              SizedBox(height: 8),
-                            ],
+                            ),
                           ),
-                        ],
-                      );
-                    }
-
-                    return SizedBox.shrink(); // Return empty widget if no data
-                  },
+                        ),
+                        const SizedBox(height: 8),
+                        ElevatedButton(
+                          onPressed: updateNotes,
+                          child: const Text('Save Notes'),
+                        ),
+                        const SizedBox(height: 8),
+                      ],
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -553,17 +479,60 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                 Padding(
                   padding: EdgeInsets.all(0),
                   child: Column(
-                    children: [
-                      FutureBuilder(
-                        future: _dueCards,
-                        builder: (context, snapshot) {
-                          if (snapshot.connectionState ==
-                              ConnectionState.waiting) {
-                            return SizedBox(height: 0);
-                          } else if (snapshot.hasData &&
-                              snapshot.data!.isNotEmpty) {
-                            try {
-                              return Column(
+                    children:
+                        (_cards.isEmpty || _currentIndex == -1)
+                            ? [
+                              Center(
+                                child: Column(
+                                  children: [
+                                    SizedBox(height: 64),
+                                    Text(
+                                      'Done studying for today!',
+                                      style: TextStyle(
+                                        fontSize: 24,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.black,
+                                        decoration:
+                                            TextDecoration
+                                                .none, // Remove underline
+                                      ),
+                                    ),
+                                    SizedBox(height: 40),
+
+                                    ElevatedButton(
+                                      style: OutlinedButton.styleFrom(
+                                        backgroundColor: Color(0xFFB42F2B),
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                          context,
+                                          MaterialPageRoute(
+                                            builder:
+                                                (context) =>
+                                                    HomePage(db: widget.db),
+                                          ),
+                                        );
+                                      },
+                                      child: Padding(
+                                        padding: EdgeInsets.all(12),
+                                        child: Text(
+                                          'Review All Cards',
+                                          style: TextStyle(color: Colors.white),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(height: 28),
+                                  ],
+                                ),
+                              ),
+                            ]
+                            : [
+                              Column(
                                 children: [
                                   SizedBox(height: 32),
                                   Padding(
@@ -595,7 +564,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           Wrap(
                                             children: [
                                               Text(
-                                                snapshot.data![0].character,
+                                                _cards[_currentIndex].character,
                                                 style: TextStyle(
                                                   fontSize: 76,
                                                   color: Colors.black87,
@@ -617,7 +586,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                   top: 12,
                                                 ),
                                                 child: Text(
-                                                  '[${snapshot.data![0].pinyin}]',
+                                                  '[${_cards[_currentIndex].pinyin}]',
                                                   style: const TextStyle(
                                                     fontSize: 48,
                                                     color: Colors.black87,
@@ -667,7 +636,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                             //     CrossAxisAlignment.center,
                                             children: [
                                               Text(
-                                                'Meaning: ${snapshot.data![0].definition}',
+                                                'Meaning: ${_cards[_currentIndex].definition}',
                                                 style: TextStyle(
                                                   fontSize: 24,
                                                   color: Color(0xFFB42F2B),
@@ -684,249 +653,178 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                     ),
                                   ),
                                 ],
-                              );
-                            } catch (e) {
-                              //change this screen
-                              return Center(
-                                child: Column(
-                                  children: [
-                                    SizedBox(height: 64),
-                                    Text(
-                                      'Done studying for today!',
-                                      style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
-                                        decoration:
-                                            TextDecoration
-                                                .none, // Remove underline
-                                      ),
-                                    ),
-                                    SizedBox(height: 40),
+                              ),
+                            ],
+                  ),
 
-                                    ElevatedButton(
-                                      style: OutlinedButton.styleFrom(
-                                        backgroundColor: Color(0xFFB42F2B),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) =>
-                                                    HomePage(db: widget.db),
-                                          ),
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Text(
-                                          'Review All Cards',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 28),
-                                  ],
-                                ),
-                              );
-                            }
-                          } else if (snapshot.hasError) {
-                            return Center(
-                              child: Column(
+                  //sentences
+                  // Padding(
+                  //                 padding: EdgeInsets.symmetric(horizontal: 16),
+                  //                 child: Column(
+                  //                   crossAxisAlignment: CrossAxisAlignment.start,
+                  //                   children: [
+                  //                     SizedBox(
+                  //                       height: 8,
+                  //                     ), // Space between meaning and example
+                  //                     Wrap(
+                  //                       children: [
+                  //                         Text(
+                  //                           'Example: ${snapshot.data![0].chinese}',
+                  //                           style: TextStyle(
+                  //                             fontSize: 16,
+                  //                             color: Colors.black87,
+                  //                             decoration:
+                  //                                 TextDecoration
+                  //                                     .none, // Remove underline
+                  //                           ),
+                  //                         ),
+                  //                       ],
+                  //                     ),
+                  //                     Wrap(
+                  //                       children: [
+                  //                         Text(
+                  //                           'Pinyin: ${snapshot.data![0].pinyin}',
+                  //                           style: TextStyle(
+                  //                             fontSize: 16,
+                  //                             color: Colors.black87,
+                  //                             decoration:
+                  //                                 TextDecoration
+                  //                                     .none, // Remove underline
+                  //                           ),
+                  //                         ),
+                  //                         Wrap(
+                  //                           children: [
+                  //                             Text(
+                  //                               "Translation: ${snapshot.data![0].english}",
+                  //                               style: TextStyle(
+                  //                                 fontSize: 16,
+                  //                                 color: Colors.black87,
+                  //                                 decoration:
+                  //                                     TextDecoration
+                  //                                         .none, // Remove underline
+                  //                               ),
+                  //                             ),
+                  //                           ],
+                  //                         ),
+                  //                       ],
+                  //                     ),
+
+                  //                     Container(
+                  //                       margin: EdgeInsets.symmetric(
+                  //                         horizontal: 4,
+                  //                       ),
+
+                  //                       padding: EdgeInsets.only(bottom: 24),
+                  //                       decoration: BoxDecoration(
+                  //                         border: Border(
+                  //                           bottom: BorderSide(
+                  //                             color:
+                  //                                 Colors.grey, // Underline color
+                  //                             width: 1, // Underline thickness
+                  //                           ),
+                  //                         ),
+                  //                       ),
+                  //                     ),
+                  //                     SizedBox(height: 12),
+                  //                   ],
+                  //                 ),
+                  //               )
+                ),
+
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child: FutureBuilder(
+                    future: _sentencesFuture,
+                    builder: (context, snapshot) {
+                      if (snapshot.connectionState == ConnectionState.waiting) {
+                        return const Text(
+                          'Loading...',
+                          style: TextStyle(
+                            fontSize: 84,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                            decoration: TextDecoration.none, // Remove underline
+                          ),
+                        );
+                      } else if (snapshot.hasData &&
+                          snapshot.data!.isNotEmpty) {
+                        if (noMoreCards) {
+                          return SizedBox(height: 4);
+                        }
+                        return Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              SizedBox(
+                                height: 8,
+                              ), // Space between meaning and example
+                              Wrap(
                                 children: [
-                                  SizedBox(height: 64),
                                   Text(
-                                    'Done studying for today!',
+                                    'Example: ${snapshot.data![0].chinese}',
                                     style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                      fontSize: 16,
+                                      color: Colors.black87,
                                       decoration:
                                           TextDecoration
                                               .none, // Remove underline
                                     ),
                                   ),
-                                  SizedBox(height: 40),
-
-                                  ElevatedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      backgroundColor: Color(0xFFB42F2B),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) =>
-                                                  HomePage(db: widget.db),
-                                        ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: Text(
-                                        'Review All Cards',
-                                        style: TextStyle(color: Colors.white),
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(height: 28),
                                 ],
                               ),
-                            );
-                          } else {
-                            return Center(
-                              child: Column(
+                              Wrap(
                                 children: [
-                                  SizedBox(height: 64),
                                   Text(
-                                    'Done studying for today!',
+                                    'Pinyin: ${snapshot.data![0].pinyin}',
                                     style: TextStyle(
-                                      fontSize: 24,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black,
+                                      fontSize: 16,
+                                      color: Colors.black87,
                                       decoration:
                                           TextDecoration
                                               .none, // Remove underline
                                     ),
                                   ),
-                                  SizedBox(height: 40),
-
-                                  ElevatedButton(
-                                    style: OutlinedButton.styleFrom(
-                                      backgroundColor: Color(0xFFB42F2B),
-                                      shape: RoundedRectangleBorder(
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                        context,
-                                        MaterialPageRoute(
-                                          builder:
-                                              (context) =>
-                                                  HomePage(db: widget.db),
+                                  Wrap(
+                                    children: [
+                                      Text(
+                                        "Translation: ${snapshot.data![0].english}",
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
                                         ),
-                                      );
-                                    },
-                                    child: Padding(
-                                      padding: EdgeInsets.all(12),
-                                      child: Text(
-                                        'Review All Cards',
-                                        style: TextStyle(color: Colors.white),
                                       ),
-                                    ),
+                                    ],
                                   ),
-                                  SizedBox(height: 28),
                                 ],
                               ),
-                            );
-                          }
-                        },
-                      ),
 
-                      Padding(
-                        padding: EdgeInsets.all(0),
-                        child: FutureBuilder(
-                          future: _sentencesFuture,
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return SizedBox(height: 0);
-                            } else if (snapshot.hasData &&
-                                snapshot.data!.isNotEmpty) {
-                              if (noMoreCards) {
-                                return SizedBox(height: 4);
-                              }
-                              return Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    SizedBox(
-                                      height: 8,
-                                    ), // Space between meaning and example
-                                    Wrap(
-                                      children: [
-                                        Text(
-                                          'Example: ${snapshot.data![0].chinese}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black87,
-                                            decoration:
-                                                TextDecoration
-                                                    .none, // Remove underline
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                    Wrap(
-                                      children: [
-                                        Text(
-                                          'Pinyin: ${snapshot.data![0].pinyin}',
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black87,
-                                            decoration:
-                                                TextDecoration
-                                                    .none, // Remove underline
-                                          ),
-                                        ),
-                                        Wrap(
-                                          children: [
-                                            Text(
-                                              "Translation: ${snapshot.data![0].english}",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                                decoration:
-                                                    TextDecoration
-                                                        .none, // Remove underline
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                              Container(
+                                margin: EdgeInsets.symmetric(horizontal: 4),
 
-                                    Container(
-                                      margin: EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                      ),
-
-                                      padding: EdgeInsets.only(bottom: 24),
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color:
-                                                Colors.grey, // Underline color
-                                            width: 1, // Underline thickness
-                                          ),
-                                        ),
-                                      ),
+                                padding: EdgeInsets.only(bottom: 24),
+                                decoration: BoxDecoration(
+                                  border: Border(
+                                    bottom: BorderSide(
+                                      color: Colors.grey, // Underline color
+                                      width: 1, // Underline thickness
                                     ),
-                                    SizedBox(height: 12),
-                                  ],
+                                  ),
                                 ),
-                              );
-                            } else if (snapshot.hasError) {
-                              return const SizedBox(height: 4);
-                            } else {
-                              return const SizedBox(height: 4);
-                            }
-                          },
-                        ),
-                      ),
-                    ],
+                              ),
+                              SizedBox(height: 12),
+                            ],
+                          ),
+                        );
+                      } else if (snapshot.hasError) {
+                        return SizedBox(height: 4);
+                      } else {
+                        return SizedBox(height: 4);
+                      }
+                    },
                   ),
                 ),
                 FutureBuilder<List<CharacterCard>>(

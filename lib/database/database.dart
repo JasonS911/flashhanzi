@@ -191,10 +191,11 @@ Future<DictionaryEntry?> lookupCharacter(
   AppDatabase db,
   String character,
 ) async {
-  final result =
-      await (db.select(db.dictionaryEntries)..where(
-        (entry) => entry.simplified.equals(character),
-      )).getSingleOrNull();
+  final query =
+      db.select(db.dictionaryEntries)
+        ..where((entry) => entry.simplified.equals(character))
+        ..limit(1);
 
-  return result; // might be null if character not found
+  final result = await query.getSingleOrNull();
+  return result;
 }

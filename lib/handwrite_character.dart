@@ -22,7 +22,8 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
 
   //select characters and update grid widget
   Set<String> recognizedList = {};
-  Set<String> charactersToAddRecognizedList = {};
+  Set<String> charactersToAddRecognizedList =
+      {}; //characters ur putting into dictionary
   void onSelectionChanged(Set<String> updatedSelection) {
     setState(() {
       charactersToAddRecognizedList = updatedSelection;
@@ -41,6 +42,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {
     for (String word in charactersToAdd) {
       newCard(db, word);
+      print(word);
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
@@ -68,6 +70,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
         List<DictionaryEntry>? results = await widget.db.searchDictionary(
           recognizedWord,
         );
+        print(results);
         if (results.isNotEmpty) {
           recognizedList.add(recognizedWord);
         }
@@ -137,6 +140,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
     setState(() {
       points.clear();
       recognizedList = {};
+      charactersToAddRecognizedList = {};
     });
   }
 
