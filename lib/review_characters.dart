@@ -23,7 +23,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
   final ExpansionTileController expansionController = ExpansionTileController();
-  bool noMoreCards = false;
   bool _initialized = false;
 
   String? _lastCardCharacter; // keeps track of the previously shown character
@@ -40,7 +39,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
           cards.isNotEmpty
               ? widget.db.findSentencesFor(cards[0].character)
               : null;
-      noMoreCards = cards.isEmpty;
       _dueCards = widget.db.getDueCards();
       _initialized = true;
     });
@@ -86,51 +84,65 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
     var cards = await widget.db.getDueCards();
-    //currentindex is 1 if cards is empty
-    print(_currentIndex);
+    final allCards = await widget.db.select(widget.db.characterCards).get();
 
+    for (final card in allCards) {
+      print('Next Review: ${card.nextReview}');
+    }
+    //currentindex is 1 if cards is empty
     if (_currentIndex == -1) {
       return;
     }
     // make currentIndex -1 to show completed cards
     if (cards.isNotEmpty) {
-      if (_currentIndex >= cards.length) {
-        setState(() {
-          _currentIndex = -1;
-          noMoreCards = true;
-        });
-        return;
-      }
-
-      // widget.db.updateNextReview(cards[0].character, DateTime.now());
+      // if (_currentIndex >= cards.length) {
+      //   setState(() {
+      //     _currentIndex = -1;
+      //   });
+      //   return;
+      // }
 
       // Reschedule for the specified number of days
       // Cycle through cards
+      const minEase = 1.3;
 
-      if (grade == 1) {
-        // If "Forgot" button was pressed
-        widget.db.updateNextReview(
-          cards[0].character,
-          DateTime.now().add(Duration(days: 1)),
-        ); // Reschedule for tomorrow
-      } else if (grade == 2) {
-        // If "Hard" button was pressed
-        widget.db.updateNextReview(
-          cards[0].character,
-          DateTime.now().add(Duration(days: 2)),
-        ); // Reschedule for two days later
-      } else if (grade == 3) {
-        // If "Good" button was pressed
-        widget.db.updateNextReview(
-          cards[0].character,
-          DateTime.now().add(Duration(days: 3)),
-        ); // Reschedule for three days later
-      } else if (grade == 4) {
-        // If "Easy" button was pressed
-        widget.db.updateNextReview(
-          cards[0].character,
-          DateTime.now().add(Duration(days: 4)),
-        ); // Reschedule for a week later
+      int reps = cards[0].repetition;
+      double ease = cards[0].easeFactor;
+      int interval = cards[0].interval;
+
+      if (grade < 2) {
+        // Forgot
+        reps = 0;
+        interval = 1; // NEXT REVIEW: Tomorrow
+      } else {
+        // Remembered
+        reps += 1;
+
+        if (reps == 1) {
+          interval = 1;
+        } else if (reps == 2) {
+          interval = 6;
+        } else {
+          interval = (interval * ease).round();
+        }
+
+        // Adjust easeFactor
+        final modifier = 0.1 - (4 - grade) * (0.08 + (4 - grade) * 0.02);
+        ease += modifier;
+        if (ease < minEase) ease = minEase;
+      }
+
+      widget.db.updateNextReview(
+        cards[0].character,
+        reps,
+        interval,
+        ease,
+        DateTime.now().add(Duration(days: interval)),
+      ); // Reschedule for tomorrow
+      final allCards = await widget.db.select(widget.db.characterCards).get();
+
+      for (final card in allCards) {
+        print('Next Review: ${card.nextReview}');
       }
       if (strokeMap.containsKey(cards[0].character)) {
         expansionController.collapse();
@@ -656,79 +668,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                               ),
                             ],
                   ),
-
-                  //sentences
-                  // Padding(
-                  //                 padding: EdgeInsets.symmetric(horizontal: 16),
-                  //                 child: Column(
-                  //                   crossAxisAlignment: CrossAxisAlignment.start,
-                  //                   children: [
-                  //                     SizedBox(
-                  //                       height: 8,
-                  //                     ), // Space between meaning and example
-                  //                     Wrap(
-                  //                       children: [
-                  //                         Text(
-                  //                           'Example: ${snapshot.data![0].chinese}',
-                  //                           style: TextStyle(
-                  //                             fontSize: 16,
-                  //                             color: Colors.black87,
-                  //                             decoration:
-                  //                                 TextDecoration
-                  //                                     .none, // Remove underline
-                  //                           ),
-                  //                         ),
-                  //                       ],
-                  //                     ),
-                  //                     Wrap(
-                  //                       children: [
-                  //                         Text(
-                  //                           'Pinyin: ${snapshot.data![0].pinyin}',
-                  //                           style: TextStyle(
-                  //                             fontSize: 16,
-                  //                             color: Colors.black87,
-                  //                             decoration:
-                  //                                 TextDecoration
-                  //                                     .none, // Remove underline
-                  //                           ),
-                  //                         ),
-                  //                         Wrap(
-                  //                           children: [
-                  //                             Text(
-                  //                               "Translation: ${snapshot.data![0].english}",
-                  //                               style: TextStyle(
-                  //                                 fontSize: 16,
-                  //                                 color: Colors.black87,
-                  //                                 decoration:
-                  //                                     TextDecoration
-                  //                                         .none, // Remove underline
-                  //                               ),
-                  //                             ),
-                  //                           ],
-                  //                         ),
-                  //                       ],
-                  //                     ),
-
-                  //                     Container(
-                  //                       margin: EdgeInsets.symmetric(
-                  //                         horizontal: 4,
-                  //                       ),
-
-                  //                       padding: EdgeInsets.only(bottom: 24),
-                  //                       decoration: BoxDecoration(
-                  //                         border: Border(
-                  //                           bottom: BorderSide(
-                  //                             color:
-                  //                                 Colors.grey, // Underline color
-                  //                             width: 1, // Underline thickness
-                  //                           ),
-                  //                         ),
-                  //                       ),
-                  //                     ),
-                  //                     SizedBox(height: 12),
-                  //                   ],
-                  //                 ),
-                  //               )
                 ),
 
                 Padding(
@@ -748,7 +687,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                         );
                       } else if (snapshot.hasData &&
                           snapshot.data!.isNotEmpty) {
-                        if (noMoreCards) {
+                        if (_currentIndex == -1) {
                           return SizedBox(height: 4);
                         }
                         return Padding(

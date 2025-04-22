@@ -11,9 +11,18 @@ class CharacterCards extends Table {
   TextColumn get character => text()();
   TextColumn get pinyin => text()();
   TextColumn get definition => text()();
-  IntColumn get interval => integer().withDefault(const Constant(1))();
-  IntColumn get repetition => integer().withDefault(const Constant(0))();
-  RealColumn get easeFactor => real().withDefault(const Constant(2.5))();
+  IntColumn get interval => // Days between reviews
+      integer().withDefault(
+        const Constant(1),
+      )(); //interval = previousInterval * easeFactor;
+  IntColumn get repetition =>
+      integer().withDefault(
+        const Constant(0),
+      )(); // How many times you've remembered this card in a row
+  RealColumn get easeFactor => // How easy this card is for you (default: 2.5)
+      real().withDefault(
+        const Constant(2.5),
+      )(); //interval = previousInterval * easeFactor;
   DateTimeColumn get nextReview => dateTime().nullable()();
   TextColumn get notes => text().nullable()();
   @override
@@ -54,10 +63,22 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // Method to update the nextReview field for a specific card
-  Future<void> updateNextReview(String character, DateTime newDate) async {
-    await (update(characterCards)..where(
-      (card) => card.character.equals(character),
-    )).write(CharacterCardsCompanion(nextReview: Value(newDate)));
+  Future<void> updateNextReview(
+    String character,
+    int newRepetition,
+    int newInterval,
+    double newEasefactor,
+    DateTime newDate,
+  ) async {
+    await (update(characterCards)
+      ..where((card) => card.character.equals(character))).write(
+      CharacterCardsCompanion(
+        repetition: Value(newRepetition),
+        interval: Value(newInterval),
+        easeFactor: Value(newEasefactor),
+        nextReview: Value(newDate),
+      ),
+    );
   }
 
   //development only
@@ -141,34 +162,6 @@ LazyDatabase _openConnection() {
     return NativeDatabase(file);
   });
 }
-
-// Future<void> seedTestCards(AppDatabase db) async {
-//   final existing = await db.select(db.characterCards).get();
-//   if (existing.isNotEmpty) {
-//     db.resetNextReview('好学');
-//     db.resetNextReview('学');
-//     return;
-//   }
-
-//   final cards = [
-//     CharacterCardsCompanion(
-//       character: Value('好学'),
-//       pinyin: Value('hǎo'),
-//       definition: Value('good'),
-//       nextReview: Value(DateTime.now().subtract(const Duration(days: 1))),
-//     ),
-//     CharacterCardsCompanion(
-//       character: Value('学'),
-//       pinyin: Value('xué'),
-//       definition: Value('to study'),
-//       nextReview: Value(DateTime.now().add(const Duration(days: 1))),
-//     ),
-//   ];
-
-//   for (final card in cards) {
-//     await db.into(db.characterCards).insert(card);
-//   }
-// }
 
 Future<void> newCard(AppDatabase db, String character) async {
   final entry = await lookupCharacter(db, character);
