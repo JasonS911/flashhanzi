@@ -18,7 +18,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   late int _currentIndex;
   final TextEditingController _notesController = TextEditingController();
   List<CharacterCard> _cards = [];
-  late Future<List<CharacterCard>> _dueCards;
   Future<List<SentencePair>>? _sentencesFuture;
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
@@ -27,6 +26,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
 
   String? _lastCardCharacter; // keeps track of the previously shown character
 
+  //grabs new cards
   void refreshDueCards() async {
     final cards = await widget.db.getDueCards();
 
@@ -36,10 +36,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
       _cards = cards;
       _currentIndex = cards.isEmpty ? -1 : 0;
       _sentencesFuture =
-          cards.isNotEmpty
-              ? widget.db.findSentencesFor(cards[0].character)
+          _cards.isNotEmpty
+              ? widget.db.findSentencesFor(_cards[_currentIndex].character)
               : null;
-      _dueCards = widget.db.getDueCards();
       _initialized = true;
     });
   }
@@ -64,17 +63,11 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   void updateNotes() async {
     final newNotes = _notesController.text;
 
-    final cards = await widget.db.getDueCards();
-
-    // Ensure the current index is valid
-    // if (_currentIndex < 0 || _currentIndex >= cards.length) {
-    //   return; // Handle out-of-bounds error or invalid index
-    // }
     if (_currentIndex < 0) {
       return; // Handle out-of-bounds error or invalid index
     }
     // Get the card to update
-    final cardToUpdate = cards[_currentIndex];
+    final cardToUpdate = _cards[_currentIndex];
 
     // Update the database
     await widget.db.updateNotesDB(cardToUpdate.character, newNotes);
@@ -83,32 +76,16 @@ class ReviewCharactersState extends State<ReviewCharacters> {
 
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
-    var cards = await widget.db.getDueCards();
-    final allCards = await widget.db.select(widget.db.characterCards).get();
 
-    for (final card in allCards) {
-      print('Next Review: ${card.nextReview}');
-    }
-    //currentindex is 1 if cards is empty
-    if (_currentIndex == -1) {
-      return;
-    }
     // make currentIndex -1 to show completed cards
-    if (cards.isNotEmpty) {
-      // if (_currentIndex >= cards.length) {
-      //   setState(() {
-      //     _currentIndex = -1;
-      //   });
-      //   return;
-      // }
-
+    if (_cards.isNotEmpty) {
       // Reschedule for the specified number of days
       // Cycle through cards
       const minEase = 1.3;
 
-      int reps = cards[0].repetition;
-      double ease = cards[0].easeFactor;
-      int interval = cards[0].interval;
+      int reps = _cards[_currentIndex].repetition;
+      double ease = _cards[_currentIndex].easeFactor;
+      int interval = _cards[_currentIndex].interval;
 
       if (grade < 2) {
         // Forgot
@@ -133,22 +110,43 @@ class ReviewCharactersState extends State<ReviewCharacters> {
       }
 
       widget.db.updateNextReview(
-        cards[0].character,
+        _cards[_currentIndex].character,
         reps,
         interval,
         ease,
         DateTime.now().add(Duration(days: interval)),
       ); // Reschedule for tomorrow
-      final allCards = await widget.db.select(widget.db.characterCards).get();
 
-      for (final card in allCards) {
-        print('Next Review: ${card.nextReview}');
-      }
-      if (strokeMap.containsKey(cards[0].character)) {
+      if (strokeMap.containsKey(_cards[_currentIndex].character)) {
         expansionController.collapse();
       }
+    }
+    //currentindex is 1 if cards is empty
+    if (_currentIndex >= _cards.length - 1) {
+      final cards = await widget.db.getDueCards();
 
-      refreshDueCards();
+      if (cards.isNotEmpty) {
+        setState(() {
+          _cards = cards;
+          _currentIndex = 0;
+          _sentencesFuture =
+              _cards.isNotEmpty
+                  ? widget.db.findSentencesFor(_cards[_currentIndex].character)
+                  : null;
+        });
+      } else {
+        setState(() {
+          _currentIndex = -1;
+        });
+      }
+    } else {
+      setState(() {
+        _currentIndex++;
+        _sentencesFuture =
+            _cards.isNotEmpty
+                ? widget.db.findSentencesFor(_cards[_currentIndex].character)
+                : null;
+      });
     }
   }
 
@@ -766,52 +764,45 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                     },
                   ),
                 ),
-                FutureBuilder<List<CharacterCard>>(
-                  future: _dueCards, // Your future to fetch the data
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return CircularProgressIndicator(); // Show loading indicator while waiting
-                    } else if (snapshot.hasError) {
-                      return SizedBox(height: 4); // Handle error state
-                    } else if (snapshot.hasData) {
-                      final cards = snapshot.data!;
-                      try {
-                        return ListView(
-                          shrinkWrap: true,
-                          children: [
-                            strokesLoaded &&
-                                    strokeMap.containsKey(cards[0].character)
-                                ? ExpansionTile(
-                                  controller: expansionController,
-                                  title: const Text("Stroke Order Animation"),
-                                  leading: const Icon(Icons.play_arrow),
-                                  children: [
-                                    Center(
-                                      child: SizedBox(
-                                        height: 150,
-                                        child:
-                                            strokeMap.containsKey(
-                                                  cards[0].character,
-                                                )
-                                                ? StrokeOrderWidget(
-                                                  character: cards[0].character,
-                                                  dataMap: strokeMap,
-                                                ) // Pass the character to the widget
-                                                : SizedBox.shrink(),
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child:
+                      (_cards.isEmpty || _currentIndex == -1 || !strokesLoaded)
+                          ? SizedBox(height: 4)
+                          : ListView(
+                            shrinkWrap: true,
+                            children: [
+                              strokesLoaded &&
+                                      strokeMap.containsKey(
+                                        _cards[_currentIndex].character,
+                                      )
+                                  ? ExpansionTile(
+                                    controller: expansionController,
+                                    title: const Text("Stroke Order Animation"),
+                                    leading: const Icon(Icons.play_arrow),
+                                    children: [
+                                      Center(
+                                        child: SizedBox(
+                                          height: 150,
+                                          child:
+                                              strokeMap.containsKey(
+                                                    _cards[_currentIndex]
+                                                        .character,
+                                                  )
+                                                  ? StrokeOrderWidget(
+                                                    character:
+                                                        _cards[_currentIndex]
+                                                            .character,
+                                                    dataMap: strokeMap,
+                                                  ) // Pass the character to the widget
+                                                  : SizedBox.shrink(),
+                                        ),
                                       ),
-                                    ),
-                                  ],
-                                )
-                                : const SizedBox.shrink(), // return nothing
-                          ],
-                        );
-                      } catch (e) {
-                        return SizedBox(height: 4);
-                      }
-                    }
-
-                    return SizedBox.shrink(); // Return empty widget if no data
-                  },
+                                    ],
+                                  )
+                                  : const SizedBox.shrink(), // return nothing
+                            ],
+                          ),
                 ),
                 //stuff after column containing future builder
                 SizedBox(height: 16),

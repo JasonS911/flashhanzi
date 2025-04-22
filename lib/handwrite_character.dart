@@ -70,7 +70,6 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
         List<DictionaryEntry>? results = await widget.db.searchDictionary(
           recognizedWord,
         );
-        print(results);
         if (results.isNotEmpty) {
           recognizedList.add(recognizedWord);
         }

@@ -47,6 +47,7 @@ dependencies:
   google_mlkit_text_recognition: ^0.15.0
   google_mlkit_digital_ink_recognition: ^0.14.1
   jieba_flutter: ^0.1.1
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
