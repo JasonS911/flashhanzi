@@ -74,19 +74,18 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     // Re-fetch the data to ensure the UI is updated
   }
 
-  void printAllCards() async {
-    final allCards = await widget.db.select(widget.db.characterCards).get();
+  // void printAllCards() async {
+  //   final allCards = await widget.db.select(widget.db.characterCards).get();
 
-    for (final card in allCards) {
-      print(
-        'Character: ${card.character}, Reps: ${card.repetition}, Interval: ${card.interval}, Ease: ${card.easeFactor}, Next: ${card.nextReview}, LearningStep: ${card.learningStep}',
-      );
-    }
-  }
+  //   for (final card in allCards) {
+  //     print(
+  //       'Character: ${card.character}, Reps: ${card.repetition}, Interval: ${card.interval}, Ease: ${card.easeFactor}, Next: ${card.nextReview}, LearningStep: ${card.learningStep}',
+  //     );
+  //   }
+  // }
 
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
-    printAllCards();
     // make currentIndex -1 to show completed cards
     if (_cards.isNotEmpty) {
       // Reschedule for the specified number of days
