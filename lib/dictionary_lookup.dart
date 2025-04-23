@@ -3,6 +3,7 @@ import 'package:flashhanzi/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flashhanzi/utils/play_audio.dart';
 
 class DictionaryLookup extends StatefulWidget {
   const DictionaryLookup({super.key, required this.db});
@@ -24,7 +25,6 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
 
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
-
   @override
   void initState() {
     super.initState();
@@ -204,7 +204,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 4),
+          padding: const EdgeInsets.only(left: 16.0, right: 16, top: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -248,7 +248,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                       color: Colors.grey,
                     ),
                     onPressed: () {
-                      print("Playing audio for ${entry.simplified}");
+                      playAudio(entry.simplified);
                     },
                   ),
                 ],

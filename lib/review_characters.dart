@@ -4,6 +4,7 @@ import 'package:flashhanzi/parse.dart';
 import 'package:flashhanzi/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart'; // Add this import for FlipCard
+import 'package:flashhanzi/utils/play_audio.dart';
 
 class ReviewCharacters extends StatefulWidget {
   const ReviewCharacters({super.key, required this.db});
@@ -734,19 +735,18 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                   ),
                                                 ),
                                               ),
-                                              GestureDetector(
-                                                onTap: doNothing,
-                                                child: Padding(
-                                                  padding:
-                                                      const EdgeInsets.only(
-                                                        top: 12,
-                                                      ),
-                                                  child: const Icon(
-                                                    Icons.volume_up,
-                                                    size: 24,
-                                                    color: Colors.grey,
-                                                  ),
+                                              IconButton(
+                                                icon: const Icon(
+                                                  Icons.volume_up,
+                                                  size: 24,
+                                                  color: Colors.grey,
                                                 ),
+                                                onPressed: () {
+                                                  playAudio(
+                                                    _cards[_currentIndex]
+                                                        .character,
+                                                  );
+                                                },
                                               ),
                                             ],
                                           ),
@@ -805,15 +805,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                     future: _sentencesFuture,
                     builder: (context, snapshot) {
                       if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Text(
-                          'Loading...',
-                          style: TextStyle(
-                            fontSize: 84,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.black87,
-                            decoration: TextDecoration.none, // Remove underline
-                          ),
-                        );
+                        return SizedBox(height: 4);
                       } else if (snapshot.hasData &&
                           snapshot.data!.isNotEmpty) {
                         if (_currentIndex == -1) {
