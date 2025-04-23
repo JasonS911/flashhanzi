@@ -197,9 +197,11 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                   ? widget.db.findSentencesFor(_cards[_currentIndex].character)
                   : null;
         });
+        //empty
       } else {
         setState(() {
           _currentIndex = -1;
+          _cards = [];
         });
       }
     } else {
@@ -261,6 +263,40 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child:
+                          _cards.isNotEmpty
+                              ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: Colors.grey,
+                                tooltip: 'Delete',
+                                onPressed: () async {
+                                  //delete logic
+                                  await widget.db.deleteCard(
+                                    currentCard!.character,
+                                  );
+                                  final cards = await widget.db.getDueCards();
+                                  setState(() {
+                                    _cards.removeAt(_currentIndex);
+                                    _cards = cards;
+                                    _currentIndex = _cards.isEmpty ? -1 : 0;
+                                  });
+                                },
+                              )
+                              : IconButton(
+                                icon: Icon(Icons.refresh),
+                                color: Colors.grey,
+                                tooltip: 'Refresh Cards',
+                                onPressed: () async {
+                                  final cards = await widget.db.getDueCards();
+                                  setState(() {
+                                    _cards = cards;
+                                    _currentIndex = _cards.isEmpty ? -1 : 0;
+                                  });
+                                },
+                              ),
                     ),
                   ],
                 ),
@@ -545,6 +581,40 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                         fontWeight: FontWeight.bold,
                       ),
                     ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child:
+                          _cards.isNotEmpty
+                              ? IconButton(
+                                icon: Icon(Icons.delete),
+                                color: Colors.grey,
+                                tooltip: 'Delete',
+                                onPressed: () async {
+                                  //delete logic
+                                  await widget.db.deleteCard(
+                                    currentCard!.character,
+                                  );
+                                  final cards = await widget.db.getDueCards();
+                                  setState(() {
+                                    _cards.removeAt(_currentIndex);
+                                    _cards = cards;
+                                    _currentIndex = _cards.isEmpty ? -1 : 0;
+                                  });
+                                },
+                              )
+                              : IconButton(
+                                icon: Icon(Icons.refresh),
+                                color: Colors.grey,
+                                tooltip: 'Refresh Cards',
+                                onPressed: () async {
+                                  final cards = await widget.db.getDueCards();
+                                  setState(() {
+                                    _cards = cards;
+                                    _currentIndex = _cards.isEmpty ? -1 : 0;
+                                  });
+                                },
+                              ),
+                    ),
                   ],
                 ),
                 SizedBox(height: 4), // Space before the review list
@@ -615,6 +685,10 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                       bottom: 16,
                                     ),
                                     child: Container(
+                                      width: double.infinity,
+                                      margin: const EdgeInsets.symmetric(
+                                        horizontal: 8,
+                                      ),
                                       padding: const EdgeInsets.only(
                                         bottom: 20,
                                       ), // Add padding inside the container
@@ -627,36 +701,28 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           ),
                                         ),
                                       ),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
+                                      child: Wrap(
+                                        runAlignment: WrapAlignment.center,
+                                        alignment: WrapAlignment.center,
                                         crossAxisAlignment:
-                                            CrossAxisAlignment.center,
+                                            WrapCrossAlignment.center,
+                                        spacing: 12,
                                         children: [
-                                          SizedBox(width: 52),
-                                          Wrap(
-                                            children: [
-                                              Text(
-                                                _cards[_currentIndex].character,
-                                                style: TextStyle(
-                                                  fontSize: 76,
-                                                  color: Colors.black87,
-                                                  decoration:
-                                                      TextDecoration
-                                                          .none, // Remove underline
-                                                ),
-                                              ),
-                                            ],
+                                          Text(
+                                            _cards[_currentIndex].character,
+                                            style: TextStyle(
+                                              fontSize: 76,
+                                              color: Colors.black87,
+                                              decoration: TextDecoration.none,
+                                            ),
                                           ),
-
-                                          SizedBox(
-                                            width: 28,
-                                          ), // Space between characters
                                           Wrap(
+                                            crossAxisAlignment:
+                                                WrapCrossAlignment.center,
                                             children: [
                                               Padding(
                                                 padding: const EdgeInsets.only(
-                                                  top: 12,
+                                                  top: 8,
                                                 ),
                                                 child: Text(
                                                   '[${_cards[_currentIndex].pinyin}]',
@@ -664,21 +730,23 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                     fontSize: 48,
                                                     color: Colors.black87,
                                                     decoration:
-                                                        TextDecoration
-                                                            .none, // Remove underline
+                                                        TextDecoration.none,
                                                   ),
                                                 ),
                                               ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.volume_up,
-                                                  size: 24,
-                                                  color: Colors.grey,
+                                              GestureDetector(
+                                                onTap: doNothing,
+                                                child: Padding(
+                                                  padding:
+                                                      const EdgeInsets.only(
+                                                        top: 12,
+                                                      ),
+                                                  child: const Icon(
+                                                    Icons.volume_up,
+                                                    size: 24,
+                                                    color: Colors.grey,
+                                                  ),
                                                 ),
-                                                onPressed: () {
-                                                  // Add functionality to play audio here
-                                                  doNothing();
-                                                },
                                               ),
                                             ],
                                           ),

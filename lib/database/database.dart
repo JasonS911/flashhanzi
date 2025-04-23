@@ -87,6 +87,11 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  Future<void> deleteCard(String character) async {
+    await (delete(characterCards)
+      ..where((tbl) => tbl.character.equals(character))).go();
+  }
+
   //development only
   Future<void> resetNextReview(String character) async {
     await (update(characterCards)
