@@ -13,15 +13,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  late AppDatabase db;
-  // late mlkit.DigitalInkRecognizer _digitalInkRecognizer;
-
+  int dueCardsLength = 0;
   @override
   void initState() {
     super.initState();
-    db =
-        widget.db; // Initialize the database using the value passed to HomePage
+    // Initialize the database using the value passed to HomePage
     ensureModelDownloaded();
+    getDueCardsLength();
+  }
+
+  void getDueCardsLength() async {
+    final dueCards = await widget.db.getDueCards(); // Call your custom method
+    setState(() {
+      dueCardsLength = dueCards.length;
+    });
   }
 
   Future<void> ensureModelDownloaded() async {
@@ -184,7 +189,7 @@ class _HomePageState extends State<HomePage> {
               height: 12,
             ), // Adds space between the word of the day and the next section
             Text(
-              '5 Characters due today', // Display the first sentence
+              '$dueCardsLength Characters due today', // Display the first sentence
               style: GoogleFonts.notoSansSc(
                 fontSize: 20,
                 color: Colors.black87,
@@ -218,7 +223,7 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                             builder:
                                 (context) =>
-                                    MyHomePage(initialIndex: 0, db: db),
+                                    MyHomePage(initialIndex: 0, db: widget.db),
                           ),
                         );
                       },
@@ -235,7 +240,7 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                             builder:
                                 (context) =>
-                                    MyHomePage(initialIndex: 1, db: db),
+                                    MyHomePage(initialIndex: 1, db: widget.db),
                           ),
                         );
                       }, // Replace with your scan function
@@ -252,9 +257,12 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                             builder:
                                 (context) =>
-                                    MyHomePage(initialIndex: 2, db: db),
+                                    MyHomePage(initialIndex: 2, db: widget.db),
                           ),
-                        );
+                        ).then((_) {
+                          // Called when returning from ReviewCharacters
+                          getDueCardsLength();
+                        });
                       },
                     ),
                   ),
@@ -269,7 +277,7 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(
                             builder:
                                 (context) =>
-                                    MyHomePage(initialIndex: 3, db: db),
+                                    MyHomePage(initialIndex: 3, db: widget.db),
                           ),
                         );
                       }, // Replace with your scan function
