@@ -23,6 +23,10 @@ class CharacterCards extends Table {
       real().withDefault(
         const Constant(2.5),
       )(); //interval = previousInterval * easeFactor;
+  IntColumn get learningStep =>
+      integer().withDefault(
+        const Constant(0),
+      )(); //if something has been learned or not. 1 is 1min 2 is 10 min 3 is graduated
   DateTimeColumn get nextReview => dateTime().nullable()();
   TextColumn get notes => text().nullable()();
   @override
@@ -69,6 +73,7 @@ class AppDatabase extends _$AppDatabase {
     int newInterval,
     double newEasefactor,
     DateTime newDate,
+    int step,
   ) async {
     await (update(characterCards)
       ..where((card) => card.character.equals(character))).write(
@@ -77,6 +82,7 @@ class AppDatabase extends _$AppDatabase {
         interval: Value(newInterval),
         easeFactor: Value(newEasefactor),
         nextReview: Value(newDate),
+        learningStep: Value(step),
       ),
     );
   }

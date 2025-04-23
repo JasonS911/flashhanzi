@@ -76,6 +76,18 @@ class $CharacterCardsTable extends CharacterCards
     requiredDuringInsert: false,
     defaultValue: const Constant(2.5),
   );
+  static const VerificationMeta _learningStepMeta = const VerificationMeta(
+    'learningStep',
+  );
+  @override
+  late final GeneratedColumn<int> learningStep = GeneratedColumn<int>(
+    'learning_step',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
   static const VerificationMeta _nextReviewMeta = const VerificationMeta(
     'nextReview',
   );
@@ -104,6 +116,7 @@ class $CharacterCardsTable extends CharacterCards
     interval,
     repetition,
     easeFactor,
+    learningStep,
     nextReview,
     notes,
   ];
@@ -161,6 +174,15 @@ class $CharacterCardsTable extends CharacterCards
         easeFactor.isAcceptableOrUnknown(data['ease_factor']!, _easeFactorMeta),
       );
     }
+    if (data.containsKey('learning_step')) {
+      context.handle(
+        _learningStepMeta,
+        learningStep.isAcceptableOrUnknown(
+          data['learning_step']!,
+          _learningStepMeta,
+        ),
+      );
+    }
     if (data.containsKey('next_review')) {
       context.handle(
         _nextReviewMeta,
@@ -212,6 +234,11 @@ class $CharacterCardsTable extends CharacterCards
             DriftSqlType.double,
             data['${effectivePrefix}ease_factor'],
           )!,
+      learningStep:
+          attachedDatabase.typeMapping.read(
+            DriftSqlType.int,
+            data['${effectivePrefix}learning_step'],
+          )!,
       nextReview: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}next_review'],
@@ -236,6 +263,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
   final int interval;
   final int repetition;
   final double easeFactor;
+  final int learningStep;
   final DateTime? nextReview;
   final String? notes;
   const CharacterCard({
@@ -245,6 +273,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     required this.interval,
     required this.repetition,
     required this.easeFactor,
+    required this.learningStep,
     this.nextReview,
     this.notes,
   });
@@ -257,6 +286,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     map['interval'] = Variable<int>(interval);
     map['repetition'] = Variable<int>(repetition);
     map['ease_factor'] = Variable<double>(easeFactor);
+    map['learning_step'] = Variable<int>(learningStep);
     if (!nullToAbsent || nextReview != null) {
       map['next_review'] = Variable<DateTime>(nextReview);
     }
@@ -274,6 +304,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       interval: Value(interval),
       repetition: Value(repetition),
       easeFactor: Value(easeFactor),
+      learningStep: Value(learningStep),
       nextReview:
           nextReview == null && nullToAbsent
               ? const Value.absent()
@@ -295,6 +326,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       interval: serializer.fromJson<int>(json['interval']),
       repetition: serializer.fromJson<int>(json['repetition']),
       easeFactor: serializer.fromJson<double>(json['easeFactor']),
+      learningStep: serializer.fromJson<int>(json['learningStep']),
       nextReview: serializer.fromJson<DateTime?>(json['nextReview']),
       notes: serializer.fromJson<String?>(json['notes']),
     );
@@ -309,6 +341,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       'interval': serializer.toJson<int>(interval),
       'repetition': serializer.toJson<int>(repetition),
       'easeFactor': serializer.toJson<double>(easeFactor),
+      'learningStep': serializer.toJson<int>(learningStep),
       'nextReview': serializer.toJson<DateTime?>(nextReview),
       'notes': serializer.toJson<String?>(notes),
     };
@@ -321,6 +354,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     int? interval,
     int? repetition,
     double? easeFactor,
+    int? learningStep,
     Value<DateTime?> nextReview = const Value.absent(),
     Value<String?> notes = const Value.absent(),
   }) => CharacterCard(
@@ -330,6 +364,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     interval: interval ?? this.interval,
     repetition: repetition ?? this.repetition,
     easeFactor: easeFactor ?? this.easeFactor,
+    learningStep: learningStep ?? this.learningStep,
     nextReview: nextReview.present ? nextReview.value : this.nextReview,
     notes: notes.present ? notes.value : this.notes,
   );
@@ -344,6 +379,10 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           data.repetition.present ? data.repetition.value : this.repetition,
       easeFactor:
           data.easeFactor.present ? data.easeFactor.value : this.easeFactor,
+      learningStep:
+          data.learningStep.present
+              ? data.learningStep.value
+              : this.learningStep,
       nextReview:
           data.nextReview.present ? data.nextReview.value : this.nextReview,
       notes: data.notes.present ? data.notes.value : this.notes,
@@ -359,6 +398,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           ..write('interval: $interval, ')
           ..write('repetition: $repetition, ')
           ..write('easeFactor: $easeFactor, ')
+          ..write('learningStep: $learningStep, ')
           ..write('nextReview: $nextReview, ')
           ..write('notes: $notes')
           ..write(')'))
@@ -373,6 +413,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     interval,
     repetition,
     easeFactor,
+    learningStep,
     nextReview,
     notes,
   );
@@ -386,6 +427,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           other.interval == this.interval &&
           other.repetition == this.repetition &&
           other.easeFactor == this.easeFactor &&
+          other.learningStep == this.learningStep &&
           other.nextReview == this.nextReview &&
           other.notes == this.notes);
 }
@@ -397,6 +439,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
   final Value<int> interval;
   final Value<int> repetition;
   final Value<double> easeFactor;
+  final Value<int> learningStep;
   final Value<DateTime?> nextReview;
   final Value<String?> notes;
   final Value<int> rowid;
@@ -407,6 +450,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.interval = const Value.absent(),
     this.repetition = const Value.absent(),
     this.easeFactor = const Value.absent(),
+    this.learningStep = const Value.absent(),
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -418,6 +462,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.interval = const Value.absent(),
     this.repetition = const Value.absent(),
     this.easeFactor = const Value.absent(),
+    this.learningStep = const Value.absent(),
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
     this.rowid = const Value.absent(),
@@ -431,6 +476,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Expression<int>? interval,
     Expression<int>? repetition,
     Expression<double>? easeFactor,
+    Expression<int>? learningStep,
     Expression<DateTime>? nextReview,
     Expression<String>? notes,
     Expression<int>? rowid,
@@ -442,6 +488,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       if (interval != null) 'interval': interval,
       if (repetition != null) 'repetition': repetition,
       if (easeFactor != null) 'ease_factor': easeFactor,
+      if (learningStep != null) 'learning_step': learningStep,
       if (nextReview != null) 'next_review': nextReview,
       if (notes != null) 'notes': notes,
       if (rowid != null) 'rowid': rowid,
@@ -455,6 +502,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Value<int>? interval,
     Value<int>? repetition,
     Value<double>? easeFactor,
+    Value<int>? learningStep,
     Value<DateTime?>? nextReview,
     Value<String?>? notes,
     Value<int>? rowid,
@@ -466,6 +514,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       interval: interval ?? this.interval,
       repetition: repetition ?? this.repetition,
       easeFactor: easeFactor ?? this.easeFactor,
+      learningStep: learningStep ?? this.learningStep,
       nextReview: nextReview ?? this.nextReview,
       notes: notes ?? this.notes,
       rowid: rowid ?? this.rowid,
@@ -493,6 +542,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     if (easeFactor.present) {
       map['ease_factor'] = Variable<double>(easeFactor.value);
     }
+    if (learningStep.present) {
+      map['learning_step'] = Variable<int>(learningStep.value);
+    }
     if (nextReview.present) {
       map['next_review'] = Variable<DateTime>(nextReview.value);
     }
@@ -514,6 +566,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
           ..write('interval: $interval, ')
           ..write('repetition: $repetition, ')
           ..write('easeFactor: $easeFactor, ')
+          ..write('learningStep: $learningStep, ')
           ..write('nextReview: $nextReview, ')
           ..write('notes: $notes, ')
           ..write('rowid: $rowid')
@@ -1232,6 +1285,7 @@ typedef $$CharacterCardsTableCreateCompanionBuilder =
       Value<int> interval,
       Value<int> repetition,
       Value<double> easeFactor,
+      Value<int> learningStep,
       Value<DateTime?> nextReview,
       Value<String?> notes,
       Value<int> rowid,
@@ -1244,6 +1298,7 @@ typedef $$CharacterCardsTableUpdateCompanionBuilder =
       Value<int> interval,
       Value<int> repetition,
       Value<double> easeFactor,
+      Value<int> learningStep,
       Value<DateTime?> nextReview,
       Value<String?> notes,
       Value<int> rowid,
@@ -1285,6 +1340,11 @@ class $$CharacterCardsTableFilterComposer
 
   ColumnFilters<double> get easeFactor => $composableBuilder(
     column: $table.easeFactor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get learningStep => $composableBuilder(
+    column: $table.learningStep,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1338,6 +1398,11 @@ class $$CharacterCardsTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get learningStep => $composableBuilder(
+    column: $table.learningStep,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get nextReview => $composableBuilder(
     column: $table.nextReview,
     builder: (column) => ColumnOrderings(column),
@@ -1379,6 +1444,11 @@ class $$CharacterCardsTableAnnotationComposer
 
   GeneratedColumn<double> get easeFactor => $composableBuilder(
     column: $table.easeFactor,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get learningStep => $composableBuilder(
+    column: $table.learningStep,
     builder: (column) => column,
   );
 
@@ -1434,6 +1504,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> interval = const Value.absent(),
                 Value<int> repetition = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
+                Value<int> learningStep = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1444,6 +1515,7 @@ class $$CharacterCardsTableTableManager
                 interval: interval,
                 repetition: repetition,
                 easeFactor: easeFactor,
+                learningStep: learningStep,
                 nextReview: nextReview,
                 notes: notes,
                 rowid: rowid,
@@ -1456,6 +1528,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> interval = const Value.absent(),
                 Value<int> repetition = const Value.absent(),
                 Value<double> easeFactor = const Value.absent(),
+                Value<int> learningStep = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
@@ -1466,6 +1539,7 @@ class $$CharacterCardsTableTableManager
                 interval: interval,
                 repetition: repetition,
                 easeFactor: easeFactor,
+                learningStep: learningStep,
                 nextReview: nextReview,
                 notes: notes,
                 rowid: rowid,

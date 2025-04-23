@@ -74,9 +74,19 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     // Re-fetch the data to ensure the UI is updated
   }
 
+  void printAllCards() async {
+    final allCards = await widget.db.select(widget.db.characterCards).get();
+
+    for (final card in allCards) {
+      print(
+        'Character: ${card.character}, Reps: ${card.repetition}, Interval: ${card.interval}, Ease: ${card.easeFactor}, Next: ${card.nextReview}, LearningStep: ${card.learningStep}',
+      );
+    }
+  }
+
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
-
+    printAllCards();
     // make currentIndex -1 to show completed cards
     if (_cards.isNotEmpty) {
       // Reschedule for the specified number of days
@@ -86,36 +96,90 @@ class ReviewCharactersState extends State<ReviewCharacters> {
       int reps = _cards[_currentIndex].repetition;
       double ease = _cards[_currentIndex].easeFactor;
       int interval = _cards[_currentIndex].interval;
+      int step = _cards[_currentIndex].learningStep;
 
-      if (grade < 2) {
-        // Forgot
-        reps = 0;
-        interval = 1; // NEXT REVIEW: Tomorrow
-      } else {
-        // Remembered
-        reps += 1;
-
-        if (reps == 1) {
-          interval = 1;
-        } else if (reps == 2) {
-          interval = 6;
+      if (reps == 0) {
+        // Learning steps for new cards
+        if (grade < 2) {
+          // Reset learning
+          step = 0;
+          widget.db.updateNextReview(
+            _cards[_currentIndex].character,
+            reps,
+            interval,
+            ease,
+            DateTime.now().add(Duration(minutes: 1)),
+            step,
+          ); // Reschedule for tomorrow
+          //if grade is better than forgot, and step is 0 then
+        } else if (step == 0) {
+          step = 1;
+          widget.db.updateNextReview(
+            _cards[_currentIndex].character,
+            reps,
+            interval,
+            ease,
+            DateTime.now().add(Duration(minutes: 1)),
+            step,
+          );
+        } else if (step == 1) {
+          step = 2;
+          widget.db.updateNextReview(
+            _cards[_currentIndex].character,
+            reps,
+            interval,
+            ease,
+            DateTime.now().add(Duration(minutes: 10)),
+            step,
+          );
         } else {
-          interval = (interval * ease).round();
+          // Graduate to review
+          step = 3;
+          reps = 1; //make sure reps is 1
+          interval = 1;
+          ease = 2.5;
+          widget.db.updateNextReview(
+            _cards[_currentIndex].character,
+            reps,
+            interval,
+            ease,
+            DateTime.now().add(Duration(minutes: 10)),
+            step,
+          );
+        }
+      } else {
+        //sm2 logic
+        if (grade < 2) {
+          // Forgot
+          reps = 0;
+          interval = 1; // NEXT REVIEW: Tomorrow
+        } else {
+          // Remembered
+          reps += 1;
+
+          if (reps == 2) {
+            interval = 1;
+          } else if (reps == 3) {
+            interval = 6;
+          } else {
+            interval = (interval * ease).round();
+          }
+
+          // Adjust easeFactor
+          final modifier = 0.1 - (4 - grade) * (0.08 + (4 - grade) * 0.02);
+          ease += modifier;
+          if (ease < minEase) ease = minEase;
         }
 
-        // Adjust easeFactor
-        final modifier = 0.1 - (4 - grade) * (0.08 + (4 - grade) * 0.02);
-        ease += modifier;
-        if (ease < minEase) ease = minEase;
+        widget.db.updateNextReview(
+          _cards[_currentIndex].character,
+          reps,
+          interval,
+          ease,
+          DateTime.now().add(Duration(days: interval)),
+          step,
+        ); // Reschedule for tomorrow
       }
-
-      widget.db.updateNextReview(
-        _cards[_currentIndex].character,
-        reps,
-        interval,
-        ease,
-        DateTime.now().add(Duration(days: interval)),
-      ); // Reschedule for tomorrow
 
       if (strokeMap.containsKey(_cards[_currentIndex].character)) {
         expansionController.collapse();
