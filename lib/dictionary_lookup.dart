@@ -74,6 +74,16 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     });
   }
 
+  Future<void> _addNewCard(AppDatabase db, String characterToAdd) async {
+    newCard(db, characterToAdd);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Word added to your review deck!'),
+        duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -194,20 +204,34 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
           borderRadius: BorderRadius.circular(8),
         ),
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.only(left: 16.0, right: 16, bottom: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                entry.simplified,
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.black87,
-                ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    entry.simplified,
+                    style: const TextStyle(
+                      fontSize: 48,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+
+                  IconButton(
+                    icon: const Icon(Icons.add, size: 30),
+
+                    onPressed: () => _addNewCard(widget.db, entry.simplified),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 8),
-              Wrap(
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     entry.pinyin,

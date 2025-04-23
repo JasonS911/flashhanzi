@@ -15,7 +15,6 @@ Future<void> parse(AppDatabase db) async {
   ); // File path
 
   if (file.isEmpty || fileSentences.isEmpty) {
-    print('File content is empty.');
     return;
   }
 

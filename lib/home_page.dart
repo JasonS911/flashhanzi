@@ -32,11 +32,7 @@ class _HomePageState extends State<HomePage> {
       bool isDownloaded = await modelManager.isModelDownloaded(modelName);
 
       if (!isDownloaded) {
-        print("Model not downloaded, downloading...");
         await modelManager.downloadModel(modelName); // Download the model once
-        print("Model downloaded and saved locally.");
-      } else {
-        print("Model is already downloaded.");
       }
     } catch (e) {
       print("Error checking/downloading model: $e");

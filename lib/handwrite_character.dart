@@ -42,7 +42,6 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {
     for (String word in charactersToAdd) {
       newCard(db, word);
-      print(word);
     }
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
