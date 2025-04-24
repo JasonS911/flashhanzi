@@ -83,7 +83,7 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _addNewCard(AppDatabase db, String characterToAdd) async {
     if (!mounted) return;
-
+    newCard(db, characterToAdd);
     showDialog(
       context: context,
       barrierDismissible: false, // optional: prevent premature tap dismissal

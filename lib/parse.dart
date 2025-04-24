@@ -61,6 +61,12 @@ Future<void> parse(AppDatabase db) async {
       final pinYinPlain = normalizePinyin(pinyin);
       final definitions = match.group(4)!.replaceAll('/', '; ').trim();
 
+      //skip surname entries
+      final lowerDef = definitions.toLowerCase();
+      final isCapitalPinyin = pinyin[0].toUpperCase() == pinyin[0];
+      final isUnwanted = lowerDef.contains('surname') && isCapitalPinyin;
+
+      if (isUnwanted) continue;
       entries.add(
         DictionaryEntriesCompanion(
           simplified: Value(simplified),
