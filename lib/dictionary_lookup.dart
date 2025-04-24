@@ -78,7 +78,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     newCard(db, characterToAdd);
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content: Text('Word added to your review deck!'),
+        content: Text('Word "$characterToAdd"  added to your review deck!'),
         duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
       ),
     );

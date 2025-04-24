@@ -7,6 +7,7 @@ import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
 
+
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final db = AppDatabase();
