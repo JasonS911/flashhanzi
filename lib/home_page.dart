@@ -1,3 +1,4 @@
+import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/main.dart';
 import 'package:flutter/material.dart';
@@ -136,287 +137,341 @@ class _HomePageState extends State<HomePage> {
       padding: const EdgeInsets.all(8),
       child: SingleChildScrollView(
         // Makes the entire page scrollable
-        child: Column(
-          crossAxisAlignment:
-              CrossAxisAlignment.center, // Centers children horizontally
+        child: Stack(
           children: [
-            Image.asset(
-              'assets/logo.png', // Ensure you have a logo image in the assets folder
-              height: 100, // Adjust height as needed
-              width: 260, // Adjust width as needed
-            ),
-            Padding(
-              padding: const EdgeInsets.only(
-                top: 0,
-                left: 4,
-                right: 4,
-                bottom: 4,
-              ),
-              child:
-                  _chineseWord == null ||
-                          _pinyinWord == null ||
-                          _englishWord == null ||
-                          _chineseSentence == null ||
-                          _pinyinSentence == null ||
-                          _englishSentence == null
-                      ? SizedBox(height: 4)
-                      : Container(
-                        width:
-                            double.infinity, // Makes the container full width
-                        // height: 300,
-                        margin: const EdgeInsets.only(
-                          left: 16,
-                          right: 16,
-                          bottom: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: [
-                            BoxShadow(color: Colors.black12, blurRadius: 8),
-                          ],
-                        ),
-                        child: Column(
-                          crossAxisAlignment:
-                              CrossAxisAlignment
-                                  .start, // Aligns children to the start
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Padding(
-                                  padding: const EdgeInsets.only(
-                                    top: 16,
-                                    left: 16,
-                                  ), // Adds space at the top
-                                  child: Text(
-                                    'Word of the Day',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
-                                      decoration:
-                                          TextDecoration
-                                              .none, // Remove underline from the title
-                                    ),
-                                  ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.add, size: 30),
-
-                                  onPressed:
-                                      () =>
-                                          _addNewCard(widget.db, _chineseWord!),
-                                ),
+            Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Centers children horizontally
+              children: [
+                Image.asset(
+                  'assets/logo.png', // Ensure you have a logo image in the assets folder
+                  height: 100, // Adjust height as needed
+                  width: 260, // Adjust width as needed
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(
+                    top: 0,
+                    left: 4,
+                    right: 4,
+                    bottom: 4,
+                  ),
+                  child:
+                      _chineseWord == null ||
+                              _pinyinWord == null ||
+                              _englishWord == null ||
+                              _chineseSentence == null ||
+                              _pinyinSentence == null ||
+                              _englishSentence == null
+                          ? SizedBox(height: 4)
+                          : Container(
+                            width:
+                                double
+                                    .infinity, // Makes the container full width
+                            // height: 300,
+                            margin: const EdgeInsets.only(
+                              left: 16,
+                              right: 16,
+                              bottom: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: [
+                                BoxShadow(color: Colors.black12, blurRadius: 8),
                               ],
                             ),
+                            child: Column(
+                              crossAxisAlignment:
+                                  CrossAxisAlignment
+                                      .start, // Aligns children to the start
+                              children: [
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 16,
+                                        left: 16,
+                                      ), // Adds space at the top
+                                      child: Text(
+                                        'Word of the Day',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline from the title
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(Icons.add, size: 30),
 
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.end,
-                                children: [
-                                  Text(
-                                    _chineseWord!,
+                                      onPressed:
+                                          () => _addNewCard(
+                                            widget.db,
+                                            _chineseWord!,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    crossAxisAlignment: CrossAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        _chineseWord!,
+                                        style: TextStyle(
+                                          fontSize: 48,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.black87,
+                                          decoration:
+                                              TextDecoration
+                                                  .none, // Remove underline
+                                        ),
+                                      ),
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          left: 12,
+                                          bottom: 8,
+                                        ), // Adds space between character and text
+                                        child: Text(
+                                          _pinyinWord!, // Pinyin with tone
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                      ),
+                                      IconButton(
+                                        icon: const Icon(
+                                          Icons.volume_up,
+                                          size: 24,
+                                          color: Colors.grey,
+                                        ),
+                                        onPressed: () {
+                                          // Add functionality to play audio here
+                                          playAudio(_chineseWord!);
+                                        },
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                SizedBox(height: 4),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Text(
+                                    _englishWord!,
                                     style: TextStyle(
-                                      fontSize: 48,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.black87,
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
                                       decoration:
                                           TextDecoration
                                               .none, // Remove underline
                                     ),
                                   ),
-                                  Padding(
-                                    padding: const EdgeInsets.only(
-                                      left: 12,
-                                      bottom: 8,
-                                    ), // Adds space between character and text
-                                    child: Text(
-                                      _pinyinWord!, // Pinyin with tone
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w600,
-                                        decoration: TextDecoration.none,
-                                      ),
+                                ),
+                                SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Text(
+                                    _chineseSentence!,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.black,
+                                      fontWeight: FontWeight.w600,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
                                     ),
                                   ),
-                                  IconButton(
-                                    icon: const Icon(
-                                      Icons.volume_up,
-                                      size: 24,
+                                ),
+                                SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Text(
+                                    _pinyinSentence!,
+                                    style: TextStyle(
+                                      fontSize: 16,
                                       color: Colors.grey,
+                                      fontWeight: FontWeight.w600,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
                                     ),
-                                    onPressed: () {
-                                      // Add functionality to play audio here
-                                      playAudio(_chineseWord!);
-                                    },
                                   ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 4),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                _englishWord!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
                                 ),
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                _chineseSentence!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
+                                SizedBox(height: 8),
+                                Padding(
+                                  padding: const EdgeInsets.only(left: 16.0),
+                                  child: Text(
+                                    _englishSentence!,
+                                    style: TextStyle(
+                                      fontSize: 16,
+                                      color: Colors.grey,
+                                      fontWeight: FontWeight.w600,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
+                                  ),
                                 ),
-                              ),
+                                SizedBox(height: 16),
+                              ],
                             ),
-                            SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                _pinyinSentence!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
+                          ),
+                ), // Adds space at the top
+                SizedBox(
+                  height: 12,
+                ), // Adds space between the word of the day and the next section
+                Text(
+                  '$dueCardsLength Characters due today', // Display the first sentence
+                  style: GoogleFonts.notoSansSc(
+                    fontSize: 20,
+                    color: Colors.black87,
+                    decoration: TextDecoration.none, // Remove underline
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                SizedBox(height: 8),
+                // Adds space between sentences
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 20.0,
+                  ), // Adds space on the left and right
+                  child: GridView.count(
+                    crossAxisCount: 2, // Number of columns
+                    childAspectRatio: 1, // Aspect ratio for each grid item
+                    mainAxisSpacing: 2, // Space between rows
+                    crossAxisSpacing: 2, // Space between columns
+                    physics:
+                        NeverScrollableScrollPhysics(), // Disables scrolling
+                    shrinkWrap:
+                        true, // Ensures GridView takes only the required space
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: _ActionTile(
+                          label: 'Scan Character',
+                          icon: Icons.camera_alt,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => MyHomePage(
+                                      initialIndex: 0,
+                                      db: widget.db,
+                                    ),
                               ),
-                            ),
-                            SizedBox(height: 8),
-                            Padding(
-                              padding: const EdgeInsets.only(left: 16.0),
-                              child: Text(
-                                _englishSentence!,
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.grey,
-                                  fontWeight: FontWeight.w600,
-                                  decoration:
-                                      TextDecoration.none, // Remove underline
-                                ),
-                              ),
-                            ),
-                            SizedBox(height: 16),
-                          ],
+                            );
+                          },
                         ),
                       ),
-            ), // Adds space at the top
-            SizedBox(
-              height: 12,
-            ), // Adds space between the word of the day and the next section
-            Text(
-              '$dueCardsLength Characters due today', // Display the first sentence
-              style: GoogleFonts.notoSansSc(
-                fontSize: 20,
-                color: Colors.black87,
-                decoration: TextDecoration.none, // Remove underline
-                fontWeight: FontWeight.w500,
-              ),
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: _ActionTile(
+                          label: 'Handwrite Character',
+                          icon: Icons.brush,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => MyHomePage(
+                                      initialIndex: 1,
+                                      db: widget.db,
+                                    ),
+                              ),
+                            );
+                          }, // Replace with your scan function
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: _ActionTile(
+                          label: 'Review Characters',
+                          icon: Icons.book,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => MyHomePage(
+                                      initialIndex: 2,
+                                      db: widget.db,
+                                    ),
+                              ),
+                            ).then((_) {
+                              // Called when returning from ReviewCharacters
+                              getDueCardsLength();
+                            });
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsets.all(4),
+                        child: _ActionTile(
+                          label: 'Search Characters',
+                          icon: Icons.search,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder:
+                                    (context) => MyHomePage(
+                                      initialIndex: 3,
+                                      db: widget.db,
+                                    ),
+                              ),
+                            );
+                          }, // Replace with your scan function
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
-            SizedBox(height: 16),
-            // Adds space between sentences
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20.0,
-              ), // Adds space on the left and right
-              child: GridView.count(
-                crossAxisCount: 2, // Number of columns
-                childAspectRatio: 1, // Aspect ratio for each grid item
-                mainAxisSpacing: 2, // Space between rows
-                crossAxisSpacing: 2, // Space between columns
-                physics: NeverScrollableScrollPhysics(), // Disables scrolling
-                shrinkWrap:
-                    true, // Ensures GridView takes only the required space
-                children: [
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                    child: _ActionTile(
-                      label: 'Scan Character',
-                      icon: Icons.camera_alt,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    MyHomePage(initialIndex: 0, db: widget.db),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                    child: _ActionTile(
-                      label: 'Handwrite Character',
-                      icon: Icons.brush,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    MyHomePage(initialIndex: 1, db: widget.db),
-                          ),
-                        );
-                      }, // Replace with your scan function
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                    child: _ActionTile(
-                      label: 'Review Characters',
-                      icon: Icons.book,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    MyHomePage(initialIndex: 2, db: widget.db),
-                          ),
-                        ).then((_) {
-                          // Called when returning from ReviewCharacters
-                          getDueCardsLength();
-                        });
-                      },
-                    ),
-                  ),
-                  Padding(
-                    padding: EdgeInsets.all(4),
-                    child: _ActionTile(
-                      label: 'Search Characters',
-                      icon: Icons.search,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder:
-                                (context) =>
-                                    MyHomePage(initialIndex: 3, db: widget.db),
-                          ),
-                        );
-                      }, // Replace with your scan function
-                    ),
-                  ),
-                ],
+            // Top-right More icon
+            Positioned(
+              top: 0,
+              right: 0,
+              child: PopupMenuButton<String>(
+                color: Colors.white,
+                icon: Icon(Icons.more_vert, color: Colors.black87),
+                onSelected: (value) {
+                  if (value == 'allCharacters') {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => AllCharacters(db: widget.db),
+                      ),
+                    );
+                  }
+                  if (value == 'about') {
+                    doNothing();
+                  }
+                },
+                itemBuilder:
+                    (BuildContext context) => [
+                      const PopupMenuItem<String>(
+                        value: 'allCharacters',
+                        child: Text('Review All Characters'),
+                      ),
+                      const PopupMenuItem<String>(
+                        value: 'about',
+                        child: Text('About'),
+                      ),
+                    ],
               ),
             ),
           ],
