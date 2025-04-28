@@ -108,6 +108,17 @@ class $CharacterCardsTable extends CharacterCards
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _pinyinPlainMeta = const VerificationMeta(
+    'pinyinPlain',
+  );
+  @override
+  late final GeneratedColumn<String> pinyinPlain = GeneratedColumn<String>(
+    'pinyin_plain',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     character,
@@ -119,6 +130,7 @@ class $CharacterCardsTable extends CharacterCards
     learningStep,
     nextReview,
     notes,
+    pinyinPlain,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -195,6 +207,15 @@ class $CharacterCardsTable extends CharacterCards
         notes.isAcceptableOrUnknown(data['notes']!, _notesMeta),
       );
     }
+    if (data.containsKey('pinyin_plain')) {
+      context.handle(
+        _pinyinPlainMeta,
+        pinyinPlain.isAcceptableOrUnknown(
+          data['pinyin_plain']!,
+          _pinyinPlainMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -247,6 +268,10 @@ class $CharacterCardsTable extends CharacterCards
         DriftSqlType.string,
         data['${effectivePrefix}notes'],
       ),
+      pinyinPlain: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pinyin_plain'],
+      ),
     );
   }
 
@@ -266,6 +291,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
   final int learningStep;
   final DateTime? nextReview;
   final String? notes;
+  final String? pinyinPlain;
   const CharacterCard({
     required this.character,
     required this.pinyin,
@@ -276,6 +302,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     required this.learningStep,
     this.nextReview,
     this.notes,
+    this.pinyinPlain,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -292,6 +319,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     }
     if (!nullToAbsent || notes != null) {
       map['notes'] = Variable<String>(notes);
+    }
+    if (!nullToAbsent || pinyinPlain != null) {
+      map['pinyin_plain'] = Variable<String>(pinyinPlain);
     }
     return map;
   }
@@ -311,6 +341,10 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
               : Value(nextReview),
       notes:
           notes == null && nullToAbsent ? const Value.absent() : Value(notes),
+      pinyinPlain:
+          pinyinPlain == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pinyinPlain),
     );
   }
 
@@ -329,6 +363,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       learningStep: serializer.fromJson<int>(json['learningStep']),
       nextReview: serializer.fromJson<DateTime?>(json['nextReview']),
       notes: serializer.fromJson<String?>(json['notes']),
+      pinyinPlain: serializer.fromJson<String?>(json['pinyinPlain']),
     );
   }
   @override
@@ -344,6 +379,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       'learningStep': serializer.toJson<int>(learningStep),
       'nextReview': serializer.toJson<DateTime?>(nextReview),
       'notes': serializer.toJson<String?>(notes),
+      'pinyinPlain': serializer.toJson<String?>(pinyinPlain),
     };
   }
 
@@ -357,6 +393,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     int? learningStep,
     Value<DateTime?> nextReview = const Value.absent(),
     Value<String?> notes = const Value.absent(),
+    Value<String?> pinyinPlain = const Value.absent(),
   }) => CharacterCard(
     character: character ?? this.character,
     pinyin: pinyin ?? this.pinyin,
@@ -367,6 +404,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     learningStep: learningStep ?? this.learningStep,
     nextReview: nextReview.present ? nextReview.value : this.nextReview,
     notes: notes.present ? notes.value : this.notes,
+    pinyinPlain: pinyinPlain.present ? pinyinPlain.value : this.pinyinPlain,
   );
   CharacterCard copyWithCompanion(CharacterCardsCompanion data) {
     return CharacterCard(
@@ -386,6 +424,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       nextReview:
           data.nextReview.present ? data.nextReview.value : this.nextReview,
       notes: data.notes.present ? data.notes.value : this.notes,
+      pinyinPlain:
+          data.pinyinPlain.present ? data.pinyinPlain.value : this.pinyinPlain,
     );
   }
 
@@ -400,7 +440,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           ..write('easeFactor: $easeFactor, ')
           ..write('learningStep: $learningStep, ')
           ..write('nextReview: $nextReview, ')
-          ..write('notes: $notes')
+          ..write('notes: $notes, ')
+          ..write('pinyinPlain: $pinyinPlain')
           ..write(')'))
         .toString();
   }
@@ -416,6 +457,7 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     learningStep,
     nextReview,
     notes,
+    pinyinPlain,
   );
   @override
   bool operator ==(Object other) =>
@@ -429,7 +471,8 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           other.easeFactor == this.easeFactor &&
           other.learningStep == this.learningStep &&
           other.nextReview == this.nextReview &&
-          other.notes == this.notes);
+          other.notes == this.notes &&
+          other.pinyinPlain == this.pinyinPlain);
 }
 
 class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
@@ -442,6 +485,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
   final Value<int> learningStep;
   final Value<DateTime?> nextReview;
   final Value<String?> notes;
+  final Value<String?> pinyinPlain;
   final Value<int> rowid;
   const CharacterCardsCompanion({
     this.character = const Value.absent(),
@@ -453,6 +497,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.learningStep = const Value.absent(),
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
+    this.pinyinPlain = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharacterCardsCompanion.insert({
@@ -465,6 +510,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.learningStep = const Value.absent(),
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
+    this.pinyinPlain = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : character = Value(character),
        pinyin = Value(pinyin),
@@ -479,6 +525,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Expression<int>? learningStep,
     Expression<DateTime>? nextReview,
     Expression<String>? notes,
+    Expression<String>? pinyinPlain,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -491,6 +538,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       if (learningStep != null) 'learning_step': learningStep,
       if (nextReview != null) 'next_review': nextReview,
       if (notes != null) 'notes': notes,
+      if (pinyinPlain != null) 'pinyin_plain': pinyinPlain,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -505,6 +553,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Value<int>? learningStep,
     Value<DateTime?>? nextReview,
     Value<String?>? notes,
+    Value<String?>? pinyinPlain,
     Value<int>? rowid,
   }) {
     return CharacterCardsCompanion(
@@ -517,6 +566,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       learningStep: learningStep ?? this.learningStep,
       nextReview: nextReview ?? this.nextReview,
       notes: notes ?? this.notes,
+      pinyinPlain: pinyinPlain ?? this.pinyinPlain,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -551,6 +601,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     if (notes.present) {
       map['notes'] = Variable<String>(notes.value);
     }
+    if (pinyinPlain.present) {
+      map['pinyin_plain'] = Variable<String>(pinyinPlain.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -569,6 +622,7 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
           ..write('learningStep: $learningStep, ')
           ..write('nextReview: $nextReview, ')
           ..write('notes: $notes, ')
+          ..write('pinyinPlain: $pinyinPlain, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1288,6 +1342,7 @@ typedef $$CharacterCardsTableCreateCompanionBuilder =
       Value<int> learningStep,
       Value<DateTime?> nextReview,
       Value<String?> notes,
+      Value<String?> pinyinPlain,
       Value<int> rowid,
     });
 typedef $$CharacterCardsTableUpdateCompanionBuilder =
@@ -1301,6 +1356,7 @@ typedef $$CharacterCardsTableUpdateCompanionBuilder =
       Value<int> learningStep,
       Value<DateTime?> nextReview,
       Value<String?> notes,
+      Value<String?> pinyinPlain,
       Value<int> rowid,
     });
 
@@ -1355,6 +1411,11 @@ class $$CharacterCardsTableFilterComposer
 
   ColumnFilters<String> get notes => $composableBuilder(
     column: $table.notes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1412,6 +1473,11 @@ class $$CharacterCardsTableOrderingComposer
     column: $table.notes,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharacterCardsTableAnnotationComposer
@@ -1459,6 +1525,11 @@ class $$CharacterCardsTableAnnotationComposer
 
   GeneratedColumn<String> get notes =>
       $composableBuilder(column: $table.notes, builder: (column) => column);
+
+  GeneratedColumn<String> get pinyinPlain => $composableBuilder(
+    column: $table.pinyinPlain,
+    builder: (column) => column,
+  );
 }
 
 class $$CharacterCardsTableTableManager
@@ -1507,6 +1578,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> learningStep = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> pinyinPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion(
                 character: character,
@@ -1518,6 +1590,7 @@ class $$CharacterCardsTableTableManager
                 learningStep: learningStep,
                 nextReview: nextReview,
                 notes: notes,
+                pinyinPlain: pinyinPlain,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1531,6 +1604,7 @@ class $$CharacterCardsTableTableManager
                 Value<int> learningStep = const Value.absent(),
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
+                Value<String?> pinyinPlain = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion.insert(
                 character: character,
@@ -1542,6 +1616,7 @@ class $$CharacterCardsTableTableManager
                 learningStep: learningStep,
                 nextReview: nextReview,
                 notes: notes,
+                pinyinPlain: pinyinPlain,
                 rowid: rowid,
               ),
           withReferenceMapper:

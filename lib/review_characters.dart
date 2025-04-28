@@ -1,3 +1,4 @@
+import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/parse.dart';
@@ -252,9 +253,16 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child: IconButton(
                         icon: const Icon(Icons.home, size: 30),
                         onPressed: () {
-                          Navigator.pop(
+                          // Navigator.pop(
+                          //   context,
+                          // );
+                          // // Go back to the previous page
+                          Navigator.push(
                             context,
-                          ); // Go back to the previous page
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(db: widget.db),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -335,7 +343,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                       MaterialPageRoute(
                                         builder:
                                             (context) =>
-                                                HomePage(db: widget.db),
+                                                AllCharacters(db: widget.db),
                                       ),
                                     );
                                   },
@@ -657,8 +665,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           context,
                                           MaterialPageRoute(
                                             builder:
-                                                (context) =>
-                                                    HomePage(db: widget.db),
+                                                (context) => AllCharacters(
+                                                  db: widget.db,
+                                                ),
                                           ),
                                         );
                                       },

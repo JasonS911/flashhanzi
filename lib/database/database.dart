@@ -30,6 +30,8 @@ class CharacterCards extends Table {
       )(); //if something has been learned or not. 1 is 1min 2 is 10 min 3 is graduated
   DateTimeColumn get nextReview => dateTime().nullable()();
   TextColumn get notes => text().nullable()();
+  TextColumn get pinyinPlain => text().nullable()();
+
   @override
   Set<Column> get primaryKey => {character};
 }
@@ -117,6 +119,44 @@ class AppDatabase extends _$AppDatabase {
     )).get();
   }
 
+  //used for personal dictionary page
+  Future<List<CharacterCard>> getAllCharacterCardPaginated(
+    int limit,
+    int offset,
+  ) {
+    return (select(characterCards)
+          ..orderBy([
+            (entry) => OrderingTerm(
+              expression: FunctionCallExpression('length', [entry.character]),
+              mode: OrderingMode.asc,
+            ),
+          ])
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
+  Future<List<CharacterCard>> searchCharacterCardPaginated(
+    String input,
+    int limit,
+    int offset,
+  ) {
+    return (select(characterCards)
+          ..where(
+            (entry) =>
+                entry.character.equals(input) |
+                entry.pinyin.like('%$input%') |
+                entry.pinyinPlain.like('%$input%'),
+          )
+          ..orderBy([
+            (entry) => OrderingTerm(
+              expression: FunctionCallExpression('length', [entry.character]),
+              mode: OrderingMode.asc,
+            ),
+          ])
+          ..limit(limit, offset: offset))
+        .get();
+  }
+
   //search dictionary page search
   Future<List<DictionaryEntry>> searchDictionaryPaginated(
     String input,
@@ -187,6 +227,7 @@ Future<void> newCard(AppDatabase db, String character) async {
     pinyin: Value(entry.pinyin),
     definition: Value(entry.definition),
     nextReview: Value(DateTime.now().add(const Duration(days: 0))),
+    pinyinPlain: Value(entry.pinyinPlain),
   );
 
   await db.into(db.characterCards).insertOnConflictUpdate(card);

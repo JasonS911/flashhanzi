@@ -55,7 +55,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
 
   //get more characters after searching. Search is paginated
   Future<void> loadMore() async {
-    final input = _searchController.text.trim();
+    final input = _searchController.text.trim().replaceAll(' ', '');
     if (input.isEmpty) return;
 
     setState(() => isLoading = true);
@@ -141,7 +141,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
             padding: const EdgeInsets.symmetric(horizontal: 40),
             child: ElevatedButton(
               onPressed: () async {
-                final input = _searchController.text.trim();
+                final input = _searchController.text.trim().replaceAll(' ', '');
                 if (input.isEmpty) return;
 
                 setState(() {
