@@ -166,28 +166,39 @@ class _AllCharactersState extends State<AllCharacters> {
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
-        decoration: BoxDecoration(
-          border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
-        ),
+        // decoration: BoxDecoration(
+        //   border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
+        // ),
         child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 16, top: 4),
+          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 4),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Expanded(
-                    child: Text(
-                      entry.character,
-                      style: const TextStyle(
-                        fontSize: 48,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black87,
-                      ),
-                    ),
+                    child:
+                        entry.character.length >= 4
+                            ? Text(
+                              entry.character,
+                              style: const TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            )
+                            : Text(
+                              entry.character,
+                              style: const TextStyle(
+                                fontSize: 48,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black87,
+                              ),
+                            ),
                   ),
+                  SizedBox(width: 24),
                   Flexible(
                     child: Wrap(
                       spacing: 8, // space between pinyin text and icon
@@ -204,7 +215,7 @@ class _AllCharactersState extends State<AllCharacters> {
                         IconButton(
                           icon: const Icon(
                             Icons.volume_up,
-                            size: 24,
+                            size: 20,
                             color: Colors.grey,
                           ),
                           onPressed: () {
