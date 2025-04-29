@@ -211,15 +211,17 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    entry.simplified,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                  Expanded(
+                    child: Text(
+                      entry.simplified,
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
                     ),
                   ),
-
+                  SizedBox(width: 4),
                   IconButton(
                     icon: const Icon(Icons.add, size: 30),
 
@@ -233,14 +235,18 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                 crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    entry.pinyin,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFFB42F2B),
-                      fontWeight: FontWeight.w600,
+                  Expanded(
+                    child: Text(
+                      entry.pinyin,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        color: Color(0xFFB42F2B),
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
+
+                  SizedBox(width: 4),
                   IconButton(
                     icon: const Icon(
                       Icons.volume_up,

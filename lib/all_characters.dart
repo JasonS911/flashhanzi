@@ -167,8 +167,7 @@ class _AllCharactersState extends State<AllCharacters> {
       child: Container(
         margin: const EdgeInsets.symmetric(vertical: 8.0),
         decoration: BoxDecoration(
-          border: Border.all(color: Colors.grey, width: 2),
-          borderRadius: BorderRadius.circular(8),
+          border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
         ),
         child: Padding(
           padding: const EdgeInsets.only(left: 16.0, right: 16, top: 4),
@@ -177,44 +176,46 @@ class _AllCharactersState extends State<AllCharacters> {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    entry.character,
-                    style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                  Expanded(
+                    child: Text(
+                      entry.character,
+                      style: const TextStyle(
+                        fontSize: 48,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    child: Wrap(
+                      spacing: 8, // space between pinyin text and icon
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      children: [
+                        Text(
+                          '[${entry.pinyin}]',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Color(0xFFB42F2B),
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(
+                            Icons.volume_up,
+                            size: 24,
+                            color: Colors.grey,
+                          ),
+                          onPressed: () {
+                            playAudio(entry.character);
+                          },
+                        ),
+                      ],
                     ),
                   ),
                 ],
               ),
-
-              const SizedBox(height: 8),
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    entry.pinyin,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFFB42F2B),
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  IconButton(
-                    icon: const Icon(
-                      Icons.volume_up,
-                      size: 24,
-                      color: Colors.grey,
-                    ),
-                    onPressed: () {
-                      playAudio(entry.character);
-                    },
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
             ],
           ),
         ),

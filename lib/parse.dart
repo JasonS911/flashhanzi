@@ -43,7 +43,7 @@ Future<void> parse(AppDatabase db) async {
 
   for (final line in lines) {
     if (line.startsWith('#')) continue; // Skip comments
-
+    
     final match = RegExp(
       r'^(.+?)\s+(.+?)\s+\[(.+?)\]\s+/(.+)/$',
     ).firstMatch(line);
