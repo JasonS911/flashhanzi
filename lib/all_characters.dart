@@ -2,6 +2,8 @@ import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/utils/play_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flutter_slidable/flutter_slidable.dart';
+import 'package:flashhanzi/database/database.dart';
 
 class AllCharacters extends StatefulWidget {
   const AllCharacters({super.key, required this.db});
@@ -147,87 +149,110 @@ class _AllCharactersState extends State<AllCharacters> {
               ),
             ),
 
-          // Search Results
-          ...results.map((entry) => buildResultCardAll(entry)),
-
           // Loading Indicator
           if (isLoading)
             const Padding(
               padding: EdgeInsets.all(16),
               child: Center(child: CircularProgressIndicator()),
             ),
+
+          // Search Results
+          ...results.map((entry) => buildResultCardAll(entry)),
         ],
       ),
     );
   }
 
+  Future<void> deleteCardFromAll(String character) async {
+    widget.db.deleteCard(character);
+    setState(() {
+      results.removeWhere((entry) => entry.character == character);
+    });
+  }
+
   Widget buildResultCardAll(CharacterCard entry) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8.0),
-        // decoration: BoxDecoration(
-        //   border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
-        // ),
-        child: Padding(
-          padding: const EdgeInsets.only(left: 16.0, right: 8, top: 4),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Expanded(
-                    child:
-                        entry.character.length >= 4
-                            ? Text(
-                              entry.character,
-                              style: const TextStyle(
-                                fontSize: 24,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
+      child: Slidable(
+        endActionPane: ActionPane(
+          motion: const ScrollMotion(),
+          children: [
+            SlidableAction(
+              onPressed:
+                  (context) async => await deleteCardFromAll(entry.character),
+
+              backgroundColor: const Color(0xFFFE4A49),
+              foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+              icon: Icons.delete,
+              label: 'Delete',
+            ),
+          ],
+        ),
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 8.0),
+          // decoration: BoxDecoration(
+          //   border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
+          // ),
+          child: Padding(
+            padding: const EdgeInsets.only(left: 16.0, right: 8, top: 4),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child:
+                          entry.character.length >= 4
+                              ? Text(
+                                entry.character,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
+                              )
+                              : Text(
+                                entry.character,
+                                style: const TextStyle(
+                                  fontSize: 48,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black87,
+                                ),
                               ),
-                            )
-                            : Text(
-                              entry.character,
-                              style: const TextStyle(
-                                fontSize: 48,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                  ),
-                  SizedBox(width: 24),
-                  Flexible(
-                    child: Wrap(
-                      spacing: 8, // space between pinyin text and icon
-                      crossAxisAlignment: WrapCrossAlignment.center,
-                      children: [
-                        Text(
-                          '[${entry.pinyin}]',
-                          style: const TextStyle(
-                            fontSize: 16,
-                            color: Color(0xFFB42F2B),
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        IconButton(
-                          icon: const Icon(
-                            Icons.volume_up,
-                            size: 20,
-                            color: Colors.grey,
-                          ),
-                          onPressed: () {
-                            playAudio(entry.character);
-                          },
-                        ),
-                      ],
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    SizedBox(width: 24),
+                    Flexible(
+                      child: Wrap(
+                        spacing: 8, // space between pinyin text and icon
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        children: [
+                          Text(
+                            '[${entry.pinyin}]',
+                            style: const TextStyle(
+                              fontSize: 16,
+                              color: Color(0xFFB42F2B),
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.volume_up,
+                              size: 20,
+                              color: Colors.grey,
+                            ),
+                            onPressed: () {
+                              playAudio(entry.character);
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
