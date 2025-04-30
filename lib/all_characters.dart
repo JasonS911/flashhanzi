@@ -1,9 +1,9 @@
 import 'package:flashhanzi/database/database.dart';
+import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/utils/play_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
-import 'package:flashhanzi/database/database.dart';
 
 class AllCharacters extends StatefulWidget {
   const AllCharacters({super.key, required this.db});
@@ -177,6 +177,25 @@ class _AllCharactersState extends State<AllCharacters> {
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
           children: [
+            //search
+            SlidableAction(
+              onPressed:
+                  (context) async => await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder:
+                          (context) => DictionaryLookup(
+                            db: widget.db,
+                            prefillSearch: entry.character,
+                          ),
+                    ),
+                  ),
+              backgroundColor: const Color.fromARGB(255, 214, 214, 214),
+              foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+              icon: Icons.search,
+              label: 'Search',
+            ),
+            //delete
             SlidableAction(
               onPressed:
                   (context) async => await deleteCardFromAll(entry.character),

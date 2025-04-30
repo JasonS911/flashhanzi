@@ -1,6 +1,7 @@
 import 'package:camera/camera.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flashhanzi/utils/error.dart';
 import 'package:flutter/material.dart';
 
 class ScanCharacter extends StatefulWidget {
@@ -39,7 +40,11 @@ class _ScanCharacterState extends State<ScanCharacter> {
         _initializeControllerFuture = _cameraController?.initialize();
       });
     } catch (e) {
-      print('Error initializing camera: $e');
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
+      );
     }
   }
 

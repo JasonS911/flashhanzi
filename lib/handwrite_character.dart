@@ -1,5 +1,6 @@
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
+import 'package:flashhanzi/utils/error.dart';
 import 'package:flutter/material.dart' hide Ink;
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
     as mlkit;
@@ -53,6 +54,9 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   }
 
   Future<void> _recognizeDrawing() async {
+    if (points.isEmpty) {
+      return;
+    }
     try {
       // await ensureModelDownloaded();
       // Convert raw points to Ink
@@ -96,7 +100,11 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
         recognizedList = recognizedList;
       });
     } catch (e) {
-      print("Error recognizing handwriting: $e");
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
+      );
     }
   }
 

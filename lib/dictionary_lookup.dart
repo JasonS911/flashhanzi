@@ -6,9 +6,9 @@ import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/utils/play_audio.dart';
 
 class DictionaryLookup extends StatefulWidget {
-  const DictionaryLookup({super.key, required this.db});
+  const DictionaryLookup({super.key, required this.db, this.prefillSearch});
   final AppDatabase db;
-
+  final String? prefillSearch;
   @override
   State<DictionaryLookup> createState() => _DictionaryLookupState();
 }
@@ -28,6 +28,12 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
   @override
   void initState() {
     super.initState();
+
+    //search from personal dictionary button click
+    if (widget.prefillSearch != null && widget.prefillSearch!.isNotEmpty) {
+      _searchController.text = widget.prefillSearch!;
+      WidgetsBinding.instance.addPostFrameCallback((_) => loadMore());
+    }
 
     _scrollController.addListener(() {
       if (_scrollController.position.pixels >=

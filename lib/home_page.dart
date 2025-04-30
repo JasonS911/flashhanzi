@@ -1,6 +1,7 @@
 import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/main.dart';
+import 'package:flashhanzi/utils/error.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart'
@@ -52,7 +53,11 @@ class _HomePageState extends State<HomePage> {
         await modelManager.downloadModel(modelName); // Download the model once
       }
     } catch (e) {
-      print("Error checking/downloading model: $e");
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
+      );
     }
   }
 
@@ -78,7 +83,11 @@ class _HomePageState extends State<HomePage> {
         _englishSentence = samples[0]['english'];
       });
     } else {
-      print('Failed to load page: ${response.statusCode}');
+      if (!mounted) return;
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
+      );
     }
   }
 
@@ -123,7 +132,7 @@ class _HomePageState extends State<HomePage> {
     );
 
     // Auto dismiss after 2 seconds
-    Future.delayed(const Duration(seconds: 2), () {
+    Future.delayed(const Duration(seconds: 1), () {
       if (mounted && Navigator.canPop(context)) {
         Navigator.of(context).pop();
       }
