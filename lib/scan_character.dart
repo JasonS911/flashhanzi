@@ -209,23 +209,23 @@ class _ScanCharacterState extends State<ScanCharacter>
     return Scaffold(
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16),
-        child: ElevatedButton(
-          onPressed: _scanImage,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Color(0xFFB42F2B), // Button color
-            foregroundColor: Colors.white, // Text color
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(4), // Rounded corners
-            ),
-          ),
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            child: Text(
-              'Scan Characters',
-              style: TextStyle(color: Colors.white, fontSize: 16),
-            ),
-          ),
-        ),
+        // child: ElevatedButton(
+        //   onPressed: _scanImage,
+        //   style: ElevatedButton.styleFrom(
+        //     backgroundColor: Color(0xFFB42F2B), // Button color
+        //     foregroundColor: Colors.white, // Text color
+        //     shape: RoundedRectangleBorder(
+        //       borderRadius: BorderRadius.circular(4), // Rounded corners
+        //     ),
+        //   ),
+        //   child: Padding(
+        //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        //     child: Text(
+        //       'Scan Characters',
+        //       style: TextStyle(color: Colors.white, fontSize: 16),
+        //     ),
+        //   ),
+        // ),
       ),
       body: SingleChildScrollView(
         child: Column(
@@ -287,6 +287,55 @@ class _ScanCharacterState extends State<ScanCharacter>
               },
             ),
             SizedBox(height: 20),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 40),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          recognizedList.clear();
+                          charactersToAddRecognizedList.clear();
+                        });
+                      },
+                      style: ElevatedButton.styleFrom(
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text(
+                          'Clear',
+                          style: TextStyle(color: Colors.black, fontSize: 16),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: ElevatedButton(
+                      onPressed: () async {
+                        await _scanImage();
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFFB42F2B),
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(vertical: 12),
+                        child: Text('Scan'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
             if (recognizedList.isNotEmpty) ...[
               SizedBox(height: 28),
               Text(
@@ -302,6 +351,7 @@ class _ScanCharacterState extends State<ScanCharacter>
                 wordSet: recognizedList,
                 finalWordSet: charactersToAddRecognizedList,
                 onSelectionChanged: onSelectionChanged,
+                db: widget.db,
               ),
               SizedBox(height: 16),
               ElevatedButton(

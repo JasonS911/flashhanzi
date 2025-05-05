@@ -1,15 +1,19 @@
+import 'package:flashhanzi/database/database.dart';
+import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flutter/material.dart';
 
 class WordGrid extends StatefulWidget {
   final Set<String> wordSet; //aka recognizedList Set
   final Set<String> finalWordSet;
   final void Function(Set<String>) onSelectionChanged;
+  final AppDatabase db;
 
   const WordGrid({
     super.key,
     required this.wordSet,
     required this.finalWordSet,
     required this.onSelectionChanged,
+    required this.db,
   });
 
   @override
@@ -26,6 +30,39 @@ class _WordGridState extends State<WordGrid> {
     super.initState();
     // Convert the Set into a List to display in the GridView
     words = widget.wordSet.toList();
+  }
+
+  void _showWordOptions(BuildContext context, String word) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.search),
+              title: Text('Search "$word"'),
+              onTap: () {
+                Navigator.pop(context); // Close the modal
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => DictionaryLookup(
+                          db: widget.db,
+                          prefillSearch: word,
+                        ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override
@@ -52,6 +89,10 @@ class _WordGridState extends State<WordGrid> {
 
             widget.onSelectionChanged(newSelection); // SEND BACK here
           },
+          onLongPress: () {
+            _showWordOptions(context, word);
+          },
+
           child: Container(
             padding: EdgeInsets.all(4),
             decoration: BoxDecoration(

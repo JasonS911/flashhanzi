@@ -270,6 +270,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
                 wordSet: recognizedList,
                 finalWordSet: charactersToAddRecognizedList,
                 onSelectionChanged: onSelectionChanged,
+                db: widget.db,
               ),
 
               SizedBox(height: 16),
