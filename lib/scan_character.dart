@@ -2,6 +2,7 @@ import 'package:camera/camera.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/utils/error.dart';
+import 'package:flashhanzi/utils/word_grid.dart';
 import 'package:flutter/material.dart';
 import 'package:google_ml_kit/google_ml_kit.dart';
 import 'package:jieba_flutter/analysis/jieba_segmenter.dart';
@@ -17,9 +18,19 @@ class ScanCharacter extends StatefulWidget {
 
 class _ScanCharacterState extends State<ScanCharacter>
     with WidgetsBindingObserver {
-  final _textRecognizer = TextRecognizer(script: TextRecognitionScript.chinese);
   late CameraController? _cameraController;
+  bool isScanning = false;
+
   Future<void>? _initializeControllerFuture;
+  Set<String> recognizedList = {};
+  Set<String> charactersToAddRecognizedList =
+      {}; //characters ur putting into dictionary
+  void onSelectionChanged(Set<String> updatedSelection) {
+    setState(() {
+      charactersToAddRecognizedList = updatedSelection;
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -120,12 +131,23 @@ class _ScanCharacterState extends State<ScanCharacter>
   }
 
   Future<void> _scanImage() async {
+    if (isScanning) return;
+    setState(() {
+      isScanning = true;
+      recognizedList.clear();
+      charactersToAddRecognizedList.clear();
+    });
     try {
       await _initializeControllerFuture; // Ensure camera is ready
       final image = await _cameraController!.takePicture();
 
       final inputImage = InputImage.fromFilePath(image.path);
-      final recognizedText = await _textRecognizer.processImage(inputImage);
+      final textRecognizer = TextRecognizer(
+        script: TextRecognitionScript.chinese,
+      );
+      final recognizedText = await textRecognizer.processImage(inputImage);
+      await textRecognizer.close();
+
       final chineseOnly = _extractChineseOnly(recognizedText.text);
       //show the chiense only translation
       List<String> foundWords = [];
@@ -147,7 +169,7 @@ class _ScanCharacterState extends State<ScanCharacter>
 
       setState(() {
         // Update your UI with foundWords
-        // recognizedList = foundWords;
+        recognizedList = foundWords.map((word) => word.trim()).toSet();
       });
     } catch (e) {
       if (!mounted) return;
@@ -155,6 +177,10 @@ class _ScanCharacterState extends State<ScanCharacter>
         context,
         MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
       );
+    } finally {
+      setState(() {
+        isScanning = false;
+      });
     }
   }
 
@@ -163,129 +189,145 @@ class _ScanCharacterState extends State<ScanCharacter>
     return input.split('').where((char) => regex.hasMatch(char)).join();
   }
 
+  Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {
+    for (String word in charactersToAdd) {
+      newCard(db, word);
+    }
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${charactersToAdd.length} words added to your review deck!',
+        ),
+        duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
+      ),
+    );
+    ();
+  }
+
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(height: 20), // Add some space at the top
-          Stack(
-            alignment: Alignment.center, // Center the text in the Stack
-            children: [
-              Align(
-                alignment:
-                    Alignment.centerLeft, // Align the IconButton to the left
-                child: IconButton(
-                  icon: const Icon(Icons.home, size: 30),
-                  onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => HomePage(db: widget.db),
+    return Scaffold(
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16),
+        child: ElevatedButton(
+          onPressed: _scanImage,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Color(0xFFB42F2B), // Button color
+            foregroundColor: Colors.white, // Text color
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(4), // Rounded corners
+            ),
+          ),
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            child: Text(
+              'Scan Characters',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ),
+        ),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            SizedBox(height: 20),
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    icon: const Icon(Icons.home, size: 30),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => HomePage(db: widget.db),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+                const Text(
+                  'Scan Character',
+                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                ),
+              ],
+            ),
+            SizedBox(height: 20),
+            FutureBuilder<void>(
+              future: _initializeControllerFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  return Center(
+                    child: Container(
+                      width: 340,
+                      height: 340,
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.black, width: 2),
+                        borderRadius: BorderRadius.circular(8),
                       ),
-                    );
-                  },
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(8),
+                        child: CameraPreview(_cameraController!),
+                      ),
+                    ),
+                  );
+                } else if (snapshot.hasError) {
+                  return Center(
+                    child: Text(
+                      'Error initializing camera',
+                      style: TextStyle(color: Colors.red, fontSize: 16),
+                    ),
+                  );
+                } else {
+                  return const Center(child: CircularProgressIndicator());
+                }
+              },
+            ),
+            SizedBox(height: 20),
+            if (recognizedList.isNotEmpty) ...[
+              SizedBox(height: 28),
+              Text(
+                'Recognized Characters',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.grey[800],
+                  letterSpacing: 0.5,
                 ),
               ),
-              const Text(
-                'Scan Character',
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              WordGrid(
+                wordSet: recognizedList,
+                finalWordSet: charactersToAddRecognizedList,
+                onSelectionChanged: onSelectionChanged,
               ),
-            ],
-          ),
-          const SizedBox(
-            height: 20,
-          ), // Add some space between the text and camera
-          FutureBuilder<void>(
-            future: _initializeControllerFuture,
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.done) {
-                // If the Future is complete, display the camera preview in a box
-                return Center(
-                  child: Container(
-                    width: 340, // Set the width of the camera box
-                    height: 340, // Set the height of the camera box
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: Colors.black,
-                        width: 2,
-                      ), // Optional border
-                      borderRadius: BorderRadius.circular(
-                        8,
-                      ), // Optional rounded corners
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(
-                        8,
-                      ), // Match the border radius
-                      child: CameraPreview(_cameraController!),
-                    ),
+              SizedBox(height: 16),
+              ElevatedButton(
+                onPressed: () async {
+                  await _addNewCards(widget.db, charactersToAddRecognizedList);
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color(0xFFB42F2B),
+                  foregroundColor: Colors.white,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(4),
                   ),
-                );
-              } else if (snapshot.hasError) {
-                // Handle errors during initialization
-                return Center(
+                ),
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 12),
                   child: Text(
-                    'Error initializing camera',
-                    style: TextStyle(color: Colors.red, fontSize: 16),
+                    'Add Selected Words for Review',
+                    style: TextStyle(color: Colors.white, fontSize: 16),
                   ),
-                );
-              } else {
-                // Otherwise, display a loading indicator
-                return const Center(child: CircularProgressIndicator());
-              }
-            },
-          ),
-          SizedBox(height: 20), // Add some space before the button
-          ElevatedButton(
-            onPressed: _scanImage,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFB42F2B), // Button color
-              foregroundColor: Colors.white, // Text color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4), // Rounded corners
+                ),
               ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'Scan Characters',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          Container(
-            height: 320,
-            width: 300,
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey, width: 2),
-              borderRadius: BorderRadius.circular(8), // Rounded corners
-            ),
-          ),
-          SizedBox(height: 16), // Add some space before the button
-          ElevatedButton(
-            onPressed: doNothing,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Color(0xFFB42F2B), // Button color
-              foregroundColor: Colors.white, // Text color
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(4), // Rounded corners
-              ),
-            ),
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 12),
-              child: Text(
-                'Add Selected Words for Review',
-                style: TextStyle(color: Colors.white, fontSize: 16),
-              ),
-            ),
-          ),
-        ],
+              SizedBox(height: 16),
+            ],
+          ],
+        ),
       ),
     );
   }
 }
-
-void doNothing() {}
