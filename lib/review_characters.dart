@@ -782,71 +782,80 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                               _cards[_currentIndex].chineseSentence != null
                           ? Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  height: 8,
-                                ), // Space between meaning and example
-                                Wrap(
-                                  children: [
-                                    Text(
-                                      'Example: ${_cards[_currentIndex].chineseSentence}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black87,
-                                        decoration:
-                                            TextDecoration
-                                                .none, // Remove underline
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                                Wrap(
-                                  children: [
-                                    Text(
-                                      'Pinyin: ${_cards[_currentIndex].pinyinSentence}',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        color: Colors.black87,
-                                        decoration:
-                                            TextDecoration
-                                                .none, // Remove underline
-                                      ),
-                                    ),
-                                    Wrap(
+                            child:
+                                _cards[_currentIndex].chineseSentence == "" ||
+                                        _cards[_currentIndex].chineseSentence ==
+                                            null
+                                    ? SizedBox(height: 4)
+                                    : Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
                                       children: [
-                                        Text(
-                                          "Translation: ${_cards[_currentIndex].englishSentence}",
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black87,
-                                            decoration:
-                                                TextDecoration
-                                                    .none, // Remove underline
+                                        SizedBox(
+                                          height: 8,
+                                        ), // Space between meaning and example
+                                        Wrap(
+                                          children: [
+                                            Text(
+                                              'Example: ${_cards[_currentIndex].chineseSentence}',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                                decoration:
+                                                    TextDecoration
+                                                        .none, // Remove underline
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Wrap(
+                                          children: [
+                                            Text(
+                                              'Pinyin: ${_cards[_currentIndex].pinyinSentence}',
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                                decoration:
+                                                    TextDecoration
+                                                        .none, // Remove underline
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Wrap(
+                                          children: [
+                                            Text(
+                                              "Translation: ${_cards[_currentIndex].englishSentence}",
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black87,
+                                                decoration:
+                                                    TextDecoration
+                                                        .none, // Remove underline
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Container(
+                                          margin: EdgeInsets.symmetric(
+                                            horizontal: 4,
+                                          ),
+
+                                          padding: EdgeInsets.only(bottom: 24),
+                                          decoration: BoxDecoration(
+                                            border: Border(
+                                              bottom: BorderSide(
+                                                color:
+                                                    Colors
+                                                        .grey, // Underline color
+                                                width: 1, // Underline thickness
+                                              ),
+                                            ),
                                           ),
                                         ),
+                                        SizedBox(height: 12),
                                       ],
                                     ),
-                                  ],
-                                ),
-
-                                Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 4),
-
-                                  padding: EdgeInsets.only(bottom: 24),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Colors.grey, // Underline color
-                                        width: 1, // Underline thickness
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(height: 12),
-                              ],
-                            ),
                           )
                           : SizedBox(height: 4),
                 ),

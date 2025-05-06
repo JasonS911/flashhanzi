@@ -231,6 +231,35 @@ Future<void> newCard(AppDatabase db, String character) async {
   await db.into(db.characterCards).insertOnConflictUpdate(card);
 }
 
+Future<void> newCardFromWotd(
+  AppDatabase db,
+  String character,
+  String pinyinWord,
+  String definitionWord,
+  String? chineseS,
+  String? pinyinS,
+  String? englishS,
+) async {
+  final entry = await lookupCharacter(db, character);
+  //theoretically should not trigger
+  if (entry == null) {
+    return;
+  }
+
+  final card = CharacterCardsCompanion(
+    character: Value(character),
+    pinyin: Value(pinyinWord),
+    definition: Value(definitionWord),
+    nextReview: Value(DateTime.now().add(const Duration(days: 0))),
+    pinyinPlain: Value(entry.pinyinPlain),
+    chineseSentence: Value(chineseS ?? ''),
+    pinyinSentence: Value(pinyinS ?? ''),
+    englishSentence: Value(englishS ?? ''),
+  );
+
+  await db.into(db.characterCards).insertOnConflictUpdate(card);
+}
+
 Future<DictionaryEntry?> lookupCharacter(
   AppDatabase db,
   String character,
