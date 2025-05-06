@@ -1,5 +1,6 @@
 import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
+import 'package:flashhanzi/edit.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/parse.dart';
 import 'package:flashhanzi/stroke_order.dart';
@@ -20,7 +21,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   late int _currentIndex;
   final TextEditingController _notesController = TextEditingController();
   List<CharacterCard> _cards = [];
-  Future<List<SentencePair>>? _sentencesFuture;
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
   final ExpansionTileController expansionController = ExpansionTileController();
@@ -37,10 +37,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     setState(() {
       _cards = cards;
       _currentIndex = cards.isEmpty ? -1 : 0;
-      _sentencesFuture =
-          _cards.isNotEmpty
-              ? widget.db.findSentencesFor(_cards[_currentIndex].character)
-              : null;
       _initialized = true;
     });
   }
@@ -75,16 +71,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     await widget.db.updateNotesDB(cardToUpdate.character, newNotes);
     // Re-fetch the data to ensure the UI is updated
   }
-
-  // void printAllCards() async {
-  //   final allCards = await widget.db.select(widget.db.characterCards).get();
-
-  //   for (final card in allCards) {
-  //     print(
-  //       'Character: ${card.character}, Reps: ${card.repetition}, Interval: ${card.interval}, Ease: ${card.easeFactor}, Next: ${card.nextReview}, LearningStep: ${card.learningStep}',
-  //     );
-  //   }
-  // }
 
   void updateCard(int grade) async {
     //grades : 1 = Forgot, 2 = Hard, 3 = Good, 4 = Easy
@@ -194,10 +180,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
         setState(() {
           _cards = cards;
           _currentIndex = 0;
-          _sentencesFuture =
-              _cards.isNotEmpty
-                  ? widget.db.findSentencesFor(_cards[_currentIndex].character)
-                  : null;
         });
         //empty
       } else {
@@ -209,10 +191,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
     } else {
       setState(() {
         _currentIndex++;
-        _sentencesFuture =
-            _cards.isNotEmpty
-                ? widget.db.findSentencesFor(_cards[_currentIndex].character)
-                : null;
       });
     }
   }
@@ -253,10 +231,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child: IconButton(
                         icon: const Icon(Icons.home, size: 30),
                         onPressed: () {
-                          // Navigator.pop(
-                          //   context,
-                          // );
-                          // // Go back to the previous page
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -278,20 +252,20 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child:
                           _cards.isNotEmpty
                               ? IconButton(
-                                icon: Icon(Icons.delete),
+                                icon: Icon(Icons.edit),
                                 color: Colors.grey,
-                                tooltip: 'Delete',
-                                onPressed: () async {
-                                  //delete logic
-                                  await widget.db.deleteCard(
-                                    currentCard!.character,
+                                tooltip: 'Edit',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => EditCardPage(
+                                            card: currentCard!,
+                                            db: widget.db,
+                                          ),
+                                    ),
                                   );
-                                  final cards = await widget.db.getDueCards();
-                                  setState(() {
-                                    _cards.removeAt(_currentIndex);
-                                    _cards = cards;
-                                    _currentIndex = _cards.isEmpty ? -1 : 0;
-                                  });
                                 },
                               )
                               : IconButton(
@@ -595,20 +569,20 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child:
                           _cards.isNotEmpty
                               ? IconButton(
-                                icon: Icon(Icons.delete),
+                                icon: Icon(Icons.edit),
                                 color: Colors.grey,
-                                tooltip: 'Delete',
-                                onPressed: () async {
-                                  //delete logic
-                                  await widget.db.deleteCard(
-                                    currentCard!.character,
+                                tooltip: 'Edit',
+                                onPressed: () {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder:
+                                          (context) => EditCardPage(
+                                            card: currentCard!,
+                                            db: widget.db,
+                                          ),
+                                    ),
                                   );
-                                  final cards = await widget.db.getDueCards();
-                                  setState(() {
-                                    _cards.removeAt(_currentIndex);
-                                    _cards = cards;
-                                    _currentIndex = _cards.isEmpty ? -1 : 0;
-                                  });
                                 },
                               )
                               : IconButton(
@@ -628,274 +602,255 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                 ),
                 SizedBox(height: 4), // Space before the review list
                 //inside futurebuilder
+                Column(
+                  children:
+                      (_cards.isEmpty || _currentIndex == -1)
+                          ? [
+                            Center(
+                              child: Column(
+                                children: [
+                                  SizedBox(height: 64),
+                                  Text(
+                                    'Done studying for today!',
+                                    style: TextStyle(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors.black,
+                                      decoration:
+                                          TextDecoration
+                                              .none, // Remove underline
+                                    ),
+                                  ),
+                                  SizedBox(height: 40),
+
+                                  ElevatedButton(
+                                    style: OutlinedButton.styleFrom(
+                                      backgroundColor: Color(0xFFB42F2B),
+                                      shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                    ),
+                                    onPressed: () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder:
+                                              (context) =>
+                                                  AllCharacters(db: widget.db),
+                                        ),
+                                      );
+                                    },
+                                    child: Padding(
+                                      padding: EdgeInsets.all(12),
+                                      child: Text(
+                                        'Review All Cards',
+                                        style: TextStyle(color: Colors.white),
+                                      ),
+                                    ),
+                                  ),
+                                  SizedBox(height: 28),
+                                ],
+                              ),
+                            ),
+                          ]
+                          : [
+                            Column(
+                              children: [
+                                SizedBox(height: 32),
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 16,
+                                  ),
+                                  child: Container(
+                                    width: double.infinity,
+                                    margin: const EdgeInsets.symmetric(
+                                      horizontal: 8,
+                                    ),
+                                    padding: const EdgeInsets.only(
+                                      bottom: 20,
+                                    ), // Add padding inside the container
+                                    decoration: BoxDecoration(
+                                      border: Border(
+                                        bottom: BorderSide(
+                                          color: Colors.grey, // Underline color
+                                          width: 1, // Underline thickness
+                                        ),
+                                      ),
+                                    ),
+                                    child: Wrap(
+                                      runAlignment: WrapAlignment.center,
+                                      alignment: WrapAlignment.center,
+                                      crossAxisAlignment:
+                                          WrapCrossAlignment.center,
+                                      spacing: 12,
+                                      children: [
+                                        Text(
+                                          _cards[_currentIndex].character,
+                                          style: TextStyle(
+                                            fontSize: 76,
+                                            color: Colors.black87,
+                                            decoration: TextDecoration.none,
+                                          ),
+                                        ),
+                                        Wrap(
+                                          crossAxisAlignment:
+                                              WrapCrossAlignment.center,
+                                          children: [
+                                            Padding(
+                                              padding: const EdgeInsets.only(
+                                                top: 8,
+                                              ),
+                                              child: Text(
+                                                '[${_cards[_currentIndex].pinyin}]',
+                                                style: const TextStyle(
+                                                  fontSize: 48,
+                                                  color: Colors.black87,
+                                                  decoration:
+                                                      TextDecoration.none,
+                                                ),
+                                              ),
+                                            ),
+                                            IconButton(
+                                              icon: const Icon(
+                                                Icons.volume_up,
+                                                size: 24,
+                                                color: Colors.grey,
+                                              ),
+                                              onPressed: () {
+                                                playAudio(
+                                                  _cards[_currentIndex]
+                                                      .character,
+                                                );
+                                              },
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 4,
+                                ), // Space before the review list
+
+                                Padding(
+                                  padding: EdgeInsets.only(
+                                    left: 16,
+                                    right: 16,
+                                    bottom: 12,
+                                  ),
+                                  child: Container(
+                                    padding: const EdgeInsets.only(
+                                      bottom: 0,
+                                    ), // Add padding inside the container
+
+                                    child: Column(
+                                      children: [
+                                        Wrap(
+                                          alignment: WrapAlignment.center,
+                                          // crossAxisAlignment:
+                                          //     CrossAxisAlignment.center,
+                                          children: [
+                                            Text(
+                                              'Meaning: ${_cards[_currentIndex].definition}',
+                                              style: TextStyle(
+                                                fontSize: 24,
+                                                color: Color(0xFFB42F2B),
+                                                fontWeight: FontWeight.bold,
+                                                decoration:
+                                                    TextDecoration
+                                                        .none, // Remove underline
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                ),
+
                 Padding(
                   padding: EdgeInsets.all(0),
-                  child: Column(
-                    children:
-                        (_cards.isEmpty || _currentIndex == -1)
-                            ? [
-                              Center(
-                                child: Column(
+                  child:
+                      _currentIndex != -1 &&
+                              _cards[_currentIndex].chineseSentence != null
+                          ? Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 8,
+                                ), // Space between meaning and example
+                                Wrap(
                                   children: [
-                                    SizedBox(height: 64),
                                     Text(
-                                      'Done studying for today!',
+                                      'Example: ${_cards[_currentIndex].chineseSentence}',
                                       style: TextStyle(
-                                        fontSize: 24,
-                                        fontWeight: FontWeight.bold,
-                                        color: Colors.black,
+                                        fontSize: 16,
+                                        color: Colors.black87,
                                         decoration:
                                             TextDecoration
                                                 .none, // Remove underline
                                       ),
                                     ),
-                                    SizedBox(height: 40),
-
-                                    ElevatedButton(
-                                      style: OutlinedButton.styleFrom(
-                                        backgroundColor: Color(0xFFB42F2B),
-                                        shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(
-                                            4,
-                                          ),
-                                        ),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder:
-                                                (context) => AllCharacters(
-                                                  db: widget.db,
-                                                ),
-                                          ),
-                                        );
-                                      },
-                                      child: Padding(
-                                        padding: EdgeInsets.all(12),
-                                        child: Text(
-                                          'Review All Cards',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ),
-                                    ),
-                                    SizedBox(height: 28),
                                   ],
                                 ),
-                              ),
-                            ]
-                            : [
-                              Column(
-                                children: [
-                                  SizedBox(height: 32),
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 16,
-                                      right: 16,
-                                      bottom: 16,
-                                    ),
-                                    child: Container(
-                                      width: double.infinity,
-                                      margin: const EdgeInsets.symmetric(
-                                        horizontal: 8,
+                                Wrap(
+                                  children: [
+                                    Text(
+                                      'Pinyin: ${_cards[_currentIndex].pinyinSentence}',
+                                      style: TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black87,
+                                        decoration:
+                                            TextDecoration
+                                                .none, // Remove underline
                                       ),
-                                      padding: const EdgeInsets.only(
-                                        bottom: 20,
-                                      ), // Add padding inside the container
-                                      decoration: BoxDecoration(
-                                        border: Border(
-                                          bottom: BorderSide(
-                                            color:
-                                                Colors.grey, // Underline color
-                                            width: 1, // Underline thickness
+                                    ),
+                                    Wrap(
+                                      children: [
+                                        Text(
+                                          "Translation: ${_cards[_currentIndex].englishSentence}",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                            decoration:
+                                                TextDecoration
+                                                    .none, // Remove underline
                                           ),
                                         ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 4),
+
+                                  padding: EdgeInsets.only(bottom: 24),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey, // Underline color
+                                        width: 1, // Underline thickness
                                       ),
-                                      child: Wrap(
-                                        runAlignment: WrapAlignment.center,
-                                        alignment: WrapAlignment.center,
-                                        crossAxisAlignment:
-                                            WrapCrossAlignment.center,
-                                        spacing: 12,
-                                        children: [
-                                          Text(
-                                            _cards[_currentIndex].character,
-                                            style: TextStyle(
-                                              fontSize: 76,
-                                              color: Colors.black87,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          ),
-                                          Wrap(
-                                            crossAxisAlignment:
-                                                WrapCrossAlignment.center,
-                                            children: [
-                                              Padding(
-                                                padding: const EdgeInsets.only(
-                                                  top: 8,
-                                                ),
-                                                child: Text(
-                                                  '[${_cards[_currentIndex].pinyin}]',
-                                                  style: const TextStyle(
-                                                    fontSize: 48,
-                                                    color: Colors.black87,
-                                                    decoration:
-                                                        TextDecoration.none,
-                                                  ),
-                                                ),
-                                              ),
-                                              IconButton(
-                                                icon: const Icon(
-                                                  Icons.volume_up,
-                                                  size: 24,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () {
-                                                  playAudio(
-                                                    _cards[_currentIndex]
-                                                        .character,
-                                                  );
-                                                },
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    height: 4,
-                                  ), // Space before the review list
-
-                                  Padding(
-                                    padding: EdgeInsets.only(
-                                      left: 16,
-                                      right: 16,
-                                      bottom: 12,
-                                    ),
-                                    child: Container(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 0,
-                                      ), // Add padding inside the container
-
-                                      child: Column(
-                                        children: [
-                                          Wrap(
-                                            alignment: WrapAlignment.center,
-                                            // crossAxisAlignment:
-                                            //     CrossAxisAlignment.center,
-                                            children: [
-                                              Text(
-                                                'Meaning: ${_cards[_currentIndex].definition}',
-                                                style: TextStyle(
-                                                  fontSize: 24,
-                                                  color: Color(0xFFB42F2B),
-                                                  fontWeight: FontWeight.bold,
-                                                  decoration:
-                                                      TextDecoration
-                                                          .none, // Remove underline
-                                                ),
-                                              ),
-                                            ],
-                                          ),
-                                        ],
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                  ),
-                ),
-
-                Padding(
-                  padding: EdgeInsets.all(0),
-                  child: FutureBuilder(
-                    future: _sentencesFuture,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return SizedBox(height: 4);
-                      } else if (snapshot.hasData &&
-                          snapshot.data!.isNotEmpty) {
-                        if (_currentIndex == -1) {
-                          return SizedBox(height: 4);
-                        }
-                        return Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              SizedBox(
-                                height: 8,
-                              ), // Space between meaning and example
-                              Wrap(
-                                children: [
-                                  Text(
-                                    'Example: ${snapshot.data![0].chinese}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                      decoration:
-                                          TextDecoration
-                                              .none, // Remove underline
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              Wrap(
-                                children: [
-                                  Text(
-                                    'Pinyin: ${snapshot.data![0].pinyin}',
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black87,
-                                      decoration:
-                                          TextDecoration
-                                              .none, // Remove underline
-                                    ),
-                                  ),
-                                  Wrap(
-                                    children: [
-                                      Text(
-                                        "Translation: ${snapshot.data![0].english}",
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          color: Colors.black87,
-                                          decoration:
-                                              TextDecoration
-                                                  .none, // Remove underline
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
-
-                              Container(
-                                margin: EdgeInsets.symmetric(horizontal: 4),
-
-                                padding: EdgeInsets.only(bottom: 24),
-                                decoration: BoxDecoration(
-                                  border: Border(
-                                    bottom: BorderSide(
-                                      color: Colors.grey, // Underline color
-                                      width: 1, // Underline thickness
                                     ),
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: 12),
-                            ],
-                          ),
-                        );
-                      } else if (snapshot.hasError) {
-                        return SizedBox(height: 4);
-                      } else {
-                        return SizedBox(height: 4);
-                      }
-                    },
-                  ),
+                                SizedBox(height: 12),
+                              ],
+                            ),
+                          )
+                          : SizedBox(height: 4),
                 ),
+
                 Padding(
                   padding: EdgeInsets.all(0),
                   child:

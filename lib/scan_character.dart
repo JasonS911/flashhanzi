@@ -263,7 +263,7 @@ class _ScanCharacterState extends State<ScanCharacter>
                   return Center(
                     child: Container(
                       width: 340,
-                      height: 340,
+                      height: 440,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 2),
                         borderRadius: BorderRadius.circular(8),

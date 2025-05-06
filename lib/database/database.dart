@@ -31,7 +31,10 @@ class CharacterCards extends Table {
   DateTimeColumn get nextReview => dateTime().nullable()();
   TextColumn get notes => text().nullable()();
   TextColumn get pinyinPlain => text().nullable()();
-
+  //sentence pairs
+  TextColumn get chineseSentence => text().nullable()();
+  TextColumn get pinyinSentence => text().nullable()();
+  TextColumn get englishSentence => text().nullable()();
   @override
   Set<Column> get primaryKey => {character};
 }
@@ -93,16 +96,6 @@ class AppDatabase extends _$AppDatabase {
   Future<void> deleteCard(String character) async {
     await (delete(characterCards)
       ..where((tbl) => tbl.character.equals(character))).go();
-  }
-
-  //development only
-  Future<void> resetNextReview(String character) async {
-    await (update(characterCards)
-      ..where((card) => card.character.equals(character))).write(
-      CharacterCardsCompanion(
-        nextReview: Value(DateTime.now().subtract(const Duration(days: 1))),
-      ),
-    );
   }
 
   Future<void> updateNotesDB(String character, String newNotes) async {
@@ -221,6 +214,8 @@ Future<void> newCard(AppDatabase db, String character) async {
   if (entry == null) {
     return;
   }
+  final sentencePair = await db.findSentencesFor(character);
+  final sentence = sentencePair.isNotEmpty ? sentencePair.first : null;
 
   final card = CharacterCardsCompanion(
     character: Value(character),
@@ -228,6 +223,9 @@ Future<void> newCard(AppDatabase db, String character) async {
     definition: Value(entry.definition),
     nextReview: Value(DateTime.now().add(const Duration(days: 0))),
     pinyinPlain: Value(entry.pinyinPlain),
+    chineseSentence: Value(sentence?.chinese ?? ''),
+    pinyinSentence: Value(sentence?.pinyin ?? ''),
+    englishSentence: Value(sentence?.english ?? ''),
   );
 
   await db.into(db.characterCards).insertOnConflictUpdate(card);

@@ -119,6 +119,39 @@ class $CharacterCardsTable extends CharacterCards
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _chineseSentenceMeta = const VerificationMeta(
+    'chineseSentence',
+  );
+  @override
+  late final GeneratedColumn<String> chineseSentence = GeneratedColumn<String>(
+    'chinese_sentence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _pinyinSentenceMeta = const VerificationMeta(
+    'pinyinSentence',
+  );
+  @override
+  late final GeneratedColumn<String> pinyinSentence = GeneratedColumn<String>(
+    'pinyin_sentence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _englishSentenceMeta = const VerificationMeta(
+    'englishSentence',
+  );
+  @override
+  late final GeneratedColumn<String> englishSentence = GeneratedColumn<String>(
+    'english_sentence',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     character,
@@ -131,6 +164,9 @@ class $CharacterCardsTable extends CharacterCards
     nextReview,
     notes,
     pinyinPlain,
+    chineseSentence,
+    pinyinSentence,
+    englishSentence,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -216,6 +252,33 @@ class $CharacterCardsTable extends CharacterCards
         ),
       );
     }
+    if (data.containsKey('chinese_sentence')) {
+      context.handle(
+        _chineseSentenceMeta,
+        chineseSentence.isAcceptableOrUnknown(
+          data['chinese_sentence']!,
+          _chineseSentenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pinyin_sentence')) {
+      context.handle(
+        _pinyinSentenceMeta,
+        pinyinSentence.isAcceptableOrUnknown(
+          data['pinyin_sentence']!,
+          _pinyinSentenceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('english_sentence')) {
+      context.handle(
+        _englishSentenceMeta,
+        englishSentence.isAcceptableOrUnknown(
+          data['english_sentence']!,
+          _englishSentenceMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -272,6 +335,18 @@ class $CharacterCardsTable extends CharacterCards
         DriftSqlType.string,
         data['${effectivePrefix}pinyin_plain'],
       ),
+      chineseSentence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}chinese_sentence'],
+      ),
+      pinyinSentence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pinyin_sentence'],
+      ),
+      englishSentence: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}english_sentence'],
+      ),
     );
   }
 
@@ -292,6 +367,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
   final DateTime? nextReview;
   final String? notes;
   final String? pinyinPlain;
+  final String? chineseSentence;
+  final String? pinyinSentence;
+  final String? englishSentence;
   const CharacterCard({
     required this.character,
     required this.pinyin,
@@ -303,6 +381,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     this.nextReview,
     this.notes,
     this.pinyinPlain,
+    this.chineseSentence,
+    this.pinyinSentence,
+    this.englishSentence,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -322,6 +403,15 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     }
     if (!nullToAbsent || pinyinPlain != null) {
       map['pinyin_plain'] = Variable<String>(pinyinPlain);
+    }
+    if (!nullToAbsent || chineseSentence != null) {
+      map['chinese_sentence'] = Variable<String>(chineseSentence);
+    }
+    if (!nullToAbsent || pinyinSentence != null) {
+      map['pinyin_sentence'] = Variable<String>(pinyinSentence);
+    }
+    if (!nullToAbsent || englishSentence != null) {
+      map['english_sentence'] = Variable<String>(englishSentence);
     }
     return map;
   }
@@ -345,6 +435,18 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           pinyinPlain == null && nullToAbsent
               ? const Value.absent()
               : Value(pinyinPlain),
+      chineseSentence:
+          chineseSentence == null && nullToAbsent
+              ? const Value.absent()
+              : Value(chineseSentence),
+      pinyinSentence:
+          pinyinSentence == null && nullToAbsent
+              ? const Value.absent()
+              : Value(pinyinSentence),
+      englishSentence:
+          englishSentence == null && nullToAbsent
+              ? const Value.absent()
+              : Value(englishSentence),
     );
   }
 
@@ -364,6 +466,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       nextReview: serializer.fromJson<DateTime?>(json['nextReview']),
       notes: serializer.fromJson<String?>(json['notes']),
       pinyinPlain: serializer.fromJson<String?>(json['pinyinPlain']),
+      chineseSentence: serializer.fromJson<String?>(json['chineseSentence']),
+      pinyinSentence: serializer.fromJson<String?>(json['pinyinSentence']),
+      englishSentence: serializer.fromJson<String?>(json['englishSentence']),
     );
   }
   @override
@@ -380,6 +485,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       'nextReview': serializer.toJson<DateTime?>(nextReview),
       'notes': serializer.toJson<String?>(notes),
       'pinyinPlain': serializer.toJson<String?>(pinyinPlain),
+      'chineseSentence': serializer.toJson<String?>(chineseSentence),
+      'pinyinSentence': serializer.toJson<String?>(pinyinSentence),
+      'englishSentence': serializer.toJson<String?>(englishSentence),
     };
   }
 
@@ -394,6 +502,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     Value<DateTime?> nextReview = const Value.absent(),
     Value<String?> notes = const Value.absent(),
     Value<String?> pinyinPlain = const Value.absent(),
+    Value<String?> chineseSentence = const Value.absent(),
+    Value<String?> pinyinSentence = const Value.absent(),
+    Value<String?> englishSentence = const Value.absent(),
   }) => CharacterCard(
     character: character ?? this.character,
     pinyin: pinyin ?? this.pinyin,
@@ -405,6 +516,12 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     nextReview: nextReview.present ? nextReview.value : this.nextReview,
     notes: notes.present ? notes.value : this.notes,
     pinyinPlain: pinyinPlain.present ? pinyinPlain.value : this.pinyinPlain,
+    chineseSentence:
+        chineseSentence.present ? chineseSentence.value : this.chineseSentence,
+    pinyinSentence:
+        pinyinSentence.present ? pinyinSentence.value : this.pinyinSentence,
+    englishSentence:
+        englishSentence.present ? englishSentence.value : this.englishSentence,
   );
   CharacterCard copyWithCompanion(CharacterCardsCompanion data) {
     return CharacterCard(
@@ -426,6 +543,18 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
       notes: data.notes.present ? data.notes.value : this.notes,
       pinyinPlain:
           data.pinyinPlain.present ? data.pinyinPlain.value : this.pinyinPlain,
+      chineseSentence:
+          data.chineseSentence.present
+              ? data.chineseSentence.value
+              : this.chineseSentence,
+      pinyinSentence:
+          data.pinyinSentence.present
+              ? data.pinyinSentence.value
+              : this.pinyinSentence,
+      englishSentence:
+          data.englishSentence.present
+              ? data.englishSentence.value
+              : this.englishSentence,
     );
   }
 
@@ -441,7 +570,10 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           ..write('learningStep: $learningStep, ')
           ..write('nextReview: $nextReview, ')
           ..write('notes: $notes, ')
-          ..write('pinyinPlain: $pinyinPlain')
+          ..write('pinyinPlain: $pinyinPlain, ')
+          ..write('chineseSentence: $chineseSentence, ')
+          ..write('pinyinSentence: $pinyinSentence, ')
+          ..write('englishSentence: $englishSentence')
           ..write(')'))
         .toString();
   }
@@ -458,6 +590,9 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
     nextReview,
     notes,
     pinyinPlain,
+    chineseSentence,
+    pinyinSentence,
+    englishSentence,
   );
   @override
   bool operator ==(Object other) =>
@@ -472,7 +607,10 @@ class CharacterCard extends DataClass implements Insertable<CharacterCard> {
           other.learningStep == this.learningStep &&
           other.nextReview == this.nextReview &&
           other.notes == this.notes &&
-          other.pinyinPlain == this.pinyinPlain);
+          other.pinyinPlain == this.pinyinPlain &&
+          other.chineseSentence == this.chineseSentence &&
+          other.pinyinSentence == this.pinyinSentence &&
+          other.englishSentence == this.englishSentence);
 }
 
 class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
@@ -486,6 +624,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
   final Value<DateTime?> nextReview;
   final Value<String?> notes;
   final Value<String?> pinyinPlain;
+  final Value<String?> chineseSentence;
+  final Value<String?> pinyinSentence;
+  final Value<String?> englishSentence;
   final Value<int> rowid;
   const CharacterCardsCompanion({
     this.character = const Value.absent(),
@@ -498,6 +639,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
     this.pinyinPlain = const Value.absent(),
+    this.chineseSentence = const Value.absent(),
+    this.pinyinSentence = const Value.absent(),
+    this.englishSentence = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CharacterCardsCompanion.insert({
@@ -511,6 +655,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     this.nextReview = const Value.absent(),
     this.notes = const Value.absent(),
     this.pinyinPlain = const Value.absent(),
+    this.chineseSentence = const Value.absent(),
+    this.pinyinSentence = const Value.absent(),
+    this.englishSentence = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : character = Value(character),
        pinyin = Value(pinyin),
@@ -526,6 +673,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Expression<DateTime>? nextReview,
     Expression<String>? notes,
     Expression<String>? pinyinPlain,
+    Expression<String>? chineseSentence,
+    Expression<String>? pinyinSentence,
+    Expression<String>? englishSentence,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -539,6 +689,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       if (nextReview != null) 'next_review': nextReview,
       if (notes != null) 'notes': notes,
       if (pinyinPlain != null) 'pinyin_plain': pinyinPlain,
+      if (chineseSentence != null) 'chinese_sentence': chineseSentence,
+      if (pinyinSentence != null) 'pinyin_sentence': pinyinSentence,
+      if (englishSentence != null) 'english_sentence': englishSentence,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -554,6 +707,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     Value<DateTime?>? nextReview,
     Value<String?>? notes,
     Value<String?>? pinyinPlain,
+    Value<String?>? chineseSentence,
+    Value<String?>? pinyinSentence,
+    Value<String?>? englishSentence,
     Value<int>? rowid,
   }) {
     return CharacterCardsCompanion(
@@ -567,6 +723,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
       nextReview: nextReview ?? this.nextReview,
       notes: notes ?? this.notes,
       pinyinPlain: pinyinPlain ?? this.pinyinPlain,
+      chineseSentence: chineseSentence ?? this.chineseSentence,
+      pinyinSentence: pinyinSentence ?? this.pinyinSentence,
+      englishSentence: englishSentence ?? this.englishSentence,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -604,6 +763,15 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
     if (pinyinPlain.present) {
       map['pinyin_plain'] = Variable<String>(pinyinPlain.value);
     }
+    if (chineseSentence.present) {
+      map['chinese_sentence'] = Variable<String>(chineseSentence.value);
+    }
+    if (pinyinSentence.present) {
+      map['pinyin_sentence'] = Variable<String>(pinyinSentence.value);
+    }
+    if (englishSentence.present) {
+      map['english_sentence'] = Variable<String>(englishSentence.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -623,6 +791,9 @@ class CharacterCardsCompanion extends UpdateCompanion<CharacterCard> {
           ..write('nextReview: $nextReview, ')
           ..write('notes: $notes, ')
           ..write('pinyinPlain: $pinyinPlain, ')
+          ..write('chineseSentence: $chineseSentence, ')
+          ..write('pinyinSentence: $pinyinSentence, ')
+          ..write('englishSentence: $englishSentence, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -1343,6 +1514,9 @@ typedef $$CharacterCardsTableCreateCompanionBuilder =
       Value<DateTime?> nextReview,
       Value<String?> notes,
       Value<String?> pinyinPlain,
+      Value<String?> chineseSentence,
+      Value<String?> pinyinSentence,
+      Value<String?> englishSentence,
       Value<int> rowid,
     });
 typedef $$CharacterCardsTableUpdateCompanionBuilder =
@@ -1357,6 +1531,9 @@ typedef $$CharacterCardsTableUpdateCompanionBuilder =
       Value<DateTime?> nextReview,
       Value<String?> notes,
       Value<String?> pinyinPlain,
+      Value<String?> chineseSentence,
+      Value<String?> pinyinSentence,
+      Value<String?> englishSentence,
       Value<int> rowid,
     });
 
@@ -1416,6 +1593,21 @@ class $$CharacterCardsTableFilterComposer
 
   ColumnFilters<String> get pinyinPlain => $composableBuilder(
     column: $table.pinyinPlain,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get chineseSentence => $composableBuilder(
+    column: $table.chineseSentence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pinyinSentence => $composableBuilder(
+    column: $table.pinyinSentence,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get englishSentence => $composableBuilder(
+    column: $table.englishSentence,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -1478,6 +1670,21 @@ class $$CharacterCardsTableOrderingComposer
     column: $table.pinyinPlain,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<String> get chineseSentence => $composableBuilder(
+    column: $table.chineseSentence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pinyinSentence => $composableBuilder(
+    column: $table.pinyinSentence,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get englishSentence => $composableBuilder(
+    column: $table.englishSentence,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$CharacterCardsTableAnnotationComposer
@@ -1530,6 +1737,21 @@ class $$CharacterCardsTableAnnotationComposer
     column: $table.pinyinPlain,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get chineseSentence => $composableBuilder(
+    column: $table.chineseSentence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get pinyinSentence => $composableBuilder(
+    column: $table.pinyinSentence,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get englishSentence => $composableBuilder(
+    column: $table.englishSentence,
+    builder: (column) => column,
+  );
 }
 
 class $$CharacterCardsTableTableManager
@@ -1579,6 +1801,9 @@ class $$CharacterCardsTableTableManager
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> pinyinPlain = const Value.absent(),
+                Value<String?> chineseSentence = const Value.absent(),
+                Value<String?> pinyinSentence = const Value.absent(),
+                Value<String?> englishSentence = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion(
                 character: character,
@@ -1591,6 +1816,9 @@ class $$CharacterCardsTableTableManager
                 nextReview: nextReview,
                 notes: notes,
                 pinyinPlain: pinyinPlain,
+                chineseSentence: chineseSentence,
+                pinyinSentence: pinyinSentence,
+                englishSentence: englishSentence,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -1605,6 +1833,9 @@ class $$CharacterCardsTableTableManager
                 Value<DateTime?> nextReview = const Value.absent(),
                 Value<String?> notes = const Value.absent(),
                 Value<String?> pinyinPlain = const Value.absent(),
+                Value<String?> chineseSentence = const Value.absent(),
+                Value<String?> pinyinSentence = const Value.absent(),
+                Value<String?> englishSentence = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CharacterCardsCompanion.insert(
                 character: character,
@@ -1617,6 +1848,9 @@ class $$CharacterCardsTableTableManager
                 nextReview: nextReview,
                 notes: notes,
                 pinyinPlain: pinyinPlain,
+                chineseSentence: chineseSentence,
+                pinyinSentence: pinyinSentence,
+                englishSentence: englishSentence,
                 rowid: rowid,
               ),
           withReferenceMapper:
