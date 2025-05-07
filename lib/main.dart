@@ -1,4 +1,4 @@
-import 'package:flashhanzi/parse.dart';
+import 'package:flashhanzi/utils/parse.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/dictionary_lookup.dart';
 import 'package:flashhanzi/handwrite_character.dart';
@@ -6,7 +6,6 @@ import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flutter/material.dart';
-
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

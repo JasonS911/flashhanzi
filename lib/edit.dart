@@ -16,6 +16,9 @@ class _EditCardPageState extends State<EditCardPage> {
   late TextEditingController _pinyinController;
   late TextEditingController _definitionController;
   late TextEditingController _notesController;
+  late TextEditingController _chineseSController;
+  late TextEditingController _pinyinSController;
+  late TextEditingController _englishSController;
 
   bool _isSaving = false;
 
@@ -26,6 +29,15 @@ class _EditCardPageState extends State<EditCardPage> {
     _pinyinController = TextEditingController(text: widget.card.pinyin);
     _definitionController = TextEditingController(text: widget.card.definition);
     _notesController = TextEditingController(text: widget.card.notes ?? '');
+    _chineseSController = TextEditingController(
+      text: widget.card.chineseSentence ?? '',
+    );
+    _pinyinSController = TextEditingController(
+      text: widget.card.pinyinSentence ?? '',
+    );
+    _englishSController = TextEditingController(
+      text: widget.card.englishSentence ?? '',
+    );
   }
 
   @override
@@ -33,6 +45,9 @@ class _EditCardPageState extends State<EditCardPage> {
     _pinyinController.dispose();
     _definitionController.dispose();
     _notesController.dispose();
+    _chineseSController.dispose();
+    _pinyinSController.dispose();
+    _englishSController.dispose();
     super.dispose();
   }
 
@@ -46,8 +61,11 @@ class _EditCardPageState extends State<EditCardPage> {
     await (widget.db.update(widget.db.characterCards)
       ..where((tbl) => tbl.character.equals(widget.card.character))).write(
       CharacterCardsCompanion(
-        pinyin: drift.Value(_pinyinController.text),
-        definition: drift.Value(_definitionController.text),
+        pinyin: drift.Value(_pinyinController.text.trim()),
+        definition: drift.Value(_definitionController.text.trim()),
+        chineseSentence: drift.Value(_chineseSController.text.trim()),
+        pinyinSentence: drift.Value(_pinyinSController.text.trim()),
+        englishSentence: drift.Value(_englishSController.text.trim()),
       ),
     );
 
@@ -59,7 +77,7 @@ class _EditCardPageState extends State<EditCardPage> {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text("Card updated successfully!")));
-    Navigator.pop(context);
+    Navigator.pop(context, true);
   }
 
   Future<void> _deleteCard() async {
@@ -88,7 +106,7 @@ class _EditCardPageState extends State<EditCardPage> {
     if (confirm ?? false) {
       await widget.db.deleteCard(widget.card.character);
       if (!mounted) return;
-      Navigator.pop(context);
+      Navigator.pop(context, true); // return true to caller
     }
   }
 
@@ -98,56 +116,94 @@ class _EditCardPageState extends State<EditCardPage> {
       appBar: AppBar(title: const Text("Edit Card")),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Center(
-          child: Column(
-            children: [
-              Text(
-                widget.card.character,
-                style: const TextStyle(
-                  fontSize: 48,
-                  fontWeight: FontWeight.bold,
+        child: SingleChildScrollView(
+          child: Center(
+            child: Column(
+              children: [
+                Text(
+                  widget.card.character,
+                  style: const TextStyle(
+                    fontSize: 48,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _pinyinController,
-                decoration: const InputDecoration(labelText: "Pinyin"),
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _definitionController,
-                decoration: const InputDecoration(labelText: "Definition"),
-                maxLines: null,
-              ),
-              const SizedBox(height: 20),
-              TextField(
-                controller: _notesController,
-                decoration: const InputDecoration(labelText: "Notes"),
-                maxLines: null,
-              ),
-              const SizedBox(height: 32),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  ElevatedButton(
-                    onPressed: _isSaving ? null : _saveChanges,
-                    child:
-                        _isSaving
-                            ? const CircularProgressIndicator(
-                              color: Colors.white,
-                            )
-                            : const Text("Save Changes"),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _pinyinController,
+                  decoration: const InputDecoration(
+                    labelText: "Pinyin",
+                    alignLabelWithHint: true,
                   ),
-                  TextButton(
-                    onPressed: _deleteCard,
-                    child: const Text(
-                      "Delete Card",
-                      style: TextStyle(color: Colors.red),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _definitionController,
+                  decoration: const InputDecoration(
+                    labelText: "Definition",
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: null,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _notesController,
+                  decoration: const InputDecoration(
+                    labelText: "Notes",
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: 5,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _chineseSController,
+                  decoration: const InputDecoration(
+                    labelText: "Chinese Sentence",
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: null,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _pinyinController,
+                  decoration: const InputDecoration(
+                    labelText: "Pinyin Sentence",
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: null,
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: _englishSController,
+                  decoration: const InputDecoration(
+                    labelText: "English Sentence",
+                    alignLabelWithHint: true,
+                  ),
+                  maxLines: null,
+                ),
+                const SizedBox(height: 32),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    TextButton(
+                      onPressed: _deleteCard,
+                      child: const Text(
+                        "Delete Card",
+                        style: TextStyle(color: Colors.red),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                    ElevatedButton(
+                      onPressed: _isSaving ? null : _saveChanges,
+                      child:
+                          _isSaving
+                              ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                              : const Text("Save Changes"),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),

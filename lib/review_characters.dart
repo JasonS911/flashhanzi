@@ -2,8 +2,8 @@ import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/edit.dart';
 import 'package:flashhanzi/home_page.dart';
-import 'package:flashhanzi/parse.dart';
-import 'package:flashhanzi/stroke_order.dart';
+import 'package:flashhanzi/utils/parse.dart';
+import 'package:flashhanzi/utils/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flip_card/flip_card.dart'; // Add this import for FlipCard
 import 'package:flashhanzi/utils/play_audio.dart';
@@ -572,8 +572,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 icon: Icon(Icons.edit),
                                 color: Colors.grey,
                                 tooltip: 'Edit',
-                                onPressed: () {
-                                  Navigator.push(
+                                onPressed: () async {
+                                  final result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
@@ -583,6 +583,11 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           ),
                                     ),
                                   );
+
+                                  // After EditCardPage is popped, check result:
+                                  if (result == true) {
+                                    refreshDueCards();
+                                  }
                                 },
                               )
                               : IconButton(

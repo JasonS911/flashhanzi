@@ -1,3 +1,4 @@
+import 'package:flashhanzi/about_page.dart';
 import 'package:flashhanzi/all_characters.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/main.dart';
@@ -475,7 +476,12 @@ class _HomePageState extends State<HomePage> {
                     );
                   }
                   if (value == 'about') {
-                    doNothing();
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const AboutPage(),
+                      ),
+                    );
                   }
                 },
                 itemBuilder:

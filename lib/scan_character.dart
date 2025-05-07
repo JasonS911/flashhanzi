@@ -262,8 +262,8 @@ class _ScanCharacterState extends State<ScanCharacter>
                 if (snapshot.connectionState == ConnectionState.done) {
                   return Center(
                     child: Container(
-                      width: 340,
-                      height: 440,
+                      width: MediaQuery.of(context).size.width * 0.9,
+                      height: MediaQuery.of(context).size.height * 0.65,
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black, width: 2),
                         borderRadius: BorderRadius.circular(8),

@@ -1,5 +1,5 @@
-import 'package:flashhanzi/parse.dart';
-import 'package:flashhanzi/stroke_order.dart';
+import 'package:flashhanzi/utils/parse.dart';
+import 'package:flashhanzi/utils/stroke_order.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/home_page.dart';

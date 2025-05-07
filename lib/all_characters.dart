@@ -1,5 +1,6 @@
 import 'package:flashhanzi/database/database.dart';
 import 'package:flashhanzi/dictionary_lookup.dart';
+import 'package:flashhanzi/edit.dart';
 import 'package:flashhanzi/utils/play_audio.dart';
 import 'package:flutter/material.dart';
 import 'package:flashhanzi/home_page.dart';
@@ -157,9 +158,49 @@ class _AllCharactersState extends State<AllCharacters> {
             ),
 
           // Search Results
-          ...results.map((entry) => buildResultCardAll(entry)),
+          ...results.map(
+            (entry) => GestureDetector(
+              onLongPress: () {
+                _showWordOptions(context, entry.character);
+              },
+              child: buildResultCardAll(entry),
+            ),
+          ),
         ],
       ),
+    );
+  }
+
+  void _showWordOptions(BuildContext context, String word) {
+    showModalBottomSheet(
+      context: context,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+      ),
+      builder: (context) {
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: Icon(Icons.search),
+              title: Text('Search "$word"'),
+              onTap: () {
+                Navigator.pop(context); // Close the modal
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => DictionaryLookup(
+                          db: widget.db,
+                          prefillSearch: word,
+                        ),
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
     );
   }
 
@@ -177,24 +218,39 @@ class _AllCharactersState extends State<AllCharacters> {
         endActionPane: ActionPane(
           motion: const ScrollMotion(),
           children: [
-            //search
+            //edit
             SlidableAction(
               onPressed:
                   (context) async => await Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder:
-                          (context) => DictionaryLookup(
-                            db: widget.db,
-                            prefillSearch: entry.character,
-                          ),
+                          (context) => EditCardPage(db: widget.db, card: entry),
                     ),
                   ),
               backgroundColor: const Color.fromARGB(255, 214, 214, 214),
               foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-              icon: Icons.search,
-              label: 'Search',
+              icon: Icons.edit,
+              label: 'Edit',
             ),
+            //search
+            // SlidableAction(
+            //   onPressed:
+            //       (context) async => await Navigator.push(
+            //         context,
+            //         MaterialPageRoute(
+            //           builder:
+            //               (context) => DictionaryLookup(
+            //                 db: widget.db,
+            //                 prefillSearch: entry.character,
+            //               ),
+            //         ),
+            //       ),
+            //   backgroundColor: const Color.fromARGB(255, 214, 214, 214),
+            //   foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+            //   icon: Icons.search,
+            //   label: 'Search',
+            // ),
             //delete
             SlidableAction(
               onPressed:
