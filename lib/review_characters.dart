@@ -255,8 +255,8 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 icon: Icon(Icons.edit),
                                 color: Colors.grey,
                                 tooltip: 'Edit',
-                                onPressed: () {
-                                  Navigator.push(
+                                onPressed: () async {
+                                  final result = await Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                       builder:
@@ -266,6 +266,11 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           ),
                                     ),
                                   );
+
+                                  // After EditCardPage is popped, check result:
+                                  if (result == true) {
+                                    refreshDueCards();
+                                  }
                                 },
                               )
                               : IconButton(
@@ -499,30 +504,38 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                 // Initialize notes if needed
                 ListView(
                   shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   children: [
                     ExpansionTile(
                       title: const Text("Personal Notes"),
-                      leading: const Icon(Icons.play_arrow),
+                      leading: const Icon(Icons.notes),
+                      shape: RoundedRectangleBorder(
+                        side: BorderSide(
+                          color: Colors.transparent,
+                        ), // removes bottom line
+                      ),
                       children: [
-                        Container(
+                        Padding(
                           padding: const EdgeInsets.all(16),
-                          height: 150,
-                          child: Center(
-                            child: TextField(
-                              controller: _notesController,
-                              maxLines: 5,
-                              maxLength: 300,
-                              decoration: InputDecoration(
-                                border: InputBorder.none,
-                                hintText: "Add your notes here",
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        ElevatedButton(
-                          onPressed: updateNotes,
-                          child: const Text('Save Notes'),
+                          child:
+                              _currentIndex == -1
+                                  ? SizedBox.shrink()
+                                  : Align(
+                                    alignment: Alignment.topLeft,
+                                    child: Text(
+                                      _cards[_currentIndex].notes
+                                                  ?.trim()
+                                                  .isNotEmpty ==
+                                              true
+                                          ? _cards[_currentIndex].notes!.trim()
+                                          : "No notes yet.",
+                                      style: const TextStyle(
+                                        fontSize: 16,
+                                        color: Colors.black,
+                                      ),
+                                      textAlign: TextAlign.start,
+                                    ),
+                                  ),
                         ),
                         const SizedBox(height: 8),
                       ],
