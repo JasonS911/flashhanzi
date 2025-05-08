@@ -1,3 +1,4 @@
+import 'package:flashhanzi/subscription_page.dart';
 import 'package:flashhanzi/utils/loading_screen.dart';
 import 'package:flashhanzi/utils/parse.dart';
 import 'package:flashhanzi/database/database.dart';
@@ -6,6 +7,7 @@ import 'package:flashhanzi/handwrite_character.dart';
 import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
+import 'package:flashhanzi/utils/subscription_manager.dart';
 import 'package:flutter/material.dart';
 
 void main() async {
@@ -18,6 +20,7 @@ void main() async {
   if (isTableEmpty) {
     await parse(db);
   }
+
   runApp(AppEntry(db: db));
 }
 
@@ -62,14 +65,21 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
 
   Future<void> _startApp() async {
     await Future.delayed(Duration(seconds: 2));
+    await SubscriptionManager().initialize();
 
     if (!mounted) return;
 
-    Navigator.of(context).pushReplacement(
-      MaterialPageRoute(
-        builder: (context) => HomePage(db: widget.db), // <-- fix is here
-      ),
-    );
+    if (SubscriptionManager().isProUser) {
+      // User is Pro → go to HomePage
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
+      );
+    } else {
+      // User is not Pro → show SubscribePage
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const SubscribePage()),
+      );
+    }
   }
 
   @override

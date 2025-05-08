@@ -34,28 +34,9 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   @override
   void initState() {
     super.initState();
-    ensureModelDownloaded();
+
     // Initialize the digital ink recognizer with the correct language code
     _digitalInkRecognizer = mlkit.DigitalInkRecognizer(languageCode: 'zh-Hans');
-  }
-
-  Future<void> ensureModelDownloaded() async {
-    const modelName = 'zh-Hani';
-    final modelManager = mlkit.DigitalInkRecognizerModelManager();
-
-    try {
-      bool isDownloaded = await modelManager.isModelDownloaded(modelName);
-
-      if (!isDownloaded) {
-        await modelManager.downloadModel(modelName); // Download the model once
-      }
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
-      );
-    }
   }
 
   Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {

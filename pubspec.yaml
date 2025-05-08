@@ -55,6 +55,7 @@ dependencies:
   permission_handler: ^12.0.0+1
   flutter_launcher_icons: "^0.14.3"
   flutter_native_splash: ^2.4.6
+  purchases_flutter: ^8.8.0
 flutter_launcher_icons:
   android: true
   ios: true
