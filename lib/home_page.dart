@@ -331,9 +331,8 @@ class _HomePageState extends State<HomePage> {
                                           alignment:
                                               PlaceholderAlignment.middle,
                                           child: IconButton(
-                                            padding: EdgeInsets.only(
-                                              left: 8,
-                                            ), // optional padding before icon
+                                            padding:
+                                                EdgeInsets.only(), // optional padding before icon
                                             icon: const Icon(
                                               Icons.volume_up,
                                               size:

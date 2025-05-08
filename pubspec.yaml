@@ -53,6 +53,21 @@ dependencies:
   html: ^0.15.5+1
   flutter_slidable: ^4.0.0
   permission_handler: ^12.0.0+1
+  flutter_launcher_icons: "^0.14.3"
+  flutter_native_splash: ^2.4.6
+flutter_launcher_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon.png"
+flutter_native_splash:
+  color: "#B42F2B"
+  image: assets/logo.png
+  android: true
+  ios: true
+  web: false
+  fullscreen: true
+  android_gravity: center
+  ios_content_mode: scaleAspectFit
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +98,8 @@ flutter:
     - assets/ch_eng_pairs.tsv
     - assets/hanzi_writer.html
     - assets/graphics.txt
+    - assets/icon.png
+
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see

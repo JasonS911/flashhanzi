@@ -20,6 +20,9 @@ class _ScanCharacterState extends State<ScanCharacter>
     with WidgetsBindingObserver {
   late CameraController? _cameraController;
   bool isScanning = false;
+  double _currentZoomLevel = 1.0;
+  double _minAvailableZoom = 1.0;
+  double _maxAvailableZoom = 1.0;
 
   Future<void>? _initializeControllerFuture;
   Set<String> recognizedList = {};
@@ -90,8 +93,15 @@ class _ScanCharacterState extends State<ScanCharacter>
         enableAudio: false,
       );
 
+      await _cameraController!.initialize();
+
+      _minAvailableZoom = await _cameraController!.getMinZoomLevel();
+      _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
+      _currentZoomLevel = _minAvailableZoom;
+
+      if (!mounted) return;
       setState(() {
-        _initializeControllerFuture = _cameraController!.initialize();
+        _initializeControllerFuture = Future.value();
       });
     } catch (e) {
       if (!mounted) return;
@@ -166,7 +176,14 @@ class _ScanCharacterState extends State<ScanCharacter>
           }
         }
       }); // Initialize JiebaSegmenter
+      if (!mounted) return;
 
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('${foundWords.length} words scanned!'),
+          duration: Duration(seconds: 2), // auto-dismiss after 2 seconds
+        ),
+      );
       setState(() {
         // Update your UI with foundWords
         recognizedList = foundWords.map((word) => word.trim()).toSet();
@@ -207,26 +224,7 @@ class _ScanCharacterState extends State<ScanCharacter>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16),
-        // child: ElevatedButton(
-        //   onPressed: _scanImage,
-        //   style: ElevatedButton.styleFrom(
-        //     backgroundColor: Color(0xFFB42F2B), // Button color
-        //     foregroundColor: Colors.white, // Text color
-        //     shape: RoundedRectangleBorder(
-        //       borderRadius: BorderRadius.circular(4), // Rounded corners
-        //     ),
-        //   ),
-        //   child: Padding(
-        //     padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-        //     child: Text(
-        //       'Scan Characters',
-        //       style: TextStyle(color: Colors.white, fontSize: 16),
-        //     ),
-        //   ),
-        // ),
-      ),
+      bottomNavigationBar: Padding(padding: const EdgeInsets.all(16)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -270,7 +268,22 @@ class _ScanCharacterState extends State<ScanCharacter>
                       ),
                       child: ClipRRect(
                         borderRadius: BorderRadius.circular(8),
-                        child: CameraPreview(_cameraController!),
+                        child: GestureDetector(
+                          onScaleUpdate: (details) async {
+                            // Calculate new zoom level
+                            double newZoomLevel = (_currentZoomLevel *
+                                    details.scale)
+                                .clamp(_minAvailableZoom, _maxAvailableZoom);
+
+                            if (newZoomLevel != _currentZoomLevel) {
+                              _currentZoomLevel = newZoomLevel;
+                              await _cameraController?.setZoomLevel(
+                                _currentZoomLevel,
+                              );
+                            }
+                          },
+                          child: CameraPreview(_cameraController!),
+                        ),
                       ),
                     ),
                   );
