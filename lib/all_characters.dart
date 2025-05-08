@@ -250,6 +250,7 @@ class _AllCharactersState extends State<AllCharacters> {
           // decoration: BoxDecoration(
           //   border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
           // ),
+          // ignore: sized_box_for_whitespace
           child: Container(
             width: double.infinity,
             child: Wrap(

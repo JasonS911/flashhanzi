@@ -500,38 +500,43 @@ class _HomePageState extends State<HomePage> {
             Positioned(
               top: 0,
               right: 0,
-              child: PopupMenuButton<String>(
-                color: Colors.white,
-                icon: Icon(Icons.more_vert, color: Colors.black87),
-                onSelected: (value) {
-                  if (value == 'allCharacters') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => AllCharacters(db: widget.db),
-                      ),
-                    );
-                  }
-                  if (value == 'about') {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const AboutPage(),
-                      ),
-                    );
-                  }
-                },
-                itemBuilder:
-                    (BuildContext context) => [
-                      const PopupMenuItem<String>(
-                        value: 'allCharacters',
-                        child: Text('Review All Characters'),
-                      ),
-                      const PopupMenuItem<String>(
-                        value: 'about',
-                        child: Text('About'),
-                      ),
-                    ],
+              child: Padding(
+                padding: const EdgeInsets.only(
+                  top: 12,
+                ), // Increase this if you want
+                child: PopupMenuButton<String>(
+                  color: Colors.white,
+                  icon: Icon(Icons.more_vert, color: Colors.black87),
+                  onSelected: (value) {
+                    if (value == 'allCharacters') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => AllCharacters(db: widget.db),
+                        ),
+                      );
+                    }
+                    if (value == 'about') {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const AboutPage(),
+                        ),
+                      );
+                    }
+                  },
+                  itemBuilder:
+                      (BuildContext context) => [
+                        const PopupMenuItem<String>(
+                          value: 'allCharacters',
+                          child: Text('Review All Characters'),
+                        ),
+                        const PopupMenuItem<String>(
+                          value: 'about',
+                          child: Text('About'),
+                        ),
+                      ],
+                ),
               ),
             ),
           ],
@@ -575,10 +580,4 @@ class _ActionTile extends StatelessWidget {
       ),
     );
   }
-}
-
-void doNothing() {
-  // This function intentionally left blank to avoid any action.
-  // It can be used as a placeholder for future functionality or to prevent errors.
-  // For example, it can be used in callbacks where no action is needed.
 }
