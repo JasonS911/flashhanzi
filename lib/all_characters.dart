@@ -233,25 +233,7 @@ class _AllCharactersState extends State<AllCharacters> {
               icon: Icons.edit,
               label: 'Edit',
             ),
-            //search
-            // SlidableAction(
-            //   onPressed:
-            //       (context) async => await Navigator.push(
-            //         context,
-            //         MaterialPageRoute(
-            //           builder:
-            //               (context) => DictionaryLookup(
-            //                 db: widget.db,
-            //                 prefillSearch: entry.character,
-            //               ),
-            //         ),
-            //       ),
-            //   backgroundColor: const Color.fromARGB(255, 214, 214, 214),
-            //   foregroundColor: const Color.fromARGB(255, 255, 255, 255),
-            //   icon: Icons.search,
-            //   label: 'Search',
-            // ),
-            //delete
+
             SlidableAction(
               onPressed:
                   (context) async => await deleteCardFromAll(entry.character),
@@ -268,50 +250,38 @@ class _AllCharactersState extends State<AllCharacters> {
           // decoration: BoxDecoration(
           //   border: Border(bottom: BorderSide(color: Colors.grey, width: 2)),
           // ),
-          child: Padding(
-            padding: const EdgeInsets.only(left: 16.0, right: 8, top: 4),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+          child: Container(
+            width: double.infinity,
+            child: Wrap(
+              alignment: WrapAlignment.spaceBetween,
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: 8,
+              runSpacing: 4,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Expanded(
-                      child:
-                          entry.character.length >= 4
-                              ? Text(
-                                entry.character,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              )
-                              : Text(
-                                entry.character,
-                                style: const TextStyle(
-                                  fontSize: 48,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                    ),
-                    SizedBox(width: 24),
-                    Flexible(
-                      child: Wrap(
-                        spacing: 8, // space between pinyin text and icon
-                        crossAxisAlignment: WrapCrossAlignment.center,
-                        children: [
-                          Text(
-                            '[${entry.pinyin}]',
-                            style: const TextStyle(
-                              fontSize: 16,
-                              color: Color(0xFFB42F2B),
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                          IconButton(
+                Text(
+                  entry.character,
+                  style: TextStyle(
+                    fontSize: entry.character.length >= 4 ? 24 : 48,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                  ),
+                ),
+                RichText(
+                  text: TextSpan(
+                    children: [
+                      TextSpan(
+                        text: '[${entry.pinyin}]',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          color: Color(0xFFB42F2B),
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: Padding(
+                          padding: EdgeInsets.only(left: 4),
+                          child: IconButton(
                             icon: const Icon(
                               Icons.volume_up,
                               size: 20,
@@ -321,10 +291,10 @@ class _AllCharactersState extends State<AllCharacters> {
                               playAudio(entry.character);
                             },
                           ),
-                        ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ],
             ),

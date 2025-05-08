@@ -181,27 +181,55 @@ class _EditCardPageState extends State<EditCardPage> {
                   maxLines: null,
                 ),
                 const SizedBox(height: 32),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    TextButton(
-                      onPressed: _deleteCard,
-                      child: const Text(
-                        "Delete Card",
-                        style: TextStyle(color: Colors.red),
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 29),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: () => _deleteCard,
+                          style: ElevatedButton.styleFrom(
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child: Text(
+                              'Delete Card',
+                              style: TextStyle(color: Colors.black),
+                            ),
+                          ),
+                        ),
                       ),
-                    ),
-                    ElevatedButton(
-                      onPressed: _isSaving ? null : _saveChanges,
-                      child:
-                          _isSaving
-                              ? const CircularProgressIndicator(
-                                color: Colors.white,
-                              )
-                              : const Text("Save Changes"),
-                    ),
-                  ],
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: ElevatedButton(
+                          onPressed: _isSaving ? null : _saveChanges,
+
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: const Color(0xFFB42F2B),
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(vertical: 12),
+                            child:
+                                _isSaving
+                                    ? const CircularProgressIndicator(
+                                      color: Colors.white,
+                                    )
+                                    : const Text("Save Changes"),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                SizedBox(height: 16),
               ],
             ),
           ),

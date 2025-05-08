@@ -42,7 +42,7 @@ class AboutPage extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             const Text("For feedback or support, contact:"),
-            const Text("support@flashhanzi.com"),
+            const Text("flashhanzi@gmail.com"),
             const SizedBox(height: 24),
             const Text(
               "Privacy Policy",
@@ -65,13 +65,7 @@ class AboutPage extends StatelessWidget {
               "the service or attempt to reverse engineer the software.",
             ),
             const SizedBox(height: 24),
-            const Text(
-              "Version",
-              style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            const Text("1.0.0"),
-            const SizedBox(height: 24),
+
             Center(
               child: Text(
                 "© 2025 FlashHanzi",

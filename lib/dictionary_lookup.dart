@@ -314,17 +314,34 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Padding(
-                          padding: EdgeInsets.only(left: 0),
-                          child: Text(
-                            "Sentence: ${sentence.chinese}",
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.black,
-                            ),
+                        RichText(
+                          text: TextSpan(
+                            children: [
+                              TextSpan(
+                                text: "Sentence: ${sentence.chinese}",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              WidgetSpan(
+                                alignment: PlaceholderAlignment.middle,
+                                child: IconButton(
+                                  icon: const Icon(
+                                    Icons.volume_up,
+                                    size: 20,
+                                    color: Colors.grey,
+                                  ),
+                                  onPressed: () {
+                                    playAudio(sentence.chinese);
+                                  },
+                                ),
+                              ),
+                            ],
                           ),
                         ),
+
                         const SizedBox(height: 8),
                         Padding(
                           padding: EdgeInsets.only(left: 0),
@@ -337,7 +354,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: 16),
                         Padding(
                           padding: EdgeInsets.only(left: 0),
                           child: Text(

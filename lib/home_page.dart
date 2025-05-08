@@ -253,31 +253,44 @@ class _HomePageState extends State<HomePage> {
                                                   .none, // Remove underline
                                         ),
                                       ),
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                          left: 12,
-                                          bottom: 8,
-                                        ), // Adds space between character and text
-                                        child: Text(
-                                          _pinyinWord!, // Pinyin with tone
-                                          style: TextStyle(
-                                            fontSize: 16,
-                                            color: Colors.black,
-                                            fontWeight: FontWeight.w600,
-                                            decoration: TextDecoration.none,
+
+                                      Wrap(
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        alignment: WrapAlignment.center,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              left: 12,
+                                              bottom: 8,
+                                            ), // Adds space between character and text
+                                            child: Text(
+                                              _pinyinWord!, // Pinyin with tone
+                                              style: TextStyle(
+                                                fontSize: 16,
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w600,
+                                                decoration: TextDecoration.none,
+                                              ),
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      IconButton(
-                                        icon: const Icon(
-                                          Icons.volume_up,
-                                          size: 24,
-                                          color: Colors.grey,
-                                        ),
-                                        onPressed: () {
-                                          // Add functionality to play audio here
-                                          playAudio(_chineseWord!);
-                                        },
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                              bottom: 8,
+                                            ),
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.volume_up,
+                                                size: 24,
+                                                color: Colors.grey,
+                                              ),
+                                              onPressed: () {
+                                                // Add functionality to play audio here
+                                                playAudio(_chineseWord!);
+                                              },
+                                            ),
+                                          ),
+                                        ],
                                       ),
                                     ],
                                   ),
@@ -300,15 +313,39 @@ class _HomePageState extends State<HomePage> {
                                 SizedBox(height: 8),
                                 Padding(
                                   padding: const EdgeInsets.only(left: 16.0),
-                                  child: Text(
-                                    _chineseSentence!,
-                                    style: TextStyle(
-                                      fontSize: 16,
-                                      color: Colors.black,
-                                      fontWeight: FontWeight.w600,
-                                      decoration:
-                                          TextDecoration
-                                              .none, // Remove underline
+                                  child: RichText(
+                                    text: TextSpan(
+                                      children: [
+                                        TextSpan(
+                                          text: _chineseSentence!,
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black,
+                                            fontWeight: FontWeight.w600,
+                                            decoration:
+                                                TextDecoration
+                                                    .none, // Remove underline
+                                          ),
+                                        ),
+                                        WidgetSpan(
+                                          alignment:
+                                              PlaceholderAlignment.middle,
+                                          child: IconButton(
+                                            padding: EdgeInsets.only(
+                                              left: 8,
+                                            ), // optional padding before icon
+                                            icon: const Icon(
+                                              Icons.volume_up,
+                                              size:
+                                                  20, // Slightly smaller to align well
+                                              color: Colors.grey,
+                                            ),
+                                            onPressed: () {
+                                              playAudio(_chineseSentence!);
+                                            },
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
                                 ),

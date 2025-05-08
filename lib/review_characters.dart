@@ -676,79 +676,74 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                               children: [
                                 SizedBox(height: 32),
                                 Padding(
-                                  padding: EdgeInsets.only(
-                                    left: 16,
-                                    right: 16,
-                                    bottom: 16,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 8,
                                   ),
-                                  child: Container(
-                                    width: double.infinity,
-                                    margin: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                    ),
-                                    padding: const EdgeInsets.only(
-                                      bottom: 20,
-                                    ), // Add padding inside the container
-                                    decoration: BoxDecoration(
-                                      border: Border(
-                                        bottom: BorderSide(
-                                          color: Colors.grey, // Underline color
-                                          width: 1, // Underline thickness
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      // Character text
+                                      Text(
+                                        _cards[_currentIndex].character,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 76,
+                                          color: Colors.black87,
+                                          decoration: TextDecoration.none,
                                         ),
                                       ),
-                                    ),
-                                    child: Wrap(
-                                      runAlignment: WrapAlignment.center,
-                                      alignment: WrapAlignment.center,
-                                      crossAxisAlignment:
-                                          WrapCrossAlignment.center,
-                                      spacing: 12,
-                                      children: [
-                                        Text(
-                                          _cards[_currentIndex].character,
-                                          style: TextStyle(
-                                            fontSize: 76,
-                                            color: Colors.black87,
-                                            decoration: TextDecoration.none,
-                                          ),
-                                        ),
-                                        Wrap(
-                                          crossAxisAlignment:
-                                              WrapCrossAlignment.center,
-                                          children: [
-                                            Padding(
-                                              padding: const EdgeInsets.only(
-                                                top: 8,
-                                              ),
-                                              child: Text(
-                                                '[${_cards[_currentIndex].pinyin}]',
-                                                style: const TextStyle(
-                                                  fontSize: 48,
-                                                  color: Colors.black87,
-                                                  decoration:
-                                                      TextDecoration.none,
-                                                ),
-                                              ),
+                                      const SizedBox(height: 12),
+
+                                      // Pinyin + icon (wrapped nicely)
+                                      LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth:
+                                                  constraints.maxWidth * 0.95,
                                             ),
-                                            IconButton(
-                                              icon: const Icon(
-                                                Icons.volume_up,
-                                                size: 24,
-                                                color: Colors.grey,
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                        '[${_cards[_currentIndex].pinyin}]',
+                                                    style: const TextStyle(
+                                                      fontSize: 32,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  WidgetSpan(
+                                                    alignment:
+                                                        PlaceholderAlignment
+                                                            .middle,
+                                                    child: IconButton(
+                                                      icon: const Icon(
+                                                        Icons.volume_up,
+                                                        size: 28,
+                                                        color: Colors.grey,
+                                                      ),
+                                                      onPressed: () {
+                                                        playAudio(
+                                                          _cards[_currentIndex]
+                                                              .character,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
                                               ),
-                                              onPressed: () {
-                                                playAudio(
-                                                  _cards[_currentIndex]
-                                                      .character,
-                                                );
-                                              },
+                                              softWrap: true,
                                             ),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
+                                          );
+                                        },
+                                      ),
+                                    ],
                                   ),
                                 ),
+
                                 SizedBox(
                                   height: 4,
                                 ), // Space before the review list
@@ -812,20 +807,40 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         SizedBox(
                                           height: 8,
                                         ), // Space between meaning and example
-                                        Wrap(
-                                          children: [
-                                            Text(
-                                              'Example: ${_cards[_currentIndex].chineseSentence}',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                                decoration:
-                                                    TextDecoration
-                                                        .none, // Remove underline
+                                        RichText(
+                                          text: TextSpan(
+                                            children: [
+                                              TextSpan(
+                                                text:
+                                                    'Example: ${_cards[_currentIndex].chineseSentence}',
+                                                style: const TextStyle(
+                                                  fontSize: 16,
+                                                  color: Colors.black87,
+                                                  decoration:
+                                                      TextDecoration.none,
+                                                ),
                                               ),
-                                            ),
-                                          ],
+                                              WidgetSpan(
+                                                alignment:
+                                                    PlaceholderAlignment.middle,
+                                                child: IconButton(
+                                                  icon: const Icon(
+                                                    Icons.volume_up,
+                                                    size: 24,
+                                                    color: Colors.grey,
+                                                  ),
+                                                  onPressed: () {
+                                                    playAudio(
+                                                      _cards[_currentIndex]
+                                                          .chineseSentence!,
+                                                    );
+                                                  },
+                                                ),
+                                              ),
+                                            ],
+                                          ),
                                         ),
+
                                         Wrap(
                                           children: [
                                             Text(
