@@ -75,10 +75,14 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
         MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
       );
     } else {
-      // User is not Pro → show SubscribePage
+      //TODO: change upon update for subscription functionality
       Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const SubscribePage()),
+        MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
       );
+      // User is not Pro → show SubscribePage
+      // Navigator.of(context).pushReplacement(
+      //   MaterialPageRoute(builder: (context) => const SubscribePage()),
+      // );
     }
   }
 

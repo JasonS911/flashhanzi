@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class AboutPage extends StatelessWidget {
   const AboutPage({super.key});
@@ -49,11 +50,15 @@ class AboutPage extends StatelessWidget {
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8),
-            const Text(
-              "We respect your privacy. FlashHanzi does not collect or store any personal data. "
-              "All your data stays on your device unless you explicitly choose to back it up or sync it. "
-              "We do not sell or share your data with third parties.",
+            TextButton(
+              onPressed: () {
+                launchUrl(
+                  Uri.parse("https://flashhanzi.github.io/flashhanzi/privacy"),
+                );
+              },
+              child: Text("Privacy Policy"),
             ),
+
             const SizedBox(height: 24),
             const Text(
               "Terms of Use",
