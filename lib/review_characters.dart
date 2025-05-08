@@ -791,104 +791,103 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                 Padding(
                   padding: EdgeInsets.all(0),
                   child:
-                      _currentIndex != -1 &&
-                              _cards[_currentIndex].chineseSentence != null
+                      _currentIndex != -1
                           ? Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16),
-                            child:
-                                _cards[_currentIndex].chineseSentence == "" ||
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                SizedBox(
+                                  height: 8,
+                                ), // Space between meaning and example
+                                _cards[_currentIndex].chineseSentence == null ||
                                         _cards[_currentIndex].chineseSentence ==
-                                            null
-                                    ? SizedBox(height: 4)
-                                    : Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
+                                            ""
+                                    ? SizedBox(height: 0)
+                                    : RichText(
+                                      text: TextSpan(
+                                        children: [
+                                          TextSpan(
+                                            text:
+                                                'Example: ${_cards[_currentIndex].chineseSentence}',
+                                            style: const TextStyle(
+                                              fontSize: 16,
+                                              color: Colors.black87,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
+                                          WidgetSpan(
+                                            alignment:
+                                                PlaceholderAlignment.middle,
+                                            child: IconButton(
+                                              icon: const Icon(
+                                                Icons.volume_up,
+                                                size: 24,
+                                                color: Colors.grey,
+                                              ),
+                                              onPressed: () {
+                                                playAudio(
+                                                  _cards[_currentIndex]
+                                                      .chineseSentence!,
+                                                );
+                                              },
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                _cards[_currentIndex].pinyinSentence == null ||
+                                        _cards[_currentIndex].pinyinSentence ==
+                                            ""
+                                    ? SizedBox(height: 0)
+                                    : Wrap(
                                       children: [
-                                        SizedBox(
-                                          height: 8,
-                                        ), // Space between meaning and example
-                                        RichText(
-                                          text: TextSpan(
-                                            children: [
-                                              TextSpan(
-                                                text:
-                                                    'Example: ${_cards[_currentIndex].chineseSentence}',
-                                                style: const TextStyle(
-                                                  fontSize: 16,
-                                                  color: Colors.black87,
-                                                  decoration:
-                                                      TextDecoration.none,
-                                                ),
-                                              ),
-                                              WidgetSpan(
-                                                alignment:
-                                                    PlaceholderAlignment.middle,
-                                                child: IconButton(
-                                                  icon: const Icon(
-                                                    Icons.volume_up,
-                                                    size: 24,
-                                                    color: Colors.grey,
-                                                  ),
-                                                  onPressed: () {
-                                                    playAudio(
-                                                      _cards[_currentIndex]
-                                                          .chineseSentence!,
-                                                    );
-                                                  },
-                                                ),
-                                              ),
-                                            ],
+                                        Text(
+                                          'Pinyin: ${_cards[_currentIndex].pinyinSentence}',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                            decoration:
+                                                TextDecoration
+                                                    .none, // Remove underline
                                           ),
                                         ),
-
-                                        Wrap(
-                                          children: [
-                                            Text(
-                                              'Pinyin: ${_cards[_currentIndex].pinyinSentence}',
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                                decoration:
-                                                    TextDecoration
-                                                        .none, // Remove underline
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Wrap(
-                                          children: [
-                                            Text(
-                                              "Translation: ${_cards[_currentIndex].englishSentence}",
-                                              style: TextStyle(
-                                                fontSize: 16,
-                                                color: Colors.black87,
-                                                decoration:
-                                                    TextDecoration
-                                                        .none, // Remove underline
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        Container(
-                                          margin: EdgeInsets.symmetric(
-                                            horizontal: 4,
-                                          ),
-
-                                          padding: EdgeInsets.only(bottom: 24),
-                                          decoration: BoxDecoration(
-                                            border: Border(
-                                              bottom: BorderSide(
-                                                color:
-                                                    Colors
-                                                        .grey, // Underline color
-                                                width: 1, // Underline thickness
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 12),
                                       ],
                                     ),
+                                _cards[_currentIndex].englishSentence == null ||
+                                        _cards[_currentIndex].englishSentence ==
+                                            ""
+                                    ? SizedBox(height: 0)
+                                    : Wrap(
+                                      children: [
+                                        Text(
+                                          "Translation: ${_cards[_currentIndex].englishSentence}",
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.black87,
+                                            decoration:
+                                                TextDecoration
+                                                    .none, // Remove underline
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 4),
+
+                                  padding: EdgeInsets.only(bottom: 24),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey, // Underline color
+                                        width: 1, // Underline thickness
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: 12),
+                              ],
+                            ),
                           )
                           : SizedBox(height: 4),
                 ),

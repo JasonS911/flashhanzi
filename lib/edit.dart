@@ -164,7 +164,7 @@ class _EditCardPageState extends State<EditCardPage> {
                 ),
                 const SizedBox(height: 20),
                 TextField(
-                  controller: _pinyinController,
+                  controller: _pinyinSController,
                   decoration: const InputDecoration(
                     labelText: "Pinyin Sentence",
                     alignLabelWithHint: true,
@@ -188,7 +188,7 @@ class _EditCardPageState extends State<EditCardPage> {
                     children: [
                       Expanded(
                         child: ElevatedButton(
-                          onPressed: () => _deleteCard,
+                          onPressed: _deleteCard,
                           style: ElevatedButton.styleFrom(
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(4),
