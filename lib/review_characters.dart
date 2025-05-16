@@ -854,6 +854,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         ),
                                       ],
                                     ),
+                                SizedBox(height: 12),
                                 _cards[_currentIndex].englishSentence == null ||
                                         _cards[_currentIndex].englishSentence ==
                                             ""
@@ -904,29 +905,40 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                       strokeMap.containsKey(
                                         _cards[_currentIndex].character,
                                       )
-                                  ? ExpansionTile(
-                                    controller: expansionController,
-                                    title: const Text("Stroke Order Animation"),
-                                    leading: const Icon(Icons.play_arrow),
-                                    children: [
-                                      Center(
-                                        child: SizedBox(
-                                          height: 150,
-                                          child:
-                                              strokeMap.containsKey(
-                                                    _cards[_currentIndex]
-                                                        .character,
-                                                  )
-                                                  ? StrokeOrderWidget(
-                                                    character:
-                                                        _cards[_currentIndex]
-                                                            .character,
-                                                    dataMap: strokeMap,
-                                                  ) // Pass the character to the widget
-                                                  : SizedBox.shrink(),
-                                        ),
+                                  ? Theme(
+                                    data: Theme.of(context).copyWith(
+                                      dividerColor:
+                                          Colors
+                                              .transparent, // Removes the internal divider
+                                      splashColor: Colors.transparent,
+                                      highlightColor: Colors.transparent,
+                                    ),
+                                    child: ExpansionTile(
+                                      controller: expansionController,
+                                      title: const Text(
+                                        "Stroke Order Animation",
                                       ),
-                                    ],
+                                      leading: const Icon(Icons.play_arrow),
+                                      children: [
+                                        Center(
+                                          child: SizedBox(
+                                            height: 150,
+                                            child:
+                                                strokeMap.containsKey(
+                                                      _cards[_currentIndex]
+                                                          .character,
+                                                    )
+                                                    ? StrokeOrderWidget(
+                                                      character:
+                                                          _cards[_currentIndex]
+                                                              .character,
+                                                      dataMap: strokeMap,
+                                                    ) // Pass the character to the widget
+                                                    : SizedBox.shrink(),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
                                   )
                                   : const SizedBox.shrink(), // return nothing
                             ],

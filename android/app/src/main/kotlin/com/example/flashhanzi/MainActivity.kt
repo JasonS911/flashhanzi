@@ -1,4 +1,4 @@
-package com.example.flashhanzi
+package com.axoncode.flashhanzi
 
 import io.flutter.embedding.android.FlutterActivity
 

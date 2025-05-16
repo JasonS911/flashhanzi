@@ -220,14 +220,20 @@ class _AllCharactersState extends State<AllCharacters> {
           children: [
             //edit
             SlidableAction(
-              onPressed:
-                  (context) async => await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder:
-                          (context) => EditCardPage(db: widget.db, card: entry),
-                    ),
+              onPressed: (context) async {
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder:
+                        (context) => EditCardPage(db: widget.db, card: entry),
                   ),
+                );
+
+                if (result == true) {
+                  // Refresh the list
+                  _onSearchChanged();
+                }
+              },
               backgroundColor: const Color.fromARGB(255, 214, 214, 214),
               foregroundColor: const Color.fromARGB(255, 255, 255, 255),
               icon: Icons.edit,

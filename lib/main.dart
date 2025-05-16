@@ -9,6 +9,7 @@ import 'package:flashhanzi/review_characters.dart';
 import 'package:flashhanzi/scan_character.dart';
 import 'package:flashhanzi/utils/subscription_manager.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,8 +21,10 @@ void main() async {
   if (isTableEmpty) {
     await parse(db);
   }
-
-  runApp(AppEntry(db: db));
+  SystemChrome.setPreferredOrientations([
+    DeviceOrientation.portraitUp,
+    DeviceOrientation.portraitDown,
+  ]).then((value) => runApp(AppEntry(db: db)));
 }
 
 class AppEntry extends StatelessWidget {

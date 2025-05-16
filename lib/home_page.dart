@@ -161,6 +161,7 @@ class _HomePageState extends State<HomePage> {
               crossAxisAlignment:
                   CrossAxisAlignment.center, // Centers children horizontally
               children: [
+                SizedBox(height: 24), // Adds space at the top
                 Image.asset(
                   'assets/logo.png', // Ensure you have a logo image in the assets folder
                   height: 100, // Adjust height as needed

@@ -288,23 +288,34 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                         Text('No example sentence found.'),
                         const SizedBox(height: 16),
                         strokesLoaded && strokeMap.containsKey(entry.simplified)
-                            ? ExpansionTile(
-                              title: const Text("Stroke Animation"),
-                              leading: const Icon(Icons.play_arrow),
-                              children: [
-                                Center(
-                                  child: SizedBox(
-                                    height: 150,
-                                    child:
-                                        strokeMap.containsKey(entry.simplified)
-                                            ? StrokeOrderWidget(
-                                              character: entry.simplified,
-                                              dataMap: strokeMap,
-                                            ) // Pass the character to the widget
-                                            : SizedBox.shrink(),
+                            ? Theme(
+                              data: Theme.of(context).copyWith(
+                                dividerColor:
+                                    Colors
+                                        .transparent, // Removes the internal divider
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                              ),
+                              child: ExpansionTile(
+                                title: const Text("Stroke Animation"),
+                                leading: const Icon(Icons.play_arrow),
+                                children: [
+                                  Center(
+                                    child: SizedBox(
+                                      height: 150,
+                                      child:
+                                          strokeMap.containsKey(
+                                                entry.simplified,
+                                              )
+                                              ? StrokeOrderWidget(
+                                                character: entry.simplified,
+                                                dataMap: strokeMap,
+                                              ) // Pass the character to the widget
+                                              : SizedBox.shrink(),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             )
                             : const SizedBox.shrink(), // return nothing
                       ],
@@ -368,23 +379,34 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                         ),
                         const SizedBox(height: 16),
                         strokesLoaded && strokeMap.containsKey(entry.simplified)
-                            ? ExpansionTile(
-                              title: const Text("Stroke Animation"),
-                              leading: const Icon(Icons.play_arrow),
-                              children: [
-                                Center(
-                                  child: SizedBox(
-                                    height: 150,
-                                    child:
-                                        strokeMap.containsKey(entry.simplified)
-                                            ? StrokeOrderWidget(
-                                              character: entry.simplified,
-                                              dataMap: strokeMap,
-                                            ) // Pass the character to the widget
-                                            : SizedBox.shrink(),
+                            ? Theme(
+                              data: Theme.of(context).copyWith(
+                                dividerColor:
+                                    Colors
+                                        .transparent, // Removes the internal divider
+                                splashColor: Colors.transparent,
+                                highlightColor: Colors.transparent,
+                              ),
+                              child: ExpansionTile(
+                                title: const Text("Stroke Animation"),
+                                leading: const Icon(Icons.play_arrow),
+                                children: [
+                                  Center(
+                                    child: SizedBox(
+                                      height: 150,
+                                      child:
+                                          strokeMap.containsKey(
+                                                entry.simplified,
+                                              )
+                                              ? StrokeOrderWidget(
+                                                character: entry.simplified,
+                                                dataMap: strokeMap,
+                                              ) // Pass the character to the widget
+                                              : SizedBox.shrink(),
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             )
                             : const SizedBox.shrink(), // return nothing
                       ],
