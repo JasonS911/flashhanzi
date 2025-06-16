@@ -29,7 +29,7 @@ class LoadingScreen extends StatelessWidget {
             ),
             SizedBox(height: 20),
             Text(
-              'Loading...',
+              'Preparing your dictionary...',
               style: TextStyle(
                 color: Colors.black87,
                 fontSize: 16,

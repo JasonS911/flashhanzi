@@ -25,7 +25,23 @@ Future<void> parse(AppDatabase db) async {
   final List<DictionaryEntriesCompanion> entries = [];
   final List<SentencePairsCompanion> sentencePairs = [];
 
-  for (final line in linesSentences) {
+  // for (final line in linesSentences) {
+  //   final parts = line.split('\t');
+  //   if (parts.length >= 4) {
+  //     final chinese = parts[1].trim();
+  //     final english = parts[3].trim();
+
+  //     sentencePairs.add(
+  //       SentencePairsCompanion(
+  //         chinese: Value(chinese),
+  //         english: Value(english),
+  //         pinyin: Value(PinyinHelper.getPinyin(chinese)),
+  //       ),
+  //     );
+  //   }
+  // }
+  for (int i = 0; i < linesSentences.length; i++) {
+    final line = linesSentences[i];
     final parts = line.split('\t');
     if (parts.length >= 4) {
       final chinese = parts[1].trim();
@@ -39,10 +55,53 @@ Future<void> parse(AppDatabase db) async {
         ),
       );
     }
+
+    // Let UI breathe every 500 lines
+    if (i % 400 == 0) {
+      await Future.delayed(Duration(milliseconds: 10));
+    }
   }
 
-  for (final line in lines) {
-    if (line.startsWith('#')) continue; // Skip comments
+  // for (final line in lines) {
+  //   if (line.startsWith('#')) continue; // Skip comments
+
+  //   final match = RegExp(
+  //     r'^(.+?)\s+(.+?)\s+\[(.+?)\]\s+/(.+)/$',
+  //   ).firstMatch(line);
+
+  //   if (match != null) {
+  //     final traditional = match.group(1)!.trim();
+
+  //     // if (traditional.contains(RegExp(r'[A-Za-z]'))) continue;
+
+  //     final simplified = match.group(2)!.trim();
+
+  //     // if (simplified.contains(RegExp(r'[A-Za-z]'))) continue;
+
+  //     final pinyin = match.group(3)!.trim();
+  //     final pinYinPlain = normalizePinyin(pinyin);
+  //     final definitions = match.group(4)!.replaceAll('/', '; ').trim();
+
+  //     //skip surname entries
+  //     final lowerDef = definitions.toLowerCase();
+  //     final isCapitalPinyin = pinyin[0].toUpperCase() == pinyin[0];
+  //     final isUnwanted = lowerDef.contains('surname') && isCapitalPinyin;
+
+  //     if (isUnwanted) continue;
+  //     entries.add(
+  //       DictionaryEntriesCompanion(
+  //         simplified: Value(simplified),
+  //         traditional: Value(traditional),
+  //         pinyin: Value(pinyin),
+  //         pinyinPlain: Value(pinYinPlain),
+  //         definition: Value(definitions),
+  //       ),
+  //     );
+  //   }
+  // }
+  for (int i = 0; i < lines.length; i++) {
+    final line = lines[i];
+    if (line.startsWith('#')) continue;
 
     final match = RegExp(
       r'^(.+?)\s+(.+?)\s+\[(.+?)\]\s+/(.+)/$',
@@ -50,23 +109,17 @@ Future<void> parse(AppDatabase db) async {
 
     if (match != null) {
       final traditional = match.group(1)!.trim();
-
-      // if (traditional.contains(RegExp(r'[A-Za-z]'))) continue;
-
       final simplified = match.group(2)!.trim();
-
-      // if (simplified.contains(RegExp(r'[A-Za-z]'))) continue;
-
       final pinyin = match.group(3)!.trim();
       final pinYinPlain = normalizePinyin(pinyin);
       final definitions = match.group(4)!.replaceAll('/', '; ').trim();
 
-      //skip surname entries
       final lowerDef = definitions.toLowerCase();
       final isCapitalPinyin = pinyin[0].toUpperCase() == pinyin[0];
       final isUnwanted = lowerDef.contains('surname') && isCapitalPinyin;
 
       if (isUnwanted) continue;
+
       entries.add(
         DictionaryEntriesCompanion(
           simplified: Value(simplified),
@@ -77,21 +130,52 @@ Future<void> parse(AppDatabase db) async {
         ),
       );
     }
+
+    // Let UI breathe every 400 lines
+    if (i % 400 == 0) {
+      await Future.delayed(Duration(milliseconds: 10));
+    }
   }
 
   // Perform batch insert
-  await db.batch((batch) {
-    batch.insertAll(
-      db.dictionaryEntries,
-      entries,
-      mode: InsertMode.insertOrIgnore,
-    );
-    batch.insertAll(
-      db.sentencePairs,
-      sentencePairs,
-      mode: InsertMode.insertOrIgnore,
-    );
-  });
+  // await db.batch((batch) {
+  //   batch.insertAll(
+  //     db.dictionaryEntries,
+  //     entries,
+  //     mode: InsertMode.insertOrIgnore,
+  //   );
+  //   batch.insertAll(
+  //     db.sentencePairs,
+  //     sentencePairs,
+  //     mode: InsertMode.insertOrIgnore,
+  //   );
+  // });
+
+  const int batchSize = 300;
+
+  for (int i = 0; i < entries.length; i += batchSize) {
+    final batchEntries = entries.skip(i).take(batchSize).toList();
+    await db.batch((batch) {
+      batch.insertAll(
+        db.dictionaryEntries,
+        batchEntries,
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
+    await Future.delayed(Duration(milliseconds: 10)); // Yield to UI
+  }
+
+  for (int i = 0; i < sentencePairs.length; i += batchSize) {
+    final batchSentences = sentencePairs.skip(i).take(batchSize).toList();
+    await db.batch((batch) {
+      batch.insertAll(
+        db.sentencePairs,
+        batchSentences,
+        mode: InsertMode.insertOrIgnore,
+      );
+    });
+    await Future.delayed(Duration(milliseconds: 10)); // Yield to UI
+  }
 }
 
 String normalizePinyin(String input) {

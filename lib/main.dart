@@ -16,11 +16,11 @@ void main() async {
 
   final db = AppDatabase();
 
-  final isTableEmpty = (await db.select(db.dictionaryEntries).get()).isEmpty;
+  // final isTableEmpty = (await db.select(db.dictionaryEntries).get()).isEmpty;
 
-  if (isTableEmpty) {
-    await parse(db);
-  }
+  // if (isTableEmpty) {
+  //   await parse(db);
+  // }
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -68,6 +68,12 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
 
   Future<void> _startApp() async {
     await Future.delayed(Duration(seconds: 2));
+    final isTableEmpty =
+        (await widget.db.select(widget.db.dictionaryEntries).get()).isEmpty;
+    if (isTableEmpty) {
+      await parse(widget.db);
+    }
+
     await SubscriptionManager().initialize();
 
     if (!mounted) return;
