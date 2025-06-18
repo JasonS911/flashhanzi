@@ -68,7 +68,11 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       String recognized = result.map((candidate) => candidate.text).join('\n');
       List<String> recognizedTextList = recognized.split('\n');
       //cycle through the first ten words of the list. For each word break apart using Jieba and add to the final recognizedList to return
-      for (var wordNumber = 0; wordNumber < 10; wordNumber++) {
+      for (
+        var wordNumber = 0;
+        wordNumber < recognizedTextList.length && wordNumber < 10;
+        wordNumber++
+      ) {
         //add the most matched words right away if they exist in dictionary
         var recognizedWord = recognizedTextList[wordNumber];
         List<DictionaryEntry>? results = await widget.db.searchDictionary(
@@ -99,7 +103,9 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       }
 
       setState(() {
-        recognizedList = recognizedList;
+        recognizedList = Set.from(
+          recognizedList,
+        ); // creates a new Set with the same contents
       });
     } catch (e) {
       if (!mounted) return;
