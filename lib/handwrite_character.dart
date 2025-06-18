@@ -59,7 +59,6 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       return;
     }
     try {
-      // await ensureModelDownloaded();
       // Convert raw points to Ink
       final ink = _convertPointsToInk(points);
       final result = await _digitalInkRecognizer.recognize(ink);

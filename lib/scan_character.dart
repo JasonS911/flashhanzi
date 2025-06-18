@@ -62,27 +62,32 @@ class _ScanCharacterState extends State<ScanCharacter>
   }
 
   bool _initializing = false;
-
   Future<void> _initializeCamera() async {
     if (_initializing) return;
     _initializing = true;
 
-    final status = await Permission.camera.status;
+    try {
+      final status = await Permission.camera.status;
 
-    if (status.isGranted) {
-      await _startCamera();
-    } else if (status.isDenied || status.isRestricted) {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        await _startCamera();
-      } else {
+      final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
+      if (status.isGranted || isIOS) {
+        await _startCamera(); // <-- iOS prompt will happen *inside* .initialize()
+      } else if (status.isDenied || status.isRestricted) {
+        final result = await Permission.camera.request();
+        if (result.isGranted) {
+          await _startCamera();
+        } else {
+          _showPermissionDialog();
+        }
+      } else if (status.isPermanentlyDenied) {
         _showPermissionDialog();
       }
-    } else if (status.isPermanentlyDenied) {
+    } catch (e) {
       _showPermissionDialog();
+    } finally {
+      _initializing = false;
     }
-
-    _initializing = false;
   }
 
   // Future<void> _startCamera() async {
@@ -114,35 +119,26 @@ class _ScanCharacterState extends State<ScanCharacter>
   //   }
   // }
   Future<void> _startCamera() async {
-    try {
-      final cameras = await availableCameras();
-      final firstCamera = cameras.first;
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
 
-      _cameraController = CameraController(
-        firstCamera,
-        ResolutionPreset.high,
-        enableAudio: false,
-      );
+    _cameraController = CameraController(
+      firstCamera,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
 
-      print('Initializing camera controller...');
-      await _cameraController!
-          .initialize(); // <-- iOS triggers native permission here
+    await _cameraController!
+        .initialize(); // <-- iOS prompts here if not granted
 
-      _minAvailableZoom = await _cameraController!.getMinZoomLevel();
-      _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
-      _currentZoomLevel = _minAvailableZoom;
+    _minAvailableZoom = await _cameraController!.getMinZoomLevel();
+    _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
+    _currentZoomLevel = _minAvailableZoom;
 
-      if (!mounted) return;
-
-      setState(() {
-        _initializeControllerFuture = Future.value();
-      });
-    } catch (e) {
-      print('Camera error: $e');
-      if (mounted) {
-        _showPermissionDialog();
-      }
-    }
+    if (!mounted) return;
+    setState(() {
+      _initializeControllerFuture = Future.value();
+    });
   }
 
   void _showPermissionDialog() {

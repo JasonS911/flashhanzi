@@ -44,7 +44,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> ensureModelDownloaded() async {
-    const modelName = 'zh-Hani';
+    const modelName = 'zh-Hans';
     final modelManager = mlkit.DigitalInkRecognizerModelManager();
 
     try {
