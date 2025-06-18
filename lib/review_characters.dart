@@ -340,10 +340,21 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                               ],
                             ),
                           )
-                          : Text(
-                            currentCard!.character,
+                          : currentCard!.character.length <= 3
+                          ? Text(
+                            currentCard.character,
                             style: const TextStyle(
-                              fontSize: 116,
+                              fontSize: 76,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.black87,
+                              decoration:
+                                  TextDecoration.none, // Remove underline
+                            ),
+                          )
+                          : Text(
+                            currentCard.character,
+                            style: const TextStyle(
+                              fontSize: 46,
                               fontWeight: FontWeight.bold,
                               color: Colors.black87,
                               decoration:
@@ -689,61 +700,27 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       // Character text
-                                      Text(
-                                        _cards[_currentIndex].character,
-                                        textAlign: TextAlign.center,
-                                        style: const TextStyle(
-                                          fontSize: 76,
-                                          color: Colors.black87,
-                                          decoration: TextDecoration.none,
-                                        ),
-                                      ),
+                                      _cards[_currentIndex].character.length <=
+                                              3
+                                          ? Text(
+                                            _cards[_currentIndex].character,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 76,
+                                              color: Colors.black87,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          )
+                                          : Text(
+                                            _cards[_currentIndex].character,
+                                            textAlign: TextAlign.center,
+                                            style: const TextStyle(
+                                              fontSize: 52,
+                                              color: Colors.black87,
+                                              decoration: TextDecoration.none,
+                                            ),
+                                          ),
                                       const SizedBox(height: 12),
-
-                                      // Pinyin + icon (wrapped nicely)
-                                      LayoutBuilder(
-                                        builder: (context, constraints) {
-                                          return ConstrainedBox(
-                                            constraints: BoxConstraints(
-                                              maxWidth:
-                                                  constraints.maxWidth * 0.95,
-                                            ),
-                                            child: RichText(
-                                              text: TextSpan(
-                                                children: [
-                                                  TextSpan(
-                                                    text:
-                                                        '[${_cards[_currentIndex].pinyin}]',
-                                                    style: const TextStyle(
-                                                      fontSize: 32,
-                                                      color: Colors.black87,
-                                                    ),
-                                                  ),
-                                                  WidgetSpan(
-                                                    alignment:
-                                                        PlaceholderAlignment
-                                                            .middle,
-                                                    child: IconButton(
-                                                      icon: const Icon(
-                                                        Icons.volume_up,
-                                                        size: 28,
-                                                        color: Colors.grey,
-                                                      ),
-                                                      onPressed: () {
-                                                        playAudio(
-                                                          _cards[_currentIndex]
-                                                              .character,
-                                                        );
-                                                      },
-                                                    ),
-                                                  ),
-                                                ],
-                                              ),
-                                              softWrap: true,
-                                            ),
-                                          );
-                                        },
-                                      ),
                                     ],
                                   ),
                                 ),
@@ -751,13 +728,76 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 SizedBox(
                                   height: 4,
                                 ), // Space before the review list
+                              ],
+                            ),
+                          ],
+                ),
 
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child:
+                      _currentIndex != -1
+                          ? Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                // Pinyin + icon (wrapped nicely)
+                                LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    return ConstrainedBox(
+                                      constraints: BoxConstraints(
+                                        maxWidth: constraints.maxWidth * 0.95,
+                                      ),
+                                      child: RichText(
+                                        text: TextSpan(
+                                          children: [
+                                            TextSpan(
+                                              text:
+                                                  '[${_cards[_currentIndex].pinyin}]',
+                                              style: TextStyle(
+                                                fontSize:
+                                                    _cards[_currentIndex]
+                                                                .pinyin
+                                                                .length <=
+                                                            3
+                                                        ? 32
+                                                        : 24,
+                                                color: Colors.black87,
+                                              ),
+                                            ),
+                                            WidgetSpan(
+                                              alignment:
+                                                  PlaceholderAlignment.middle,
+                                              child: IconButton(
+                                                icon: Icon(
+                                                  Icons.volume_up,
+                                                  size:
+                                                      _cards[_currentIndex]
+                                                                  .pinyin
+                                                                  .length <=
+                                                              3
+                                                          ? 28
+                                                          : 22,
+                                                  color: Colors.grey,
+                                                ),
+                                                onPressed: () {
+                                                  playAudio(
+                                                    _cards[_currentIndex]
+                                                        .character,
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        softWrap: true,
+                                      ),
+                                    );
+                                  },
+                                ),
                                 Padding(
-                                  padding: EdgeInsets.only(
-                                    left: 16,
-                                    right: 16,
-                                    bottom: 12,
-                                  ),
+                                  padding: EdgeInsets.only(bottom: 0),
                                   child: Container(
                                     padding: const EdgeInsets.only(
                                       bottom: 0,
@@ -773,7 +813,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                             Text(
                                               'Meaning: ${_cards[_currentIndex].definition}',
                                               style: TextStyle(
-                                                fontSize: 24,
+                                                fontSize: 20,
                                                 color: Color(0xFFB42F2B),
                                                 fontWeight: FontWeight.bold,
                                                 decoration:
@@ -787,20 +827,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                     ),
                                   ),
                                 ),
-                              ],
-                            ),
-                          ],
-                ),
-
-                Padding(
-                  padding: EdgeInsets.all(0),
-                  child:
-                      _currentIndex != -1
-                          ? Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
                                 SizedBox(
                                   height: 8,
                                 ), // Space between meaning and example
@@ -856,9 +882,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                     .none, // Remove underline
                                           ),
                                         ),
+                                        SizedBox(height: 36),
                                       ],
                                     ),
-                                SizedBox(height: 12),
                                 _cards[_currentIndex].englishSentence == null ||
                                         _cards[_currentIndex].englishSentence ==
                                             ""
@@ -877,20 +903,13 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         ),
                                       ],
                                     ),
-                                Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 4),
 
-                                  padding: EdgeInsets.only(bottom: 24),
-                                  decoration: BoxDecoration(
-                                    border: Border(
-                                      bottom: BorderSide(
-                                        color: Colors.grey, // Underline color
-                                        width: 1, // Underline thickness
-                                      ),
-                                    ),
-                                  ),
+                                const Divider(
+                                  color: Colors.grey,
+                                  thickness: 1,
+                                  indent: 16,
+                                  endIndent: 16,
                                 ),
-                                SizedBox(height: 12),
                               ],
                             ),
                           )
@@ -902,51 +921,35 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                   child:
                       (_cards.isEmpty || _currentIndex == -1 || !strokesLoaded)
                           ? SizedBox(height: 4)
-                          : ListView(
-                            shrinkWrap: true,
-                            children: [
-                              strokesLoaded &&
-                                      strokeMap.containsKey(
-                                        _cards[_currentIndex].character,
-                                      )
-                                  ? Theme(
-                                    data: Theme.of(context).copyWith(
-                                      dividerColor:
-                                          Colors
-                                              .transparent, // Removes the internal divider
-                                      splashColor: Colors.transparent,
-                                      highlightColor: Colors.transparent,
+                          : strokesLoaded &&
+                              strokeMap.containsKey(
+                                _cards[_currentIndex].character,
+                              )
+                          ? Theme(
+                            data: Theme.of(context).copyWith(
+                              dividerColor: Colors.transparent,
+                              splashColor: Colors.transparent,
+                              highlightColor: Colors.transparent,
+                            ),
+                            child: ExpansionTile(
+                              controller: expansionController,
+                              title: const Text("Stroke Order Animation"),
+                              leading: const Icon(Icons.play_arrow),
+                              children: [
+                                Center(
+                                  child: SizedBox(
+                                    height: 150,
+                                    child: StrokeOrderWidget(
+                                      character:
+                                          _cards[_currentIndex].character,
+                                      dataMap: strokeMap,
                                     ),
-                                    child: ExpansionTile(
-                                      controller: expansionController,
-                                      title: const Text(
-                                        "Stroke Order Animation",
-                                      ),
-                                      leading: const Icon(Icons.play_arrow),
-                                      children: [
-                                        Center(
-                                          child: SizedBox(
-                                            height: 150,
-                                            child:
-                                                strokeMap.containsKey(
-                                                      _cards[_currentIndex]
-                                                          .character,
-                                                    )
-                                                    ? StrokeOrderWidget(
-                                                      character:
-                                                          _cards[_currentIndex]
-                                                              .character,
-                                                      dataMap: strokeMap,
-                                                    ) // Pass the character to the widget
-                                                    : SizedBox.shrink(),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  )
-                                  : const SizedBox.shrink(), // return nothing
-                            ],
-                          ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                          : const SizedBox.shrink(),
                 ),
                 //stuff after column containing future builder
                 SizedBox(height: 16),
