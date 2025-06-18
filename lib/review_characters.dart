@@ -23,7 +23,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   List<CharacterCard> _cards = [];
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
-  final ExpansionTileController expansionController = ExpansionTileController();
+  final ExpansibleController expansionController = ExpansibleController();
   bool _initialized = false;
 
   String? _lastCardCharacter; // keeps track of the previously shown character
@@ -220,7 +220,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 20), // Space at the top
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top,
+                ), // Space at the top
                 Stack(
                   alignment: Alignment.center, // Center the text in the Stack
                   children: [
@@ -553,7 +555,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
           child: Center(
             child: Column(
               children: [
-                SizedBox(height: 20), // Space at the top
+                SizedBox(
+                  height: MediaQuery.of(context).padding.top,
+                ), // Space at the top
                 Stack(
                   alignment: Alignment.center, // Center the text in the Stack
                   children: [

@@ -74,25 +74,25 @@ class _InitialLoadingScreenState extends State<InitialLoadingScreen> {
       await parse(widget.db);
     }
 
-    await SubscriptionManager().initialize();
+    // await SubscriptionManager().initialize();
 
     if (!mounted) return;
 
-    if (SubscriptionManager().isProUser) {
-      // User is Pro → go to HomePage
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
-      );
-    } else {
-      //TODO: change upon update for subscription functionality
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
-      );
-      // User is not Pro → show SubscribePage
-      // Navigator.of(context).pushReplacement(
-      //   MaterialPageRoute(builder: (context) => const SubscribePage()),
-      // );
-    }
+    // if (SubscriptionManager().isProUser) {
+    //   // User is Pro → go to HomePage
+    Navigator.of(context).pushReplacement(
+      MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
+    );
+    // } else {
+    //   //TODO: change upon update for subscription functionality
+    //   Navigator.of(context).pushReplacement(
+    //     MaterialPageRoute(builder: (context) => HomePage(db: widget.db)),
+    //   );
+    //   // User is not Pro → show SubscribePage
+    //   // Navigator.of(context).pushReplacement(
+    //   //   MaterialPageRoute(builder: (context) => const SubscribePage()),
+    //   // );
+    // }
   }
 
   @override

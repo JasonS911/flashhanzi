@@ -95,7 +95,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     return Scaffold(
       body: ListView(
         controller: _scrollController,
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: EdgeInsets.only(top: MediaQuery.of(context).padding.top),
         children: [
           // Home Button + Title
           Padding(
