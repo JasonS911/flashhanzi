@@ -22,6 +22,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
   final int limit = 20;
   bool isLoading = false;
   bool hasMore = true;
+  bool _showScrollToTop = false;
 
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
@@ -36,11 +37,23 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
     }
 
     _scrollController.addListener(() {
+      //hide keyboard when scrolling
+      if (FocusScope.of(context).hasFocus) {
+        FocusScope.of(context).unfocus();
+      }
+
+      //load more results when near bottom
       if (_scrollController.position.pixels >=
               _scrollController.position.maxScrollExtent - 300 &&
           !isLoading &&
           hasMore) {
         loadMore();
+      }
+      // Toggle scroll-to-top button visibility
+      if (_scrollController.offset > 300 && !_showScrollToTop) {
+        setState(() => _showScrollToTop = true);
+      } else if (_scrollController.offset <= 300 && _showScrollToTop) {
+        setState(() => _showScrollToTop = false);
       }
     });
 
@@ -197,6 +210,20 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
             ),
         ],
       ),
+      floatingActionButton:
+          _showScrollToTop
+              ? FloatingActionButton(
+                onPressed: () {
+                  _scrollController.animateTo(
+                    0,
+                    duration: Duration(milliseconds: 500),
+                    curve: Curves.easeOut,
+                  );
+                },
+                backgroundColor: Colors.black87,
+                child: Icon(Icons.arrow_upward, color: Colors.white),
+              )
+              : null,
     );
   }
 
