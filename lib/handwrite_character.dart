@@ -34,9 +34,10 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
   @override
   void initState() {
     super.initState();
+    const modelName = 'zh-Hani';
 
     // Initialize the digital ink recognizer with the correct language code
-    _digitalInkRecognizer = mlkit.DigitalInkRecognizer(languageCode: 'zh-Hans');
+    _digitalInkRecognizer = mlkit.DigitalInkRecognizer(languageCode: modelName);
   }
 
   Future<void> _addNewCards(AppDatabase db, Set<String> charactersToAdd) async {
@@ -60,7 +61,9 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
     }
     try {
       // Convert raw points to Ink
+
       final ink = _convertPointsToInk(points);
+      //bug is here
       final result = await _digitalInkRecognizer.recognize(ink);
 
       // Convert the List<RecognitionCandidate> to a single string
