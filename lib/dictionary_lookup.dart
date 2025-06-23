@@ -352,28 +352,51 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
+                        SizedBox(height: 4),
+                        Divider(
+                          color: Colors.grey,
+                          height: 1,
+                          indent: 0,
+                          endIndent: 0,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.only(top: 0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Sentence:",
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.grey,
+                                  fontWeight: FontWeight.w600,
+                                  decoration:
+                                      TextDecoration.none, // Remove underline
+                                ),
+                              ),
+                              IconButton(
+                                icon: const Icon(
+                                  Icons.volume_up,
+                                  size: 20,
+                                  color: Colors.grey,
+                                ),
+                                onPressed: () {
+                                  playAudio(sentence.chinese);
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
+
                         RichText(
                           text: TextSpan(
                             children: [
                               TextSpan(
-                                text: "Sentence: ${sentence.chinese}",
+                                text: sentence.chinese,
                                 style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w600,
                                   color: Colors.black,
-                                ),
-                              ),
-                              WidgetSpan(
-                                alignment: PlaceholderAlignment.middle,
-                                child: IconButton(
-                                  icon: const Icon(
-                                    Icons.volume_up,
-                                    size: 20,
-                                    color: Colors.grey,
-                                  ),
-                                  onPressed: () {
-                                    playAudio(sentence.chinese);
-                                  },
                                 ),
                               ),
                             ],
@@ -384,7 +407,7 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                         Padding(
                           padding: EdgeInsets.only(left: 0),
                           child: Text(
-                            "Pinyin: ${sentence.pinyin}",
+                            sentence.pinyin,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,
@@ -392,11 +415,11 @@ class _DictionaryLookupState extends State<DictionaryLookup> {
                             ),
                           ),
                         ),
-                        const SizedBox(height: 16),
+                        const SizedBox(height: 8),
                         Padding(
                           padding: EdgeInsets.only(left: 0),
                           child: Text(
-                            "Translation: ${sentence.english}",
+                            sentence.english,
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w600,

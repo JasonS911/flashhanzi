@@ -34,6 +34,8 @@ class AppEntry extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
+
       title: 'FlashHanzi',
       theme: ThemeData(
         primaryTextTheme: TextTheme(
@@ -124,6 +126,7 @@ class _MyHomePageState extends State<MyHomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: IndexedStack(
         index: _currentIndex,
         children: [
@@ -136,7 +139,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ],
       ),
       bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _currentIndex,
+        currentIndex: _currentIndex == 4 ? 3 : _currentIndex,
         onTap: (index) {
           setState(() {
             _currentIndex = index;

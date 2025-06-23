@@ -4,7 +4,8 @@ import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/utils/error.dart';
 import 'package:flashhanzi/utils/word_grid.dart';
 import 'package:flutter/material.dart';
-// import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
+// ignore: unnecessary_import
+import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:jieba_flutter/analysis/jieba_segmenter.dart';
 import 'package:jieba_flutter/analysis/seg_token.dart';
@@ -19,7 +20,7 @@ class ScanCharacter extends StatefulWidget {
 
 class _ScanCharacterState extends State<ScanCharacter>
     with WidgetsBindingObserver {
-  late CameraController? _cameraController;
+  CameraController? _cameraController;
   bool isScanning = false;
   double _currentZoomLevel = 1.0;
   double _minAvailableZoom = 1.0;
@@ -61,56 +62,83 @@ class _ScanCharacterState extends State<ScanCharacter>
   }
 
   bool _initializing = false;
-
   Future<void> _initializeCamera() async {
     if (_initializing) return;
     _initializing = true;
 
-    final status = await Permission.camera.status;
+    try {
+      final status = await Permission.camera.status;
 
-    if (status.isGranted) {
-      await _startCamera();
-    } else if (status.isDenied || status.isRestricted) {
-      final result = await Permission.camera.request();
-      if (result.isGranted) {
-        await _startCamera();
-      } else {
+      final isIOS = Theme.of(context).platform == TargetPlatform.iOS;
+
+      if (status.isGranted || isIOS) {
+        await _startCamera(); // <-- iOS prompt will happen *inside* .initialize()
+      } else if (status.isDenied || status.isRestricted) {
+        final result = await Permission.camera.request();
+        if (result.isGranted) {
+          await _startCamera();
+        } else {
+          _showPermissionDialog();
+        }
+      } else if (status.isPermanentlyDenied) {
         _showPermissionDialog();
       }
-    } else if (status.isPermanentlyDenied) {
+    } catch (e) {
       _showPermissionDialog();
+    } finally {
+      _initializing = false;
     }
-
-    _initializing = false;
   }
 
+  // Future<void> _startCamera() async {
+  //   try {
+  //     final cameras = await availableCameras();
+  //     final firstCamera = cameras.first;
+  //     _cameraController = CameraController(
+  //       firstCamera,
+  //       ResolutionPreset.high,
+  //       enableAudio: false,
+  //     );
+
+  //     await _cameraController!.initialize();
+
+  //     _minAvailableZoom = await _cameraController!.getMinZoomLevel();
+  //     _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
+  //     _currentZoomLevel = _minAvailableZoom;
+
+  //     if (!mounted) return;
+  //     setState(() {
+  //       _initializeControllerFuture = Future.value();
+  //     });
+  //   } catch (e) {
+  //     if (!mounted) return;
+  //     Navigator.push(
+  //       context,
+  //       MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
+  //     );
+  //   }
+  // }
   Future<void> _startCamera() async {
-    try {
-      final cameras = await availableCameras();
-      final firstCamera = cameras.first;
-      _cameraController = CameraController(
-        firstCamera,
-        ResolutionPreset.high,
-        enableAudio: false,
-      );
+    final cameras = await availableCameras();
+    final firstCamera = cameras.first;
 
-      await _cameraController!.initialize();
+    _cameraController = CameraController(
+      firstCamera,
+      ResolutionPreset.high,
+      enableAudio: false,
+    );
 
-      _minAvailableZoom = await _cameraController!.getMinZoomLevel();
-      _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
-      _currentZoomLevel = _minAvailableZoom;
+    await _cameraController!
+        .initialize(); // <-- iOS prompts here if not granted
 
-      if (!mounted) return;
-      setState(() {
-        _initializeControllerFuture = Future.value();
-      });
-    } catch (e) {
-      if (!mounted) return;
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => ErrorPage(db: widget.db)),
-      );
-    }
+    _minAvailableZoom = await _cameraController!.getMinZoomLevel();
+    _maxAvailableZoom = await _cameraController!.getMaxZoomLevel();
+    _currentZoomLevel = _minAvailableZoom;
+
+    if (!mounted) return;
+    setState(() {
+      _initializeControllerFuture = Future.value();
+    });
   }
 
   void _showPermissionDialog() {
@@ -225,7 +253,6 @@ class _ScanCharacterState extends State<ScanCharacter>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Padding(padding: const EdgeInsets.all(16)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

@@ -689,7 +689,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                           : [
                             Column(
                               children: [
-                                SizedBox(height: 32),
+                                SizedBox(height: 12),
                                 Padding(
                                   padding: const EdgeInsets.symmetric(
                                     horizontal: 16,
@@ -700,27 +700,61 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         CrossAxisAlignment.center,
                                     children: [
                                       // Character text
-                                      _cards[_currentIndex].character.length <=
-                                              3
-                                          ? Text(
-                                            _cards[_currentIndex].character,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 76,
-                                              color: Colors.black87,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          )
-                                          : Text(
-                                            _cards[_currentIndex].character,
-                                            textAlign: TextAlign.center,
-                                            style: const TextStyle(
-                                              fontSize: 52,
-                                              color: Colors.black87,
-                                              decoration: TextDecoration.none,
-                                            ),
-                                          ),
+                                      Text(
+                                        _cards[_currentIndex].character,
+                                        textAlign: TextAlign.center,
+                                        style: const TextStyle(
+                                          fontSize: 76,
+                                          color: Colors.black87,
+                                          decoration: TextDecoration.none,
+                                        ),
+                                      ),
                                       const SizedBox(height: 12),
+
+                                      // Pinyin + icon (wrapped nicely)
+                                      LayoutBuilder(
+                                        builder: (context, constraints) {
+                                          return ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth:
+                                                  constraints.maxWidth * 0.95,
+                                            ),
+                                            child: RichText(
+                                              text: TextSpan(
+                                                children: [
+                                                  TextSpan(
+                                                    text:
+                                                        '[${_cards[_currentIndex].pinyin}]',
+                                                    style: const TextStyle(
+                                                      fontSize: 32,
+                                                      color: Colors.black87,
+                                                    ),
+                                                  ),
+                                                  WidgetSpan(
+                                                    alignment:
+                                                        PlaceholderAlignment
+                                                            .middle,
+                                                    child: IconButton(
+                                                      icon: const Icon(
+                                                        Icons.volume_up,
+                                                        size: 28,
+                                                        color: Colors.grey,
+                                                      ),
+                                                      onPressed: () {
+                                                        playAudio(
+                                                          _cards[_currentIndex]
+                                                              .character,
+                                                        );
+                                                      },
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                              softWrap: true,
+                                            ),
+                                          );
+                                        },
+                                      ),
                                     ],
                                   ),
                                 ),
@@ -728,74 +762,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                 SizedBox(
                                   height: 4,
                                 ), // Space before the review list
-                              ],
-                            ),
-                          ],
-                ),
 
-                Padding(
-                  padding: EdgeInsets.all(0),
-                  child:
-                      _currentIndex != -1
-                          ? Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 16),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                // Pinyin + icon (wrapped nicely)
-                                LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return ConstrainedBox(
-                                      constraints: BoxConstraints(
-                                        maxWidth: constraints.maxWidth * 0.95,
-                                      ),
-                                      child: RichText(
-                                        text: TextSpan(
-                                          children: [
-                                            TextSpan(
-                                              text:
-                                                  '[${_cards[_currentIndex].pinyin}]',
-                                              style: TextStyle(
-                                                fontSize:
-                                                    _cards[_currentIndex]
-                                                                .pinyin
-                                                                .length <=
-                                                            3
-                                                        ? 32
-                                                        : 24,
-                                                color: Colors.black87,
-                                              ),
-                                            ),
-                                            WidgetSpan(
-                                              alignment:
-                                                  PlaceholderAlignment.middle,
-                                              child: IconButton(
-                                                icon: Icon(
-                                                  Icons.volume_up,
-                                                  size:
-                                                      _cards[_currentIndex]
-                                                                  .pinyin
-                                                                  .length <=
-                                                              3
-                                                          ? 28
-                                                          : 22,
-                                                  color: Colors.grey,
-                                                ),
-                                                onPressed: () {
-                                                  playAudio(
-                                                    _cards[_currentIndex]
-                                                        .character,
-                                                  );
-                                                },
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                        softWrap: true,
-                                      ),
-                                    );
-                                  },
-                                ),
                                 Padding(
                                   padding: EdgeInsets.only(bottom: 0),
                                   child: Container(
@@ -811,9 +778,9 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                           //     CrossAxisAlignment.center,
                                           children: [
                                             Text(
-                                              'Meaning: ${_cards[_currentIndex].definition}',
+                                              _cards[_currentIndex].definition,
                                               style: TextStyle(
-                                                fontSize: 20,
+                                                fontSize: 24,
                                                 color: Color(0xFFB42F2B),
                                                 fontWeight: FontWeight.bold,
                                                 decoration:
@@ -827,9 +794,66 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                     ),
                                   ),
                                 ),
+                              ],
+                            ),
+                          ],
+                ),
+
+                Padding(
+                  padding: EdgeInsets.all(0),
+                  child:
+                      _currentIndex != -1
+                          ? Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 SizedBox(
                                   height: 8,
                                 ), // Space between meaning and example
+                                _cards[_currentIndex].chineseSentence == null ||
+                                        _cards[_currentIndex].chineseSentence ==
+                                            ""
+                                    ? SizedBox(height: 0)
+                                    : const Divider(
+                                      color: Colors.grey,
+                                      thickness: 1,
+                                      // indent: 0,
+                                      // endIndent: 0,
+                                    ),
+                                _cards[_currentIndex].chineseSentence == null ||
+                                        _cards[_currentIndex].chineseSentence ==
+                                            ""
+                                    ? SizedBox(height: 0)
+                                    : Row(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceBetween,
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.center,
+                                      children: [
+                                        Text(
+                                          'Sentence',
+                                          style: TextStyle(
+                                            fontSize: 16,
+                                            color: Colors.grey,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        IconButton(
+                                          icon: const Icon(
+                                            Icons.volume_up,
+                                            size: 20,
+                                            color: Colors.grey,
+                                          ),
+                                          onPressed: () {
+                                            playAudio(
+                                              _cards[_currentIndex]
+                                                  .chineseSentence!,
+                                            );
+                                          },
+                                        ),
+                                      ],
+                                    ),
                                 _cards[_currentIndex].chineseSentence == null ||
                                         _cards[_currentIndex].chineseSentence ==
                                             ""
@@ -846,26 +870,10 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                               decoration: TextDecoration.none,
                                             ),
                                           ),
-                                          WidgetSpan(
-                                            alignment:
-                                                PlaceholderAlignment.middle,
-                                            child: IconButton(
-                                              icon: const Icon(
-                                                Icons.volume_up,
-                                                size: 24,
-                                                color: Colors.grey,
-                                              ),
-                                              onPressed: () {
-                                                playAudio(
-                                                  _cards[_currentIndex]
-                                                      .chineseSentence!,
-                                                );
-                                              },
-                                            ),
-                                          ),
                                         ],
                                       ),
                                     ),
+                                SizedBox(height: 8),
                                 _cards[_currentIndex].pinyinSentence == null ||
                                         _cards[_currentIndex].pinyinSentence ==
                                             ""
@@ -882,7 +890,6 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                                     .none, // Remove underline
                                           ),
                                         ),
-                                        SizedBox(height: 36),
                                       ],
                                     ),
                                 _cards[_currentIndex].englishSentence == null ||
@@ -903,13 +910,20 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                         ),
                                       ],
                                     ),
+                                Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 4),
 
-                                const Divider(
-                                  color: Colors.grey,
-                                  thickness: 1,
-                                  indent: 16,
-                                  endIndent: 16,
+                                  padding: EdgeInsets.only(bottom: 24),
+                                  decoration: BoxDecoration(
+                                    border: Border(
+                                      bottom: BorderSide(
+                                        color: Colors.grey, // Underline color
+                                        width: 1, // Underline thickness
+                                      ),
+                                    ),
+                                  ),
                                 ),
+                                SizedBox(height: 12),
                               ],
                             ),
                           )
