@@ -112,7 +112,13 @@ Future<void> parse(AppDatabase db) async {
       final simplified = match.group(2)!.trim();
       final pinyin = match.group(3)!.trim();
       final pinYinPlain = normalizePinyin(pinyin);
-      final definitions = match.group(4)!.replaceAll('/', '; ').trim();
+      // final definitions = match.group(4)!.replaceAll('/', '; ').trim();
+      final rawDefs = match.group(4)!;
+      final defParts = rawDefs.split('/')..removeWhere((e) => e.trim().isEmpty);
+
+      // Keep only the first 3 parts
+      final limitedDefs = defParts.take(3).join('\n').trim();
+      final definitions = limitedDefs;
 
       final lowerDef = definitions.toLowerCase();
       final isCapitalPinyin = pinyin[0].toUpperCase() == pinyin[0];

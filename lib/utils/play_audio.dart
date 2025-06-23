@@ -6,3 +6,7 @@ void playAudio(String character) async {
       'https://translate.google.com/translate_tts?ie=UTF-8&q=$character&tl=zh-CN&client=tw-ob';
   await player.play(UrlSource(url));
 }
+
+void pauseAudio() async {
+  await player.pause();
+}

@@ -253,7 +253,6 @@ class _ScanCharacterState extends State<ScanCharacter>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      bottomNavigationBar: Padding(padding: const EdgeInsets.all(16)),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,

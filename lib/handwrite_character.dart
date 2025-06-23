@@ -162,146 +162,151 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Center(
-        child: Column(
-          children: [
-            SizedBox(height: MediaQuery.of(context).padding.top),
-            Stack(
-              alignment: Alignment.center,
-              children: [
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.home, size: 30),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => HomePage(db: widget.db),
-                        ),
-                      );
-                    },
-                  ),
-                ),
-                const Text(
-                  'Handwrite Character',
-                  style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                ),
-              ],
-            ),
-            SizedBox(height: 20),
-            RepaintBoundary(
-              key: _globalKey,
-              child: Container(
-                height: 340,
-                width: 340,
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  border: Border.all(color: Colors.grey, width: 2),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    setState(() {
-                      double x = details.localPosition.dx;
-                      double y = details.localPosition.dy;
-                      if (x >= 10 && x <= 330 && y >= 10 && y <= 330) {
-                        points.add(details.localPosition);
-                      }
-                    });
-                  },
-                  onPanEnd: (details) {
-                    points.add(null); // End of stroke
-                  },
-                  child: CustomPaint(painter: MyPainter(points)),
-                ),
-              ),
-            ),
-            SizedBox(height: 20),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 40),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+    return Scaffold(
+      body: SingleChildScrollView(
+        child: Center(
+          child: Column(
+            children: [
+              SizedBox(height: MediaQuery.of(context).padding.top),
+              Stack(
+                alignment: Alignment.center,
                 children: [
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: clearCanvas,
-                      style: ElevatedButton.styleFrom(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text(
-                          'Clear',
-                          style: TextStyle(color: Colors.black, fontSize: 16),
-                        ),
-                      ),
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: IconButton(
+                      icon: const Icon(Icons.home, size: 30),
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => HomePage(db: widget.db),
+                          ),
+                        );
+                      },
                     ),
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: ElevatedButton(
-                      onPressed: () async {
-                        await _recognizeDrawing();
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFB42F2B),
-                        foregroundColor: Colors.white,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: EdgeInsets.symmetric(vertical: 12),
-                        child: Text('Recognize'),
-                      ),
-                    ),
+                  const Text(
+                    'Handwrite Character',
+                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                 ],
               ),
-            ),
-            if (recognizedList.isNotEmpty) ...[
-              const SizedBox(height: 28),
-              Text(
-                'Recognized Characters',
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.grey[800],
-                  letterSpacing: 0.5,
-                ),
-              ),
-
-              WordGrid(
-                wordSet: recognizedList,
-                finalWordSet: charactersToAddRecognizedList,
-                onSelectionChanged: onSelectionChanged,
-                db: widget.db,
-              ),
-
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () async {
-                  await _addNewCards(widget.db, charactersToAddRecognizedList);
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFB42F2B),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(4),
+              SizedBox(height: 20),
+              RepaintBoundary(
+                key: _globalKey,
+                child: Container(
+                  height: 340,
+                  width: 340,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    border: Border.all(color: Colors.grey, width: 2),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: GestureDetector(
+                    onPanUpdate: (details) {
+                      setState(() {
+                        double x = details.localPosition.dx;
+                        double y = details.localPosition.dy;
+                        if (x >= 10 && x <= 330 && y >= 10 && y <= 330) {
+                          points.add(details.localPosition);
+                        }
+                      });
+                    },
+                    onPanEnd: (details) {
+                      points.add(null); // End of stroke
+                    },
+                    child: CustomPaint(painter: MyPainter(points)),
                   ),
                 ),
-                child: Padding(
-                  padding: EdgeInsets.symmetric(vertical: 12),
-                  child: Text('Add Characters to Personal Dictionary'),
+              ),
+              SizedBox(height: 20),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 40),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: clearCanvas,
+                        style: ElevatedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Text(
+                            'Clear',
+                            style: TextStyle(color: Colors.black, fontSize: 16),
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: ElevatedButton(
+                        onPressed: () async {
+                          await _recognizeDrawing();
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFFB42F2B),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                        ),
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(vertical: 12),
+                          child: Text('Recognize'),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              SizedBox(height: 16),
+              if (recognizedList.isNotEmpty) ...[
+                const SizedBox(height: 28),
+                Text(
+                  'Recognized Characters',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.grey[800],
+                    letterSpacing: 0.5,
+                  ),
+                ),
+
+                WordGrid(
+                  wordSet: recognizedList,
+                  finalWordSet: charactersToAddRecognizedList,
+                  onSelectionChanged: onSelectionChanged,
+                  db: widget.db,
+                ),
+
+                SizedBox(height: 16),
+                ElevatedButton(
+                  onPressed: () async {
+                    await _addNewCards(
+                      widget.db,
+                      charactersToAddRecognizedList,
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFFB42F2B),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(vertical: 12),
+                    child: Text('Add Characters to Personal Dictionary'),
+                  ),
+                ),
+                SizedBox(height: 16),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );
