@@ -4,7 +4,7 @@ import 'package:flashhanzi/home_page.dart';
 import 'package:flashhanzi/utils/error.dart';
 import 'package:flashhanzi/utils/word_grid.dart';
 import 'package:flutter/material.dart';
-import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
+// import 'package:google_mlkit_digital_ink_recognition/google_mlkit_digital_ink_recognition.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import 'package:jieba_flutter/analysis/jieba_segmenter.dart';
 import 'package:jieba_flutter/analysis/seg_token.dart';
@@ -230,7 +230,7 @@ class _ScanCharacterState extends State<ScanCharacter>
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(height: 20),
+            SizedBox(height: MediaQuery.of(context).padding.top),
             Stack(
               alignment: Alignment.center,
               children: [

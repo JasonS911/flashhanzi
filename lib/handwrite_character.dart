@@ -158,7 +158,7 @@ class _HandwriteCharacterState extends State<HandwriteCharacter> {
       child: Center(
         child: Column(
           children: [
-            SizedBox(height: 20),
+            SizedBox(height: MediaQuery.of(context).padding.top),
             Stack(
               alignment: Alignment.center,
               children: [

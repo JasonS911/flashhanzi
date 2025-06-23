@@ -23,7 +23,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
   List<CharacterCard> _cards = [];
   late Map<String, String> strokeMap;
   bool strokesLoaded = false;
-  final ExpansionTileController expansionController = ExpansionTileController();
+  final ExpansibleController expansionController = ExpansibleController();
   bool _initialized = false;
 
   String? _lastCardCharacter; // keeps track of the previously shown character
