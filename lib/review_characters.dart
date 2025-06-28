@@ -233,7 +233,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child: IconButton(
                         icon: const Icon(Icons.home, size: 30),
                         onPressed: () {
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
                               builder: (context) => HomePage(db: widget.db),
@@ -579,9 +579,12 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                       child: IconButton(
                         icon: const Icon(Icons.home, size: 30),
                         onPressed: () {
-                          Navigator.pop(
+                          Navigator.pushReplacement(
                             context,
-                          ); // Go back to the previous page
+                            MaterialPageRoute(
+                              builder: (context) => HomePage(db: widget.db),
+                            ),
+                          );
                         },
                       ),
                     ),
@@ -824,7 +827,7 @@ class ReviewCharactersState extends State<ReviewCharacters> {
                                             Text(
                                               _cards[_currentIndex].definition,
                                               style: TextStyle(
-                                                fontSize: 22,
+                                                fontSize: 16,
                                                 // color: Color(0xFFB42F2B),
                                                 color: Colors.black87,
 
